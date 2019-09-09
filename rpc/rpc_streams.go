@@ -238,10 +238,33 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		return nil, err
 	}
 
+	if stream.Status == v1.StreamStatusCompleted {
+		// nothing to do since it was already stopped
+		streamProfile, err := s.manager.GetStreamProfile(stream)
+		if err != nil {
+			s.logger.Error(err)
+			return nil, rpc.ErrRpcInternal
+		}
+
+		return streamProfile, nil
+	}
+
 	_, _ = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 		StreamContractId:      stream.StreamContractId,
 		StreamContractAddress: stream.StreamContractAddress,
 	})
+
+	stream, err = s.manager.Update(
+		ctx,
+		stream,
+		map[string]interface{}{
+			"status": v1.StreamStatusCompleted,
+		},
+	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
 
 	streamProfile, err := s.manager.GetStreamProfile(stream)
 	if err != nil {
