@@ -1,0 +1,7 @@
+FROM golang:1.10
+
+MAINTAINER VideoCoin
+
+WORKDIR /go/src/github.com/videocoin/cloud-pipelines
+
+CMD go run cmd/main.go
