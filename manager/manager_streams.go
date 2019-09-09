@@ -76,6 +76,10 @@ func (m *Manager) Update(ctx context.Context, stream *v1.Stream, updates map[str
 		stream.Status = value.(v1.StreamStatus)
 	}
 
+	if value, ok := updates["input_status"]; ok {
+		stream.InputStatus = value.(v1.InputStatus)
+	}
+
 	if err := m.ds.Stream.Update(ctx, stream, updates); err != nil {
 		return nil, err
 	}
