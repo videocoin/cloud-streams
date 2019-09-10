@@ -37,11 +37,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: accountsRpcAddr
-            - name: MANAGER_RPC_ADDR
+            - name: EMITTER_RPC_ADDR
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
-                  key: managerRpcAddr
+                  key: emitterRpcAddr
             - name: DBURI
               valueFrom:
                 secretKeyRef:

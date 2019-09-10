@@ -2,7 +2,7 @@ replicasCount: 1
 maxUnavailableCount: 0
 
 image:
-  repository: gcr.io/videocoin-network/pipelines
+  repository: gcr.io/videocoin-network/streams
   tag: latest
   pullPolicy: Always
 
