@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	ServiceName string = "pipelines"
+	ServiceName string = "streams"
 	Version     string = "dev"
 )
 
