@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/jinzhu/copier"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/uuid4"
@@ -85,22 +84,4 @@ func (m *Manager) Update(ctx context.Context, stream *v1.Stream, updates map[str
 	}
 
 	return stream, nil
-}
-
-func (m *Manager) GetStreamProfile(stream *v1.Stream) (*v1.StreamProfile, error) {
-	profile := new(v1.StreamProfile)
-	if err := copier.Copy(profile, stream); err != nil {
-		return nil, err
-	}
-
-	return profile, nil
-}
-
-func (m *Manager) GetStreamProfiles(streams []*v1.Stream) (*v1.StreamProfiles, error) {
-	profiles := &v1.StreamProfiles{}
-	if err := copier.Copy(&profiles.Items, &streams); err != nil {
-		return nil, err
-	}
-
-	return profiles, nil
 }
