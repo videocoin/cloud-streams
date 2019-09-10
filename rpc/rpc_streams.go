@@ -20,13 +20,18 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
 
-	userId, _, err := s.authenticate(ctx)
+	userID, _, err := s.authenticate(ctx)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
 	}
 
-	stream, err := s.manager.Create(ctx, req.Name, userId, s.baseInputURL, s.baseOutputURL, req.ProfileId)
+	if verr := s.validator.validate(req); verr != nil {
+		s.logger.Warning(verr)
+		return nil, rpc.NewRpcValidationError(verr)
+	}
+
+	stream, err := s.manager.Create(ctx, req.Name, userID, s.baseInputURL, s.baseOutputURL, req.ProfileId)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
@@ -35,7 +40,7 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	streamProfile, err := s.manager.GetStreamProfile(stream)
 	if err != nil {
 		s.logger.Error(err)
-		return nil, err
+		return nil, rpc.ErrRpcInternal
 	}
 
 	return streamProfile, nil
