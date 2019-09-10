@@ -43,6 +43,7 @@ type RpcServer struct {
 	emitter         emitterv1.EmitterServiceClient
 	manager         *manager.Manager
 	logger          *logrus.Entry
+	validator       *requestValidator
 }
 
 func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
@@ -66,6 +67,7 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		baseInputURL:    opts.BaseInputURL,
 		baseOutputURL:   opts.BaseOutputURL,
 		logger:          opts.Logger.WithField("system", "rpc"),
+		validator:       newRequestValidator(),
 	}
 
 	v1.RegisterStreamServiceServer(grpcServer, rpcServer)
@@ -90,11 +92,13 @@ func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, 
 	ctx = auth.NewContextWithSecretKey(ctx, s.authTokenSecret)
 	ctx, err := auth.AuthFromContext(ctx)
 	if err != nil {
+		s.logger.Warningf("failed to auth from context: %s", err)
 		return "", ctx, rpc.ErrRpcUnauthenticated
 	}
 
 	userID, ok := auth.UserIDFromContext(ctx)
 	if !ok {
+		s.logger.Warningf("failed to get user id from context: %s", err)
 		return "", ctx, rpc.ErrRpcUnauthenticated
 	}
 
