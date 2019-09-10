@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"context"
-	"net"
+	"fmt"
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
@@ -11,96 +11,269 @@ import (
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
-	"github.com/videocoin/cloud-pkg/auth"
-	"github.com/videocoin/cloud-pkg/grpcutil"
-	ds "github.com/videocoin/cloud-streams/datastore"
-	"github.com/videocoin/cloud-streams/manager"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
-type RpcServerOpts struct {
-	Addr            string
-	AuthTokenSecret string
-	BaseInputURL    string
-	BaseOutputURL   string
-	Manager         *manager.Manager
-	Ds              *ds.Datastore
-	Accounts        accountsv1.AccountServiceClient
-	Emitter         emitterv1.EmitterServiceClient
-	Logger          *logrus.Entry
-}
+func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamProfile, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
+	defer span.Finish()
 
-type RpcServer struct {
-	addr            string
-	authTokenSecret string
-	baseInputURL    string
-	baseOutputURL   string
-	grpc            *grpc.Server
-	listen          net.Listener
-	ds              *ds.Datastore
-	accounts        accountsv1.AccountServiceClient
-	emitter         emitterv1.EmitterServiceClient
-	manager         *manager.Manager
-	logger          *logrus.Entry
-	validator       *requestValidator
-}
+	span.SetTag("name", req.Name)
+	span.SetTag("profile_id", req.ProfileId)
 
-func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
-	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
-	grpcServer := grpc.NewServer(grpcOpts...)
-
-	listen, err := net.Listen("tcp", opts.Addr)
+	userID, _, err := s.authenticate(ctx)
 	if err != nil {
+		s.logger.Error(err)
 		return nil, err
 	}
 
-	rpcServer := &RpcServer{
-		addr:            opts.Addr,
-		authTokenSecret: opts.AuthTokenSecret,
-		grpc:            grpcServer,
-		listen:          listen,
-		ds:              opts.Ds,
-		accounts:        opts.Accounts,
-		emitter:         opts.Emitter,
-		manager:         opts.Manager,
-		baseInputURL:    opts.BaseInputURL,
-		baseOutputURL:   opts.BaseOutputURL,
-		logger:          opts.Logger.WithField("system", "rpc"),
-		validator:       newRequestValidator(),
+	if verr := s.validator.validate(req); verr != nil {
+		s.logger.Warning(verr)
+		return nil, rpc.NewRpcValidationError(verr)
 	}
 
-	v1.RegisterStreamServiceServer(grpcServer, rpcServer)
-	reflection.Register(grpcServer)
+	stream, err := s.manager.Create(ctx, req.Name, userID, s.baseInputURL, s.baseOutputURL, req.ProfileId)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
 
-	return rpcServer, nil
+	streamProfile, err := toStreamProfile(stream)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamProfile, nil
 }
 
-func (s *RpcServer) Start() error {
-	s.logger.Infof("starting rpc server on %s", s.addr)
-	return s.grpc.Serve(s.listen)
-}
-
-func (s *RpcServer) Health(ctx context.Context, req *protoempty.Empty) (*rpc.HealthStatus, error) {
-	return &rpc.HealthStatus{Status: "OK"}, nil
-}
-
-func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "authenticate")
+func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Delete")
 	defer span.Finish()
 
-	ctx = auth.NewContextWithSecretKey(ctx, s.authTokenSecret)
-	ctx, err := auth.AuthFromContext(ctx)
+	span.SetTag("id", req.Id)
+
+	_, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Warningf("failed to auth from context: %s", err)
-		return "", ctx, rpc.ErrRpcUnauthenticated
+		s.logger.Error(err)
+		return nil, err
 	}
 
-	userID, ok := auth.UserIDFromContext(ctx)
-	if !ok {
-		s.logger.Warningf("failed to get user id from context: %s", err)
-		return "", ctx, rpc.ErrRpcUnauthenticated
+	err = s.manager.Delete(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
 	}
 
-	return userID, ctx, nil
+	return &protoempty.Empty{}, nil
+}
+
+func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Get")
+	defer span.Finish()
+
+	span.SetTag("id", req.Id)
+
+	_, _, err := s.authenticate(ctx)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	stream, err := s.manager.Get(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	streamProfile, err := toStreamProfile(stream)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamProfile, nil
+}
+
+func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamProfiles, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "List")
+	defer span.Finish()
+
+	userID, _, err := s.authenticate(ctx)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	streams, err := s.manager.List(ctx, userID)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	streamProfiles, err := toStreamProfiles(streams)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamProfiles, nil
+}
+
+func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamProfile, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Update")
+	defer span.Finish()
+
+	span.SetTag("id", req.Id)
+
+	_, _, err := s.authenticate(ctx)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	stream, err := s.manager.Get(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	stream, err = s.manager.Update(
+		ctx,
+		stream,
+		map[string]interface{}{
+			"name": req.Name,
+		},
+	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	streamProfile, err := toStreamProfile(stream)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamProfile, nil
+}
+
+func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Run")
+	defer span.Finish()
+
+	span.SetTag("id", req.Id)
+
+	userID, _, err := s.authenticate(ctx)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
+	if err != nil {
+		s.logger.WithFields(
+			logrus.Fields{
+				"userId": userID,
+			}).Errorf("failed to get account: %s", err.Error())
+		return nil, rpc.ErrRpcInternal
+	}
+
+	// temp balance limit force on api level
+	if account.Balance < 20 || account.Balance > 50 {
+		s.logger.Errorf("hit balance limitation")
+		return nil, rpc.ErrRpcBadRequest
+	}
+
+	stream, err := s.manager.Get(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	if stream.UserId != userID {
+		return nil, rpc.ErrRpcPermissionDenied
+	}
+
+	stream, err = s.manager.Update(
+		ctx,
+		stream,
+		map[string]interface{}{
+			"status": v1.StreamStatusPreparing,
+		},
+	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	profileName := fmt.Sprintf("%d", stream.ProfileId)
+	_, _ = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
+		UserId:           userID,
+		StreamContractId: stream.StreamContractId,
+		ProfileNames:     []string{profileName},
+	})
+
+	streamProfile, err := toStreamProfile(stream)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamProfile, nil
+}
+
+func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "Stop")
+	defer span.Finish()
+
+	span.SetTag("id", req.Id)
+
+	_, _, err := s.authenticate(ctx)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	stream, err := s.manager.Get(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	if stream.Status == v1.StreamStatusCompleted {
+		// nothing to do since it was already stopped
+		streamProfile, err := toStreamProfile(stream)
+		if err != nil {
+			s.logger.Error(err)
+			return nil, rpc.ErrRpcInternal
+		}
+
+		return streamProfile, nil
+	}
+
+	_, _ = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+		StreamContractId:      stream.StreamContractId,
+		StreamContractAddress: stream.StreamContractAddress,
+	})
+
+	stream, err = s.manager.Update(
+		ctx,
+		stream,
+		map[string]interface{}{
+			"status": v1.StreamStatusCompleted,
+		},
+	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	streamProfile, err := toStreamProfile(stream)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamProfile, nil
 }
