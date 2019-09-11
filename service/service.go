@@ -45,12 +45,14 @@ func NewService(cfg *Config) (*Service, error) {
 
 	rpcConfig := &rpc.RpcServerOpts{
 		Addr:            cfg.RPCAddr,
-		Logger:          cfg.Logger,
 		Ds:              ds,
 		Manager:         manager,
 		Accounts:        accounts,
+		BaseInputURL:    cfg.BaseInputURL,
+		BaseOutputURL:   cfg.BaseOutputURL,
 		Emitter:         emitter,
 		AuthTokenSecret: cfg.AuthTokenSecret,
+		Logger:          cfg.Logger,
 	}
 
 	rpc, err := rpc.NewRpcServer(rpcConfig)
