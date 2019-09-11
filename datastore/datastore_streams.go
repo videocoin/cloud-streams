@@ -89,6 +89,20 @@ func (ds *StreamDatastore) Get(ctx context.Context, id string) (*v1.Stream, erro
 	return stream, nil
 }
 
+func (ds *StreamDatastore) GetByUserID(ctx context.Context, userID string, streamID string) (*v1.Stream, error) {
+	stream := &v1.Stream{}
+
+	if err := ds.db.Where("user_id = ? AND id = ?", userID, streamID).First(stream).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrStreamNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get stream by user id: %s", err.Error())
+	}
+
+	return stream, nil
+}
+
 func (ds *StreamDatastore) List(ctx context.Context, userID string) ([]*v1.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "List")
 	defer span.Finish()

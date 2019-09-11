@@ -11,20 +11,20 @@ import (
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
+	"github.com/videocoin/cloud-streams/datastore"
 )
 
 func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamProfile, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "CreateStream")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
 
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
+
+	span.SetTag("user_id", userID)
 
 	if verr := s.validator.validate(req); verr != nil {
 		s.logger.Warning(verr)
@@ -47,19 +47,22 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 }
 
 func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Delete")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 
-	_, _, err := s.authenticate(ctx)
+	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
 
-	err = s.manager.Delete(ctx, req.Id)
+	span.SetTag("user_id", userID)
+
+	err = s.manager.DeleteUserStream(ctx, userID, req.Id)
 	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
 	}
@@ -68,19 +71,22 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 }
 
 func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Get")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 
-	_, _, err := s.authenticate(ctx)
+	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
 
-	stream, err := s.manager.Get(ctx, req.Id)
+	span.SetTag("user_id", userID)
+
+	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
 	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
 	}
@@ -95,16 +101,16 @@ func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 }
 
 func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamProfiles, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "List")
-	defer span.Finish()
+	span := opentracing.SpanFromContext(ctx)
 
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
 
-	streams, err := s.manager.List(ctx, userID)
+	span.SetTag("user_id", userID)
+
+	streams, err := s.manager.GetStreamListByUserID(ctx, userID)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
@@ -120,29 +126,30 @@ func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.Stream
 }
 
 func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamProfile, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Update")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 
-	_, _, err := s.authenticate(ctx)
+	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
 
-	stream, err := s.manager.Get(ctx, req.Id)
+	span.SetTag("user_id", userID)
+
+	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
 	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	stream, err = s.manager.Update(
+	stream, err = s.manager.UpdateStream(
 		ctx,
 		stream,
-		map[string]interface{}{
-			"name": req.Name,
-		},
+		map[string]interface{}{"name": req.Name},
 	)
 	if err != nil {
 		s.logger.Error(err)
@@ -159,12 +166,10 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 }
 
 func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "UpdateStatus")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 
-	stream, err := s.manager.Get(ctx, req.Id)
+	stream, err := s.manager.GetStreamByID(ctx, req.Id)
 	if err != nil {
 		s.logger.Error(err)
 		return nil, err
@@ -184,7 +189,7 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 		updates["input_status"] = req.InputStatus
 	}
 
-	_, err = s.manager.Update(
+	_, err = s.manager.UpdateStream(
 		ctx,
 		stream,
 		updates,
@@ -198,16 +203,15 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 }
 
 func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Run")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
+
+	span.SetTag("user_id", userID)
 
 	account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
 	if err != nil {
@@ -224,22 +228,20 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		return nil, rpc.ErrRpcBadRequest
 	}
 
-	stream, err := s.manager.Get(ctx, req.Id)
+	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
 	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	if stream.UserId != userID {
-		return nil, rpc.ErrRpcPermissionDenied
-	}
-
-	stream, err = s.manager.Update(
+	stream, err = s.manager.UpdateStream(
 		ctx,
 		stream,
-		map[string]interface{}{
-			"status": v1.StreamStatusPreparing,
-		},
+		map[string]interface{}{"status": v1.StreamStatusPreparing},
 	)
 	if err != nil {
 		s.logger.Error(err)
@@ -247,12 +249,16 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 	}
 
 	profileName := fmt.Sprintf("%d", stream.ProfileId)
-	_, _ = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
+	_, err = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
 		StreamId:         stream.Id,
 		UserId:           userID,
 		StreamContractId: stream.StreamContractId,
 		ProfileNames:     []string{profileName},
 	})
+
+	if err != nil {
+		s.logger.Errorf("emitter: failed to init stream %s", err)
+	}
 
 	streamProfile, err := toStreamProfile(stream)
 	if err != nil {
@@ -264,19 +270,22 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 }
 
 func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "Stop")
-	defer span.Finish()
-
+	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 
-	_, _, err := s.authenticate(ctx)
+	userID, _, err := s.authenticate(ctx)
 	if err != nil {
-		s.logger.Error(err)
 		return nil, err
 	}
 
-	stream, err := s.manager.Get(ctx, req.Id)
+	span.SetTag("user_id", userID)
+
+	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
 	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
 		s.logger.Error(err)
 		return nil, rpc.ErrRpcInternal
 	}
@@ -292,17 +301,19 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		return streamProfile, nil
 	}
 
-	_, _ = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 		StreamContractId:      stream.StreamContractId,
 		StreamContractAddress: stream.StreamContractAddress,
 	})
 
-	stream, err = s.manager.Update(
+	if err != nil {
+		s.logger.Errorf("emitter: failed to end stream %s", err)
+	}
+
+	stream, err = s.manager.UpdateStream(
 		ctx,
 		stream,
-		map[string]interface{}{
-			"status": v1.StreamStatusCompleted,
-		},
+		map[string]interface{}{"status": v1.StreamStatusCompleted},
 	)
 	if err != nil {
 		s.logger.Error(err)
