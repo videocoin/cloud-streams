@@ -23,7 +23,6 @@ service EmitterService {
 
     rpc InitStream(InitStreamRequest) returns (google.protobuf.Empty) {}
     rpc EndStream(EndStreamRequest) returns (google.protobuf.Empty) {}
-
     rpc AddInputChunkId(AddInputChunkIdRequest) returns (Tx) {}
 }
 
@@ -32,15 +31,17 @@ message Tx {
 }
 
 message InitStreamRequest {
-    string user_id = 1;
-    uint64 stream_contract_id = 2;
-    repeated string profile_names = 3;
+    string stream_id = 1;
+    string user_id = 2;
+    uint64 stream_contract_id = 3;
+    repeated string profile_names = 4;
 }
 
 message EndStreamRequest {
-    string user_id = 1;
-    uint64 stream_contract_id = 2;
-    string stream_contract_address = 3;
+    string stream_id = 1;
+    string user_id = 2;
+    uint64 stream_contract_id = 3;
+    string stream_contract_address = 4;
 }
 
 message AddInputChunkIdRequest {

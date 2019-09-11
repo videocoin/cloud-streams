@@ -153,6 +153,45 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	return streamProfile, nil
 }
 
+func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "UpdateStatus")
+	defer span.Finish()
+
+	span.SetTag("id", req.Id)
+
+	stream, err := s.manager.Get(ctx, req.Id)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	updates := make(map[string]interface{})
+
+	if req.Status != v1.StreamStatusNew {
+		updates["status"] = req.Status
+	}
+
+	if req.StreamContractAddress != "" {
+		updates["stream_contract_address"] = req.StreamContractAddress
+	}
+
+	if req.InputStatus != v1.InputStatusNone {
+		updates["input_status"] = req.InputStatus
+	}
+
+	_, err = s.manager.Update(
+		ctx,
+		stream,
+		updates,
+	)
+	if err != nil {
+		s.logger.Error(err)
+		return nil, err
+	}
+
+	return &protoempty.Empty{}, nil
+}
+
 func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "Run")
 	defer span.Finish()
@@ -205,6 +244,7 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 
 	profileName := fmt.Sprintf("%d", stream.ProfileId)
 	_, _ = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
+		StreamId:         stream.Id,
 		UserId:           userId,
 		StreamContractId: stream.StreamContractId,
 		ProfileNames:     []string{profileName},

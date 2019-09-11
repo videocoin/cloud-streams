@@ -56,6 +56,8 @@ service StreamService {
       };
     };
 
+    rpc UpdateStatus(UpdateStreamRequest) returns (google.protobuf.Empty) {};
+
     rpc Run(StreamRequest) returns (StreamProfile) {
       option (google.api.http) = {
         post: "/api/v1/streams/{id}/run"
@@ -70,8 +72,13 @@ service StreamService {
 }
 
 message CreateStreamRequest {
-    string name = 1;
-    cloud.api.profiles.v1.ProfileId profile_id = 2;
+    string name = 1 [
+      (gogoproto.moretags) = "validate:\"required\""
+    ];
+
+    cloud.api.profiles.v1.ProfileId profile_id = 2 [
+      (gogoproto.moretags) = "validate:\"required\""
+    ];
 }
 
 message StreamRequest {
