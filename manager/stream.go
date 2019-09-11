@@ -14,8 +14,8 @@ import (
 	"github.com/videocoin/cloud-pkg/uuid4"
 )
 
-func (m *Manager) Create(ctx context.Context, name, userID, inputURL, outputURL string, profileID profilesv1.ProfileId) (*v1.Stream, error) {
-	span, _ := opentracing.StartSpanFromContext(ctx, "manager.Create")
+func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outputURL string, profileID profilesv1.ProfileId) (*v1.Stream, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "manager.CreateStream")
 	defer span.Finish()
 
 	span.SetTag("name", name)
