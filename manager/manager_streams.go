@@ -24,7 +24,7 @@ func (m *Manager) Create(ctx context.Context, name, userId, inputURL, outputURL 
 		UserId:           userId,
 		Name:             name,
 		ProfileId:        profileID,
-		InputUrl:         fmt.Sprintf("%s/%s/index.m3u8", inputURL, id),
+		InputUrl:         fmt.Sprintf("%s/%s", inputURL, id),
 		OutputUrl:        fmt.Sprintf("%s/%s/index.m3u8", outputURL, id),
 		StreamContractId: streamContractID.Uint64(),
 		Status:           v1.StreamStatusNew,

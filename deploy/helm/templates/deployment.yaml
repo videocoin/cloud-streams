@@ -42,6 +42,16 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: emitterRpcAddr
+            - name: BASE_INPUT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: baseInputUrl
+            - name: BASE_OUTPUT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: baseOutputUrl
             - name: DBURI
               valueFrom:
                 secretKeyRef:
