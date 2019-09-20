@@ -9,6 +9,7 @@ type Config struct {
 	Version string `envconfig:"-"`
 
 	RPCAddr         string `default:"0.0.0.0:5002" envconfig:"RPC_ADDR"`
+	PrivateRPCAddr  string `default:"0.0.0.0:5102" envconfig:"PRIVATE_RPC_ADDR"`
 	AccountsRPCAddr string `default:"0.0.0.0:5001" envconfig:"ACCOUNTS_RPC_ADDR"`
 	EmitterRPCAddr  string `default:"0.0.0.0:5003" envconfig:"EMITTER_RPC_ADDR"`
 

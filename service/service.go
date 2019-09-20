@@ -11,8 +11,9 @@ import (
 )
 
 type Service struct {
-	cfg *Config
-	rpc *rpc.RpcServer
+	cfg        *Config
+	rpc        *rpc.RpcServer
+	privateRPC *rpc.PrivateRPCServer
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -55,14 +56,26 @@ func NewService(cfg *Config) (*Service, error) {
 		Logger:          cfg.Logger,
 	}
 
-	rpc, err := rpc.NewRpcServer(rpcConfig)
+	publicRPC, err := rpc.NewRpcServer(rpcConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	privateRPCConfig := &rpc.PrivateRPCServerOpts{
+		Addr:    cfg.PrivateRPCAddr,
+		Logger:  cfg.Logger.WithField("system", "privaterpc"),
+		Manager: manager,
+	}
+
+	privateRPC, err := rpc.NewPrivateRPCServer(privateRPCConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	svc := &Service{
-		cfg: cfg,
-		rpc: rpc,
+		cfg:        cfg,
+		rpc:        publicRPC,
+		privateRPC: privateRPC,
 	}
 
 	return svc, nil
@@ -70,6 +83,7 @@ func NewService(cfg *Config) (*Service, error) {
 
 func (s *Service) Start() error {
 	go s.rpc.Start()
+	go s.privateRPC.Start()
 	return nil
 }
 
