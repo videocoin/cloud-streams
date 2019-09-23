@@ -17,6 +17,7 @@ require (
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/sirupsen/logrus v1.4.2
+	github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94
 	github.com/videocoin/cloud-api v0.2.7
 	github.com/videocoin/cloud-pkg v0.0.5
 	google.golang.org/grpc v1.23.0

@@ -3,7 +3,10 @@ package eventbus
 import (
 	"context"
 
+	"github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	"github.com/videocoin/cloud-pkg/mqmux"
 )
@@ -46,12 +49,24 @@ func (e *EventBus) Stop() error {
 	return e.mq.Close()
 }
 
-func (e *EventBus) emitCUDStream(t privatev1.EventType, id string) error {
+func (e *EventBus) emitCUDStream(ctx context.Context, t privatev1.EventType, id string) error {
+	headers := make(amqp.Table)
+
+	span := opentracing.SpanFromContext(ctx)
+	ext.SpanKindRPCServer.Set(span)
+	ext.Component.Set(span, "streams")
+
+	span.Tracer().Inject(
+		span.Context(),
+		opentracing.TextMap,
+		mqmux.RMQHeaderCarrier(headers),
+	)
+
 	event := &privatev1.Event{
 		Type:     t,
 		StreamID: id,
 	}
-	err := e.mq.Publish("streams.events", event)
+	err := e.mq.PublishX("streams.events", event, headers)
 	if err != nil {
 		return err
 	}
@@ -60,15 +75,15 @@ func (e *EventBus) emitCUDStream(t privatev1.EventType, id string) error {
 
 func (e *EventBus) EmitCreateStream(ctx context.Context, id string) error {
 	e.logger.Debugf("emitting create stream: %s", id)
-	return e.emitCUDStream(privatev1.EventTypeCreate, id)
+	return e.emitCUDStream(ctx, privatev1.EventTypeCreate, id)
 }
 
 func (e *EventBus) EmitUpdateStream(ctx context.Context, id string) error {
 	e.logger.Debugf("emitting update stream: %s", id)
-	return e.emitCUDStream(privatev1.EventTypeUpdate, id)
+	return e.emitCUDStream(ctx, privatev1.EventTypeUpdate, id)
 }
 
 func (e *EventBus) EmitDeleteStream(ctx context.Context, id string) error {
 	e.logger.Debugf("emitting delete stream: %s", id)
-	return e.emitCUDStream(privatev1.EventTypeDelete, id)
+	return e.emitCUDStream(ctx, privatev1.EventTypeDelete, id)
 }
