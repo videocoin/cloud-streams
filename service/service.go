@@ -5,6 +5,7 @@ import (
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	ds "github.com/videocoin/cloud-streams/datastore"
+	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"github.com/videocoin/cloud-streams/rpc"
 	"google.golang.org/grpc"
@@ -14,6 +15,7 @@ type Service struct {
 	cfg        *Config
 	rpc        *rpc.RpcServer
 	privateRPC *rpc.PrivateRPCServer
+	eb         *eventbus.EventBus
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -44,7 +46,18 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	emitter := emitterv1.NewEmitterServiceClient(emitterConn)
 
+	ebConfig := &eventbus.Config{
+		URI:    cfg.MQURI,
+		Name:   cfg.Name,
+		Logger: cfg.Logger.WithField("system", "eventbus"),
+	}
+	eb, err := eventbus.New(ebConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	rpcConfig := &rpc.RpcServerOpts{
+		Logger:          cfg.Logger,
 		Addr:            cfg.RPCAddr,
 		Ds:              ds,
 		Manager:         manager,
@@ -53,7 +66,7 @@ func NewService(cfg *Config) (*Service, error) {
 		BaseOutputURL:   cfg.BaseOutputURL,
 		Emitter:         emitter,
 		AuthTokenSecret: cfg.AuthTokenSecret,
-		Logger:          cfg.Logger,
+		EventBus:        eb,
 	}
 
 	publicRPC, err := rpc.NewRpcServer(rpcConfig)
@@ -76,6 +89,7 @@ func NewService(cfg *Config) (*Service, error) {
 		cfg:        cfg,
 		rpc:        publicRPC,
 		privateRPC: privateRPC,
+		eb:         eb,
 	}
 
 	return svc, nil
@@ -84,9 +98,11 @@ func NewService(cfg *Config) (*Service, error) {
 func (s *Service) Start() error {
 	go s.rpc.Start()
 	go s.privateRPC.Start()
+	go s.eb.Start()
 	return nil
 }
 
 func (s *Service) Stop() error {
+	s.eb.Stop()
 	return nil
 }

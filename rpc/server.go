@@ -14,6 +14,7 @@ import (
 	"github.com/videocoin/cloud-pkg/auth"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	ds "github.com/videocoin/cloud-streams/datastore"
+	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -28,6 +29,7 @@ type RpcServerOpts struct {
 	Ds              *ds.Datastore
 	Accounts        accountsv1.AccountServiceClient
 	Emitter         emitterv1.EmitterServiceClient
+	EventBus        *eventbus.EventBus
 	Logger          *logrus.Entry
 }
 
@@ -44,6 +46,7 @@ type RpcServer struct {
 	manager         *manager.Manager
 	logger          *logrus.Entry
 	validator       *requestValidator
+	eb              *eventbus.EventBus
 }
 
 func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
@@ -68,6 +71,7 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		baseOutputURL:   opts.BaseOutputURL,
 		logger:          opts.Logger.WithField("system", "rpc"),
 		validator:       newRequestValidator(),
+		eb:              opts.EventBus,
 	}
 
 	v1.RegisterStreamServiceServer(grpcServer, rpcServer)

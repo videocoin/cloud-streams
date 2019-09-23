@@ -43,6 +43,8 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
+	go s.eb.EmitCreateStream(ctx, streamProfile.Id)
+
 	return streamProfile, nil
 }
 
@@ -68,6 +70,8 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 		logFailedTo(logger, "delete user stream", err)
 		return nil, rpc.ErrRpcInternal
 	}
+
+	go s.eb.EmitDeleteStream(ctx, req.Id)
 
 	return &protoempty.Empty{}, nil
 }
@@ -169,6 +173,8 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
+	go s.eb.EmitUpdateStream(ctx, stream.Id)
+
 	return streamProfile, nil
 }
 
@@ -206,6 +212,8 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 		logFailedTo(logger, "update stream", err)
 		return nil, rpc.ErrRpcInternal
 	}
+
+	go s.eb.EmitUpdateStream(ctx, stream.Id)
 
 	return &protoempty.Empty{}, nil
 }
@@ -272,6 +280,8 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		return nil, rpc.ErrRpcInternal
 	}
 
+	go s.eb.EmitUpdateStream(ctx, stream.Id)
+
 	return streamProfile, nil
 }
 
@@ -333,6 +343,8 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
+
+	go s.eb.EmitUpdateStream(ctx, stream.Id)
 
 	return streamProfile, nil
 }
