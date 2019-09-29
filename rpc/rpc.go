@@ -2,11 +2,9 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
-	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -239,16 +237,16 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
 
-	account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
-	if err != nil {
-		logFailedTo(logger, "get account", err)
-		return nil, rpc.ErrRpcInternal
-	}
+	// account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
+	// if err != nil {
+	// 	logFailedTo(logger, "get account", err)
+	// 	return nil, rpc.ErrRpcInternal
+	// }
 
-	// temp balance limit force on api level
-	if account.Balance < 20 || account.Balance > 50 {
-		return nil, rpc.NewRpcPermissionError("hit balance limitation")
-	}
+	// // temp balance limit force on api level
+	// if account.Balance < 20 || account.Balance > 50 {
+	// 	return nil, rpc.NewRpcPermissionError("hit balance limitation")
+	// }
 
 	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
 	if err != nil {
@@ -270,12 +268,11 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		return nil, rpc.ErrRpcInternal
 	}
 
-	profileName := fmt.Sprintf("%d", stream.ProfileId)
 	_, err = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
 		StreamId:         stream.Id,
 		UserId:           userID,
 		StreamContractId: stream.StreamContractId,
-		ProfileNames:     []string{profileName},
+		ProfilesIds:      []string{stream.ProfileId},
 	})
 
 	if err != nil {

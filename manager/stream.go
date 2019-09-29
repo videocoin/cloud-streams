@@ -8,13 +8,12 @@ import (
 	"math/rand"
 
 	"github.com/opentracing/opentracing-go"
-	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	tracer "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-pkg/uuid4"
 )
 
-func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outputURL string, profileID profilesv1.ProfileId) (*v1.Stream, error) {
+func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outputURL, profileID string) (*v1.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.CreateStream")
 	defer span.Finish()
 
