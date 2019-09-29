@@ -5,6 +5,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/opentracing/opentracing-go/log"
 	"github.com/streadway/amqp"
 	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/config"
@@ -43,4 +44,14 @@ func ExtractMQSpan(d amqp.Delivery, spanName string) (opentracing.SpanContext, o
 	}
 
 	return ctx, span
+}
+
+func SpanLogError(span opentracing.Span, err error) {
+	if err != nil {
+		ext.Error.Set(span, true)
+		span.LogFields(
+			log.String("event", "error"),
+			log.String("message", err.Error()),
+		)
+	}
 }

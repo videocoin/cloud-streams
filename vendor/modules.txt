@@ -8,6 +8,12 @@ github.com/dgrijalva/jwt-go
 github.com/evalphobia/logrus_sentry
 # github.com/getsentry/raven-go v0.2.0
 github.com/getsentry/raven-go
+# github.com/go-playground/locales v0.12.1
+github.com/go-playground/locales/en
+github.com/go-playground/locales
+github.com/go-playground/locales/currency
+# github.com/go-playground/universal-translator v0.16.0
+github.com/go-playground/universal-translator
 # github.com/go-sql-driver/mysql v1.4.1
 github.com/go-sql-driver/mysql
 # github.com/gogo/googleapis v1.2.0
@@ -61,6 +67,8 @@ github.com/jinzhu/inflection
 github.com/kelseyhightower/envconfig
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/leodido/go-urn v1.1.0
+github.com/leodido/go-urn
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/opentracing/opentracing-go v1.1.0
@@ -105,19 +113,19 @@ github.com/uber/jaeger-client-go/thrift-gen/agent
 github.com/uber/jaeger-client-go/thrift-gen/baggage
 # github.com/uber/jaeger-lib v2.0.0+incompatible
 github.com/uber/jaeger-lib/metrics
-# github.com/videocoin/cloud-api v0.2.7 => ../cloud-api
+# github.com/videocoin/cloud-api v0.2.13 => ../cloud-api
 github.com/videocoin/cloud-api/streams/v1
-github.com/videocoin/cloud-api/profiles/v1
+github.com/videocoin/cloud-api/streams/private/v1
 github.com/videocoin/cloud-api/accounts/v1
 github.com/videocoin/cloud-api/emitter/v1
 github.com/videocoin/cloud-api/rpc
 # github.com/videocoin/cloud-pkg v0.0.5 => ../cloud-pkg
 github.com/videocoin/cloud-pkg/logger
 github.com/videocoin/cloud-pkg/tracer
+github.com/videocoin/cloud-pkg/mqmux
 github.com/videocoin/cloud-pkg/uuid4
 github.com/videocoin/cloud-pkg/auth
 github.com/videocoin/cloud-pkg/grpcutil
-github.com/videocoin/cloud-pkg/mqmux
 # golang.org/x/net v0.0.0-20190522155817-f3200d17e092
 golang.org/x/net/trace
 golang.org/x/net/context
@@ -175,3 +183,6 @@ google.golang.org/grpc/balancer/base
 google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/internal/syscall
+# gopkg.in/go-playground/validator.v9 v9.29.1
+gopkg.in/go-playground/validator.v9
+gopkg.in/go-playground/validator.v9/translations/en

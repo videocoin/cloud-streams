@@ -19,3 +19,13 @@ func NewRpcValidationError(verr proto.Message) error {
 	s, _ := status.New(codes.InvalidArgument, "invalid argument").WithDetails(verr)
 	return s.Err()
 }
+
+func NewRpcInternalError(err error) error {
+	s := status.New(codes.Internal, err.Error())
+	return s.Err()
+}
+
+func NewRpcPermissionError(err string) error {
+	s := status.New(codes.PermissionDenied, err)
+	return s.Err()
+}

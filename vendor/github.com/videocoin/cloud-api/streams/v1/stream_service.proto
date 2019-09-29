@@ -6,7 +6,6 @@ import "github.com/videocoin/cloud-api/rpc/health.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/videocoin/cloud-api/profiles/v1/profiles.proto";
 
 import "streams/v1/stream.proto";
 
@@ -76,7 +75,7 @@ message CreateStreamRequest {
       (gogoproto.moretags) = "validate:\"required\""
     ];
 
-    cloud.api.profiles.v1.ProfileId profile_id = 2 [
+    string profile_id = 2 [
       (gogoproto.moretags) = "validate:\"required\""
     ];
 }
