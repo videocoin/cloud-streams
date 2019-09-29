@@ -3,7 +3,6 @@ syntax = "proto3";
 package cloud.api.streams.v1;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/videocoin/cloud-api/profiles/v1/profiles.proto";
 
 import "google/protobuf/timestamp.proto";
 
@@ -48,7 +47,7 @@ message Stream {
     string user_id = 2;
     string name = 3;
 
-    cloud.api.profiles.v1.ProfileId profile_id = 4;
+    string profile_id = 4;
 
     StreamStatus status = 5;
     InputStatus input_status = 6;

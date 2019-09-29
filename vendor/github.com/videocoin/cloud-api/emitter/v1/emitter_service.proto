@@ -34,7 +34,7 @@ message InitStreamRequest {
     string stream_id = 1;
     string user_id = 2;
     uint64 stream_contract_id = 3;
-    repeated string profile_names = 4;
+    repeated string profiles_ids = 4;
 }
 
 message EndStreamRequest {
