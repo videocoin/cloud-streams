@@ -57,6 +57,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Chart.Name }}
                   key: dbUri
+            - name: MQURI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: mqUri
             - name: AUTH_TOKEN_SECRET
               valueFrom:
                 secretKeyRef:
