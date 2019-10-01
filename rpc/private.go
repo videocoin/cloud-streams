@@ -94,5 +94,10 @@ func toStreamResponse(stream *v1.Stream) (*privatev1.StreamResponse, error) {
 		return nil, err
 	}
 
+	resp.ID = stream.Id
+	resp.InputURL = stream.InputUrl
+	resp.OutputURL = stream.OutputUrl
+	resp.ProfileID = stream.ProfileId
+
 	return resp, nil
 }
