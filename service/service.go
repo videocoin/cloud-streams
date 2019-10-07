@@ -75,9 +75,11 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 
 	privateRPCConfig := &rpc.PrivateRPCServerOpts{
-		Addr:    cfg.PrivateRPCAddr,
-		Logger:  cfg.Logger.WithField("system", "privaterpc"),
-		Manager: manager,
+		Addr:     cfg.PrivateRPCAddr,
+		Logger:   cfg.Logger.WithField("system", "privaterpc"),
+		Manager:  manager,
+		Emitter:  emitter,
+		EventBus: eb,
 	}
 
 	privateRPC, err := rpc.NewPrivateRPCServer(privateRPCConfig)

@@ -35,7 +35,7 @@ func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outp
 		UserId:           userID,
 		Name:             name,
 		ProfileId:        profileID,
-		InputUrl:         fmt.Sprintf("%s/%s", inputURL, id),
+		InputUrl:         fmt.Sprintf("%s/%s/index.m3u8", inputURL, id),
 		OutputUrl:        fmt.Sprintf("%s/%s/index.m3u8", outputURL, id),
 		StreamContractId: streamContractID.Uint64(),
 		Status:           v1.StreamStatusNew,
@@ -84,7 +84,7 @@ func (m *Manager) GetStreamListByUserID(ctx context.Context, userID string) ([]*
 	return streams, nil
 }
 
-func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates map[string]interface{}) (*v1.Stream, error) {
+func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates map[string]interface{}) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.UpdateStream")
 	defer span.Finish()
 
@@ -106,10 +106,10 @@ func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates m
 
 	if err := m.ds.Stream.Update(ctx, stream, updates); err != nil {
 		tracer.SpanLogError(span, err)
-		return nil, err
+		return err
 	}
 
-	return stream, nil
+	return nil
 }
 
 func (m *Manager) GetUserStream(ctx context.Context, userID string, streamID string) (*v1.Stream, error) {

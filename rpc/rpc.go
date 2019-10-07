@@ -159,7 +159,7 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
-	stream, err = s.manager.UpdateStream(
+	err = s.manager.UpdateStream(
 		ctx,
 		stream,
 		map[string]interface{}{"name": req.Name},
@@ -207,7 +207,7 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 		updates["input_status"] = req.InputStatus
 	}
 
-	_, err = s.manager.UpdateStream(
+	err = s.manager.UpdateStream(
 		ctx,
 		stream,
 		updates,
@@ -258,7 +258,7 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		return nil, rpc.ErrRpcInternal
 	}
 
-	stream, err = s.manager.UpdateStream(
+	err = s.manager.UpdateStream(
 		ctx,
 		stream,
 		map[string]interface{}{"status": v1.StreamStatusPreparing},
@@ -335,7 +335,7 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		logFailedTo(logger, "end stream", err)
 	}
 
-	stream, err = s.manager.UpdateStream(
+	err = s.manager.UpdateStream(
 		ctx,
 		stream,
 		map[string]interface{}{"status": v1.StreamStatusCompleted},
