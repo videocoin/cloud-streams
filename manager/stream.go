@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/big"
 	"math/rand"
+	"time"
 
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -29,6 +30,7 @@ func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outp
 
 	span.SetTag("id", id)
 
+	rand.Seed(time.Now().UTC().UnixNano())
 	streamContractID := big.NewInt(int64(rand.Intn(math.MaxInt64)))
 	stream, err := m.ds.Stream.Create(ctx, &v1.Stream{
 		Id:               id,

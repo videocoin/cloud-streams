@@ -35,15 +35,15 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
+	go s.eb.EmitCreateStream(
+		opentracing.ContextWithSpan(ctx, span),
+		stream.Id)
+
 	streamProfile, err := toStreamProfile(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
-
-	go s.eb.EmitCreateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		streamProfile.Id)
 
 	return streamProfile, nil
 }
@@ -274,9 +274,9 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		StreamContractId: stream.StreamContractId,
 		ProfilesIds:      []string{stream.ProfileId},
 	})
-
 	if err != nil {
-		logFailedTo(logger, "init strea,", err)
+		logFailedTo(logger, "init stream", err)
+		return nil, rpc.ErrRpcInternal
 	}
 
 	streamProfile, err := toStreamProfile(stream)

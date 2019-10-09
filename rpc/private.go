@@ -203,6 +203,8 @@ func toStreamResponse(stream *v1.Stream) (*privatev1.StreamResponse, error) {
 	resp.InputURL = stream.InputUrl
 	resp.OutputURL = stream.OutputUrl
 	resp.ProfileID = stream.ProfileId
+	resp.StreamContractID = stream.StreamContractId
+	resp.StreamContractAddress = stream.StreamContractAddress
 
 	return resp, nil
 }
