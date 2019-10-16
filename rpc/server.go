@@ -25,6 +25,7 @@ type RpcServerOpts struct {
 	AuthTokenSecret string
 	BaseInputURL    string
 	BaseOutputURL   string
+	RTMPURL         string
 	Manager         *manager.Manager
 	Ds              *ds.Datastore
 	Accounts        accountsv1.AccountServiceClient
@@ -38,6 +39,7 @@ type RpcServer struct {
 	authTokenSecret string
 	baseInputURL    string
 	baseOutputURL   string
+	rtmpURL         string
 	grpc            *grpc.Server
 	listen          net.Listener
 	ds              *ds.Datastore
@@ -69,9 +71,11 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		manager:         opts.Manager,
 		baseInputURL:    opts.BaseInputURL,
 		baseOutputURL:   opts.BaseOutputURL,
-		logger:          opts.Logger.WithField("system", "rpc"),
-		validator:       newRequestValidator(),
-		eb:              opts.EventBus,
+		rtmpURL:         opts.RTMPURL,
+
+		logger:    opts.Logger.WithField("system", "rpc"),
+		validator: newRequestValidator(),
+		eb:        opts.EventBus,
 	}
 
 	v1.RegisterStreamServiceServer(grpcServer, rpcServer)

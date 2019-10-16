@@ -16,10 +16,11 @@ type Config struct {
 	DBURI string `default:"root:root@/videocoin?charset=utf8&parseTime=True&loc=Local" envconfig:"DBURI"`
 	MQURI string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
 
-	AuthTokenSecret string `default:"" envconfig:"AUTH_TOKEN_SECRET"`
+	AuthTokenSecret string `required:"true" envconfig:"AUTH_TOKEN_SECRET"`
 
-	BaseInputURL  string `default:"" envconfig:"BASE_INPUT_URL"`
-	BaseOutputURL string `default:"" envconfig:"BASE_OUTPUT_URL"`
+	BaseInputURL  string `required:"true" envconfig:"BASE_INPUT_URL"`
+	BaseOutputURL string `required:"true" envconfig:"BASE_OUTPUT_URL"`
+	RTMPURL       string `required:"true" envconfig:"RTMP_URL"`
 
 	Logger *logrus.Entry `envconfig:"-"`
 }

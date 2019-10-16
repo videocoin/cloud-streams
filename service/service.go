@@ -64,6 +64,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Accounts:        accounts,
 		BaseInputURL:    cfg.BaseInputURL,
 		BaseOutputURL:   cfg.BaseOutputURL,
+		RTMPURL:         cfg.RTMPURL,
 		Emitter:         emitter,
 		AuthTokenSecret: cfg.AuthTokenSecret,
 		EventBus:        eb,

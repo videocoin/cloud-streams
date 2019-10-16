@@ -29,7 +29,15 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.NewRpcValidationError(verr)
 	}
 
-	stream, err := s.manager.CreateStream(ctx, req.Name, userID, s.baseInputURL, s.baseOutputURL, req.ProfileId)
+	stream, err := s.manager.CreateStream(
+		ctx,
+		req.Name,
+		req.ProfileId,
+		userID,
+		s.baseInputURL,
+		s.baseOutputURL,
+		s.rtmpURL,
+	)
 	if err != nil {
 		logFailedTo(logger, "create stream", err)
 		return nil, rpc.ErrRpcInternal

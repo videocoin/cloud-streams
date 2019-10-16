@@ -14,7 +14,15 @@ import (
 	"github.com/videocoin/cloud-pkg/uuid4"
 )
 
-func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outputURL, profileID string) (*v1.Stream, error) {
+func (m *Manager) CreateStream(
+	ctx context.Context,
+	name string,
+	profileID string,
+	userID string,
+	inputURL string,
+	outputURL string,
+	rtmpURL string,
+) (*v1.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.CreateStream")
 	defer span.Finish()
 
@@ -39,6 +47,7 @@ func (m *Manager) CreateStream(ctx context.Context, name, userID, inputURL, outp
 		ProfileId:        profileID,
 		InputUrl:         fmt.Sprintf("%s/%s/index.m3u8", inputURL, id),
 		OutputUrl:        fmt.Sprintf("%s/%s/index.m3u8", outputURL, id),
+		RtmpUrl:          fmt.Sprintf("%s/%s", rtmpURL, id),
 		StreamContractId: streamContractID.Uint64(),
 		Status:           v1.StreamStatusNew,
 	})
