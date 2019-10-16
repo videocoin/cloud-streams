@@ -23,7 +23,7 @@ build:
 			./cmd/main.go
 
 deps:
-	env GO111MODULE=on go mod vendor
+	GO111MODULE=on go mod vendor
 
 docker-build:
 	docker build -t gcr.io/${GCP_PROJECT}/${NAME}:${VERSION} -f Dockerfile .

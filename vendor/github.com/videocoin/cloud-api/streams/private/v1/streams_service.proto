@@ -19,6 +19,8 @@ option (gogoproto.messagename_all) = true;
 service StreamsService {
   rpc Health(google.protobuf.Empty) returns (cloud.api.rpc.HealthStatus) {}
   rpc Get(StreamRequest) returns (StreamResponse) {}
+  rpc Publish(StreamRequest) returns (StreamResponse) {}
+  rpc PublishDone(StreamRequest) returns (StreamResponse) {}
 }
 
 message StreamRequest {

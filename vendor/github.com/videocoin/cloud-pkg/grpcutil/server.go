@@ -13,7 +13,7 @@ import (
 )
 
 func DefaultServerOpts(logger *logrus.Entry) []grpc.ServerOption {
-	grpclogrus.ReplaceGrpcLogger(logger)
+	// grpclogrus.ReplaceGrpcLogger(logger)
 
 	tracerOpts := grpctracing.WithTracer(opentracing.GlobalTracer())
 

@@ -23,7 +23,7 @@ service EmitterService {
 
     rpc InitStream(InitStreamRequest) returns (google.protobuf.Empty) {}
     rpc EndStream(EndStreamRequest) returns (google.protobuf.Empty) {}
-    rpc AddInputChunkId(AddInputChunkIdRequest) returns (Tx) {}
+    rpc AddInputChunkId(AddInputChunkIdRequest) returns (google.protobuf.Empty) {}
 }
 
 message Tx {
