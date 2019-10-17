@@ -32,6 +32,8 @@ spec:
               value: "6831"
             - name: RPC_ADDR
               value: 0.0.0.0:{{ .Values.service.internalRpcPort }}
+            - name: PRIVATE_RPC_ADDR
+              value: 0.0.0.0:{{ .Values.service.internalPrivateRpcPort }}
             - name: ACCOUNTS_RPC_ADDR
               valueFrom:
                 configMapKeyRef:

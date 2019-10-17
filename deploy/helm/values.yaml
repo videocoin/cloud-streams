@@ -12,6 +12,8 @@ service:
   type: ClusterIP
   externalRpcPort: 5002
   internalRpcPort: 5002
+  externalPrivateRpcPort: 5102
+  internalPrivateRpcPort: 5102
 
 autoscaler:
   minCount: 1
