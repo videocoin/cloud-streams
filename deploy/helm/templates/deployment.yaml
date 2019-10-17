@@ -23,6 +23,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalRpcPort }}
+            - containerPort: {{ .Values.service.internalPrivateRpcPort }}
           env:
             - name: JAEGER_AGENT_HOST
               valueFrom:
