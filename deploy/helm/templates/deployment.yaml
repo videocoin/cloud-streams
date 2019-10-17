@@ -52,6 +52,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: baseOutputUrl
+            - name: RTMP_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: rtmpUrl
             - name: DBURI
               valueFrom:
                 secretKeyRef:
