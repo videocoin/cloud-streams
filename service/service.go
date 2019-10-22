@@ -50,6 +50,7 @@ func NewService(cfg *Config) (*Service, error) {
 		URI:    cfg.MQURI,
 		Name:   cfg.Name,
 		Logger: cfg.Logger.WithField("system", "eventbus"),
+		DM:     manager,
 	}
 	eb, err := eventbus.New(ebConfig)
 	if err != nil {

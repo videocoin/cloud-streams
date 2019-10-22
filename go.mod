@@ -3,6 +3,7 @@ module github.com/videocoin/cloud-streams
 go 1.12
 
 require (
+	github.com/AlekSi/pointer v1.1.0
 	github.com/go-playground/locales v0.12.1
 	github.com/go-playground/universal-translator v0.16.0
 	github.com/gogo/protobuf v1.3.0

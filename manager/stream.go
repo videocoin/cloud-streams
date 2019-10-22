@@ -8,6 +8,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/AlekSi/pointer"
+
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	tracer "github.com/videocoin/cloud-pkg/tracer"
@@ -113,6 +115,26 @@ func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates m
 
 	if value, ok := updates["input_status"]; ok {
 		stream.InputStatus = value.(v1.InputStatus)
+	}
+
+	if value, ok := updates["ready_at"]; ok {
+		stream.ReadyAt = pointer.ToTime(value.(time.Time))
+	}
+
+	if value, ok := updates["completed_at"]; ok {
+		stream.CompletedAt = pointer.ToTime(value.(time.Time))
+	}
+
+	if stream.Status == v1.StreamStatusCompleted && stream.CompletedAt == nil {
+		stream.CompletedAt = pointer.ToTime(time.Now())
+		stream.InputStatus = v1.InputStatusNone
+		updates["completed_at"] = stream.CompletedAt
+		updates["input_status"] = stream.InputStatus
+	}
+
+	if stream.Status == v1.StreamStatusReady && stream.ReadyAt == nil {
+		stream.ReadyAt = pointer.ToTime(time.Now())
+		updates["ready_at"] = stream.ReadyAt
 	}
 
 	if err := m.ds.Stream.Update(ctx, stream, updates); err != nil {
