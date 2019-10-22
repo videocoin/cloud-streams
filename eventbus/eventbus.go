@@ -2,6 +2,7 @@ package eventbus
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -9,17 +10,21 @@ import (
 	"github.com/streadway/amqp"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	"github.com/videocoin/cloud-pkg/mqmux"
+	tracerext "github.com/videocoin/cloud-pkg/tracer"
+	"github.com/videocoin/cloud-streams/manager"
 )
 
 type Config struct {
 	Logger *logrus.Entry
 	URI    string
 	Name   string
+	DM     *manager.Manager
 }
 
 type EventBus struct {
 	logger *logrus.Entry
 	mq     *mqmux.WorkerMux
+	dm     *manager.Manager
 }
 
 func New(c *Config) (*EventBus, error) {
@@ -34,6 +39,7 @@ func New(c *Config) (*EventBus, error) {
 	return &EventBus{
 		logger: c.Logger,
 		mq:     mq,
+		dm:     c.DM,
 	}, nil
 }
 
@@ -42,6 +48,12 @@ func (e *EventBus) Start() error {
 	if err != nil {
 		return err
 	}
+
+	err = e.mq.Consumer("streams.status", 1, false, e.handleStreamStatus)
+	if err != nil {
+		return err
+	}
+
 	return e.mq.Run()
 }
 
@@ -86,4 +98,62 @@ func (e *EventBus) EmitUpdateStream(ctx context.Context, id string) error {
 func (e *EventBus) EmitDeleteStream(ctx context.Context, id string) error {
 	e.logger.Debugf("emitting delete stream: %s", id)
 	return e.emitCUDStream(ctx, privatev1.EventTypeDelete, id)
+}
+
+func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
+	var span opentracing.Span
+	tracer := opentracing.GlobalTracer()
+	spanCtx, err := tracer.Extract(opentracing.TextMap, mqmux.RMQHeaderCarrier(d.Headers))
+
+	e.logger.Debugf("handling body: %+v", string(d.Body))
+
+	if err != nil {
+		span = tracer.StartSpan("eventbus.handleStreamStatus")
+	} else {
+		span = tracer.StartSpan("eventbus.handleStreamStatus", ext.RPCServerOption(spanCtx))
+	}
+
+	defer span.Finish()
+
+	req := new(privatev1.Event)
+	err = json.Unmarshal(d.Body, req)
+	if err != nil {
+		tracerext.SpanLogError(span, err)
+		return err
+	}
+
+	span.SetTag("stream_id", req.StreamID)
+	span.SetTag("event_type", req.Type.String())
+	span.SetTag("status", req.Status.String())
+
+	e.logger.Debugf("handling request %+v", req)
+
+	// ctx := opentracing.ContextWithSpan(context.Background(), span)
+
+	switch req.Type {
+	case privatev1.EventTypeUpdateStatus:
+		{
+			logger := e.logger.WithFields(logrus.Fields{
+				"status":    req.Status.String(),
+				"stream_id": req.StreamID,
+			})
+			logger.Info("updating status")
+
+			ctx := context.Background()
+			stream, err := e.dm.GetStreamByID(ctx, req.StreamID)
+			if err != nil {
+				logger.Errorf("failed to get stream: %s", err)
+				return nil
+			}
+
+			updates := map[string]interface{}{"status": req.Status}
+			err = e.dm.UpdateStream(ctx, stream, updates)
+			if err != nil {
+				logger.Errorf("failed to update stream status: %s", err)
+				return nil
+			}
+		}
+	}
+
+	return nil
 }
