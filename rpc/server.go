@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 
-	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
@@ -18,6 +17,8 @@ import (
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 )
 
 type RpcServerOpts struct {
@@ -54,7 +55,8 @@ type RpcServer struct {
 func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
 	grpcServer := grpc.NewServer(grpcOpts...)
-
+	healthService := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(grpcServer, healthService)
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
@@ -87,10 +89,6 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 func (s *RpcServer) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
-}
-
-func (s *RpcServer) Health(ctx context.Context, req *protoempty.Empty) (*rpc.HealthStatus, error) {
-	return &rpc.HealthStatus{Status: "OK"}, nil
 }
 
 func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, error) {

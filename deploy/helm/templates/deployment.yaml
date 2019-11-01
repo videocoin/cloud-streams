@@ -24,6 +24,14 @@ spec:
           ports:
             - containerPort: {{ .Values.service.internalRpcPort }}
             - containerPort: {{ .Values.service.internalPrivateRpcPort }}
+          readinessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalRpcPort }}", "&&", "/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalPrivateRpcPort }}"]
+            initialDelaySeconds: 5
+          livenessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalRpcPort }}", "&&", "/bin/grpc_health_probe", "-addr=:{{ .Values.service.internalPrivateRpcPort }}"]
+            initialDelaySeconds: 10
           env:
             - name: JAEGER_AGENT_HOST
               valueFrom:
