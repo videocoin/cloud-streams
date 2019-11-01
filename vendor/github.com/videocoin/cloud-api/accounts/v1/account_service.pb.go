@@ -11,7 +11,6 @@ import (
 	proto "github.com/gogo/protobuf/proto"
 	types "github.com/gogo/protobuf/types"
 	golang_proto "github.com/golang/protobuf/proto"
-	rpc "github.com/videocoin/cloud-api/rpc"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -30,7 +29,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type AccountRequest struct {
 	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -54,7 +53,7 @@ func (m *AccountRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return xxx_messageInfo_AccountRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -112,7 +111,7 @@ func (m *Address) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return xxx_messageInfo_Address.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -163,7 +162,7 @@ func (m *ListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)
 		return xxx_messageInfo_ListResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -192,6 +191,65 @@ func (m *ListResponse) GetItems() []*AccountProfile {
 func (*ListResponse) XXX_MessageName() string {
 	return "cloud.api.account.v1.ListResponse"
 }
+
+type WithdrawRequest struct {
+	OwnerId              string   `protobuf:"bytes,1,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	TransferId           string   `protobuf:"bytes,2,opt,name=transfer_id,json=transferId,proto3" json:"transfer_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *WithdrawRequest) Reset()         { *m = WithdrawRequest{} }
+func (m *WithdrawRequest) String() string { return proto.CompactTextString(m) }
+func (*WithdrawRequest) ProtoMessage()    {}
+func (*WithdrawRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_0a57b966a6f05cc7, []int{3}
+}
+func (m *WithdrawRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *WithdrawRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_WithdrawRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *WithdrawRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WithdrawRequest.Merge(m, src)
+}
+func (m *WithdrawRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *WithdrawRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_WithdrawRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WithdrawRequest proto.InternalMessageInfo
+
+func (m *WithdrawRequest) GetOwnerId() string {
+	if m != nil {
+		return m.OwnerId
+	}
+	return ""
+}
+
+func (m *WithdrawRequest) GetTransferId() string {
+	if m != nil {
+		return m.TransferId
+	}
+	return ""
+}
+
+func (*WithdrawRequest) XXX_MessageName() string {
+	return "cloud.api.account.v1.WithdrawRequest"
+}
 func init() {
 	proto.RegisterType((*AccountRequest)(nil), "cloud.api.account.v1.AccountRequest")
 	golang_proto.RegisterType((*AccountRequest)(nil), "cloud.api.account.v1.AccountRequest")
@@ -199,6 +257,8 @@ func init() {
 	golang_proto.RegisterType((*Address)(nil), "cloud.api.account.v1.Address")
 	proto.RegisterType((*ListResponse)(nil), "cloud.api.account.v1.ListResponse")
 	golang_proto.RegisterType((*ListResponse)(nil), "cloud.api.account.v1.ListResponse")
+	proto.RegisterType((*WithdrawRequest)(nil), "cloud.api.account.v1.WithdrawRequest")
+	golang_proto.RegisterType((*WithdrawRequest)(nil), "cloud.api.account.v1.WithdrawRequest")
 }
 
 func init() { proto.RegisterFile("accounts/v1/account_service.proto", fileDescriptor_0a57b966a6f05cc7) }
@@ -207,38 +267,37 @@ func init() {
 }
 
 var fileDescriptor_0a57b966a6f05cc7 = []byte{
-	// 481 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x52, 0xbd, 0x6e, 0x13, 0x41,
-	0x10, 0xf6, 0x9d, 0x83, 0x1d, 0x86, 0x28, 0x42, 0x2b, 0x7e, 0x1c, 0x87, 0x9c, 0xc2, 0x41, 0x91,
-	0x26, 0x7b, 0x72, 0xe8, 0xa0, 0x4a, 0x00, 0x05, 0x08, 0x92, 0x91, 0x23, 0x28, 0xd2, 0x44, 0xeb,
-	0xdb, 0xc9, 0x79, 0x25, 0xfb, 0xf6, 0xb8, 0xdd, 0x3b, 0x64, 0x10, 0x0d, 0xaf, 0xc0, 0x0b, 0x51,
-	0xa6, 0x44, 0xe2, 0x05, 0x90, 0xc3, 0x2b, 0xd0, 0xa3, 0xdb, 0x5d, 0x13, 0x17, 0x4e, 0xe4, 0xc2,
-	0xdd, 0xcc, 0xce, 0xf7, 0xcd, 0x7c, 0xfb, 0xcd, 0xc0, 0x43, 0x16, 0xc7, 0xb2, 0x48, 0xb5, 0x8a,
-	0xca, 0x4e, 0xe4, 0xe2, 0x53, 0x85, 0x79, 0x29, 0x62, 0xa4, 0x59, 0x2e, 0xb5, 0x24, 0x77, 0xe2,
-	0xa1, 0x2c, 0x38, 0x65, 0x99, 0xa0, 0x0e, 0x40, 0xcb, 0x4e, 0x7b, 0x63, 0x0e, 0xd1, 0x12, 0xda,
-	0x51, 0x22, 0xf4, 0xa0, 0xe8, 0xd3, 0x58, 0x8e, 0xa2, 0x52, 0x70, 0x94, 0xb1, 0x14, 0x69, 0x64,
-	0xba, 0xec, 0xb2, 0x4c, 0x44, 0x79, 0x16, 0x47, 0x03, 0x64, 0x43, 0x3d, 0x70, 0x84, 0xdd, 0x19,
-	0x42, 0x22, 0x13, 0x19, 0x99, 0xe7, 0x7e, 0x71, 0x66, 0x32, 0x93, 0x98, 0xc8, 0xc1, 0x37, 0x13,
-	0x29, 0x93, 0x21, 0x5e, 0xa2, 0x70, 0x94, 0xe9, 0xb1, 0x2b, 0x3e, 0x70, 0xc5, 0x6a, 0x10, 0x4b,
-	0x53, 0xa9, 0x99, 0x16, 0x32, 0x55, 0xb6, 0x1a, 0x3e, 0x83, 0xf5, 0x7d, 0xab, 0xb5, 0x87, 0x1f,
-	0x0b, 0x54, 0x9a, 0xac, 0x83, 0x2f, 0x78, 0xcb, 0xdb, 0xf6, 0x76, 0x6e, 0xf6, 0x7c, 0xc1, 0xc9,
-	0x06, 0xac, 0xca, 0x4f, 0x29, 0xe6, 0xa7, 0x82, 0xb7, 0x7c, 0xf3, 0xda, 0x34, 0xf9, 0x6b, 0x1e,
-	0x3e, 0x82, 0xe6, 0x3e, 0xe7, 0x39, 0x2a, 0x45, 0x5a, 0xd0, 0x64, 0x36, 0x74, 0xd4, 0x69, 0x1a,
-	0xbe, 0x81, 0xb5, 0xb7, 0x42, 0xe9, 0x1e, 0xaa, 0x4c, 0xa6, 0x0a, 0xc9, 0x53, 0xb8, 0x21, 0x34,
-	0x8e, 0x2a, 0x5c, 0x7d, 0xe7, 0xd6, 0xde, 0x63, 0x3a, 0xcf, 0x4d, 0xea, 0x44, 0xbd, 0xcb, 0xe5,
-	0x99, 0x18, 0x62, 0xcf, 0x52, 0xf6, 0xfe, 0xae, 0xfc, 0x97, 0x7b, 0x6c, 0x57, 0x42, 0xba, 0xd0,
-	0x78, 0x65, 0xac, 0x23, 0xf7, 0xa8, 0xfd, 0x29, 0x9d, 0xda, 0x40, 0x5f, 0x56, 0x36, 0xb4, 0x37,
-	0x67, 0x26, 0xe4, 0x59, 0x4c, 0x2d, 0xfc, 0x58, 0x33, 0x5d, 0xa8, 0xf0, 0xf6, 0xb7, 0x5f, 0x7f,
-	0xbe, 0xfb, 0x40, 0x56, 0xdd, 0x02, 0x3e, 0x93, 0x0c, 0xea, 0x87, 0xa8, 0xc9, 0xf5, 0xba, 0x9c,
-	0x59, 0xed, 0x85, 0xd4, 0x87, 0x5b, 0x66, 0xc8, 0x7d, 0x72, 0xd7, 0x2c, 0xe1, 0xf2, 0x3c, 0x54,
-	0xf4, 0x45, 0xf0, 0xaf, 0xe4, 0x3d, 0xac, 0x1d, 0xa2, 0x3e, 0x18, 0x4f, 0xbd, 0xdc, 0xba, 0xa2,
-	0xa9, 0x2d, 0x2f, 0x38, 0xb3, 0x46, 0x4e, 0x00, 0x4c, 0xdb, 0x6e, 0xb5, 0xad, 0xa5, 0xfe, 0xa7,
-	0x46, 0x3e, 0x40, 0xe3, 0x79, 0x8e, 0x4c, 0xe3, 0x92, 0xfb, 0xbe, 0x80, 0x95, 0xea, 0x58, 0xae,
-	0xdc, 0x65, 0x38, 0xbf, 0xcf, 0xec, 0x81, 0x85, 0x35, 0xd2, 0x85, 0xfa, 0x11, 0x8e, 0x17, 0x94,
-	0xb6, 0x7d, 0x2d, 0xea, 0x08, 0xc7, 0x61, 0xed, 0xa0, 0x75, 0x3e, 0x09, 0xbc, 0x9f, 0x93, 0xc0,
-	0xfb, 0x3d, 0x09, 0xbc, 0x1f, 0x17, 0x81, 0x77, 0x7e, 0x11, 0x78, 0x27, 0x7e, 0xd9, 0xe9, 0x37,
-	0x8c, 0xc0, 0x27, 0xff, 0x02, 0x00, 0x00, 0xff, 0xff, 0xe2, 0x41, 0xe3, 0x10, 0x37, 0x04, 0x00,
-	0x00,
+	// 476 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x52, 0xcd, 0x6e, 0xd3, 0x40,
+	0x10, 0xb6, 0x9d, 0xd2, 0x94, 0x69, 0x55, 0xa4, 0x15, 0x3f, 0xa9, 0xa1, 0xa6, 0x2c, 0x20, 0xf5,
+	0xc2, 0x5a, 0x29, 0x37, 0x38, 0xb5, 0x80, 0xaa, 0x12, 0x50, 0x51, 0x10, 0x20, 0xf5, 0x52, 0x6d,
+	0xbc, 0x13, 0x77, 0xa5, 0xc4, 0x6b, 0xbc, 0xeb, 0x54, 0x11, 0xe2, 0xc2, 0x2b, 0xf0, 0x42, 0x1c,
+	0x7b, 0x44, 0xe2, 0x05, 0x50, 0xca, 0x0b, 0xf0, 0x06, 0x28, 0x6b, 0x9b, 0x06, 0xe4, 0x56, 0x39,
+	0xf4, 0x36, 0x3f, 0xdf, 0xcc, 0x7c, 0x33, 0xf3, 0xc1, 0x3d, 0x1e, 0x45, 0x2a, 0x4f, 0x8c, 0x0e,
+	0x47, 0xed, 0xb0, 0xb4, 0x0f, 0x35, 0x66, 0x23, 0x19, 0x21, 0x4b, 0x33, 0x65, 0x14, 0xb9, 0x1e,
+	0x0d, 0x54, 0x2e, 0x18, 0x4f, 0x25, 0x2b, 0x01, 0x6c, 0xd4, 0xf6, 0xd7, 0x6a, 0x0a, 0x8b, 0x02,
+	0xff, 0x51, 0x2c, 0xcd, 0x51, 0xde, 0x63, 0x91, 0x1a, 0x86, 0xb1, 0x8a, 0x55, 0x68, 0xc3, 0xbd,
+	0xbc, 0x6f, 0x3d, 0xeb, 0x58, 0xab, 0x84, 0xdf, 0x8e, 0x95, 0x8a, 0x07, 0x78, 0x86, 0xc2, 0x61,
+	0x6a, 0xc6, 0x65, 0xf2, 0x4e, 0x99, 0xe4, 0xa9, 0x0c, 0x79, 0x92, 0x28, 0xc3, 0x8d, 0x54, 0x89,
+	0x2e, 0xb2, 0xf4, 0x29, 0xac, 0x6e, 0x17, 0xa3, 0xbb, 0xf8, 0x31, 0x47, 0x6d, 0xc8, 0x2a, 0x78,
+	0x52, 0xb4, 0xdc, 0x0d, 0x77, 0xf3, 0x6a, 0xd7, 0x93, 0x82, 0xac, 0xc1, 0x92, 0x3a, 0x4e, 0x30,
+	0x3b, 0x94, 0xa2, 0xe5, 0xd9, 0x68, 0xd3, 0xfa, 0x7b, 0x82, 0xde, 0x87, 0xe6, 0xb6, 0x10, 0x19,
+	0x6a, 0x4d, 0x5a, 0xd0, 0xe4, 0x85, 0x59, 0x96, 0x56, 0x2e, 0x7d, 0x09, 0x2b, 0xaf, 0xa4, 0x36,
+	0x5d, 0xd4, 0xa9, 0x4a, 0x34, 0x92, 0x27, 0x70, 0x45, 0x1a, 0x1c, 0x4e, 0x71, 0x8d, 0xcd, 0xe5,
+	0xad, 0x07, 0xac, 0xee, 0x38, 0xac, 0x24, 0xf5, 0x26, 0x53, 0x7d, 0x39, 0xc0, 0x6e, 0x51, 0x42,
+	0x5f, 0xc3, 0xb5, 0x0f, 0xd2, 0x1c, 0x89, 0x8c, 0x1f, 0x57, 0x74, 0x67, 0xe9, 0xb9, 0xff, 0xd0,
+	0x23, 0x77, 0x61, 0xd9, 0x64, 0x3c, 0xd1, 0xfd, 0x59, 0xf2, 0x50, 0x85, 0xf6, 0xc4, 0xd6, 0xef,
+	0x85, 0xbf, 0xdb, 0xbf, 0x2d, 0x1e, 0x46, 0x52, 0x68, 0xec, 0xa2, 0x21, 0x17, 0xb3, 0x2a, 0x67,
+	0xfb, 0x73, 0x71, 0xa7, 0xeb, 0x5f, 0x7e, 0xfc, 0xfa, 0xea, 0xdd, 0x22, 0x37, 0xec, 0x0b, 0xce,
+	0x7e, 0xad, 0xc3, 0x4f, 0x52, 0x7c, 0x26, 0xef, 0x60, 0x65, 0x17, 0xcd, 0xce, 0xb8, 0xba, 0xe4,
+	0xfa, 0x39, 0x4d, 0x8b, 0xf4, 0x9c, 0x33, 0x1d, 0x72, 0x00, 0x60, 0xdb, 0xee, 0x4f, 0x8f, 0x71,
+	0xa9, 0xfb, 0x38, 0xe4, 0x3d, 0x2c, 0x3e, 0xcb, 0x90, 0x1b, 0xbc, 0xe4, 0xbe, 0xcf, 0x61, 0x61,
+	0x2a, 0x15, 0x72, 0x93, 0x15, 0x9a, 0x65, 0x95, 0xa0, 0xd9, 0x8b, 0xa9, 0xa0, 0x7d, 0x5a, 0xdf,
+	0x67, 0x56, 0x5e, 0xd4, 0x21, 0xfb, 0xd0, 0xe8, 0xe0, 0x78, 0x4e, 0x6a, 0x1b, 0x17, 0xa2, 0x3a,
+	0x38, 0xa6, 0x0e, 0xe9, 0xc0, 0x52, 0xa5, 0x3a, 0xf2, 0xb0, 0x1e, 0xff, 0x9f, 0x2a, 0xfd, 0x73,
+	0x36, 0xa0, 0xce, 0x4e, 0xeb, 0x64, 0x12, 0xb8, 0xdf, 0x27, 0x81, 0xfb, 0x73, 0x12, 0xb8, 0xdf,
+	0x4e, 0x03, 0xf7, 0xe4, 0x34, 0x70, 0x0f, 0xbc, 0x51, 0xbb, 0xb7, 0x68, 0xb1, 0x8f, 0xff, 0x04,
+	0x00, 0x00, 0xff, 0xff, 0x20, 0xfd, 0xf3, 0xf4, 0x51, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -253,13 +312,13 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AccountServiceClient interface {
-	Health(ctx context.Context, in *types.Empty, opts ...grpc.CallOption) (*rpc.HealthStatus, error)
 	Get(ctx context.Context, in *AccountRequest, opts ...grpc.CallOption) (*AccountProfile, error)
 	GetByAddress(ctx context.Context, in *Address, opts ...grpc.CallOption) (*AccountProfile, error)
 	GetByOwner(ctx context.Context, in *AccountRequest, opts ...grpc.CallOption) (*AccountProfile, error)
 	Create(ctx context.Context, in *AccountRequest, opts ...grpc.CallOption) (*AccountProfile, error)
 	List(ctx context.Context, in *types.Empty, opts ...grpc.CallOption) (*ListResponse, error)
 	Key(ctx context.Context, in *AccountRequest, opts ...grpc.CallOption) (*AccountKey, error)
+	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*types.Empty, error)
 }
 
 type accountServiceClient struct {
@@ -268,15 +327,6 @@ type accountServiceClient struct {
 
 func NewAccountServiceClient(cc *grpc.ClientConn) AccountServiceClient {
 	return &accountServiceClient{cc}
-}
-
-func (c *accountServiceClient) Health(ctx context.Context, in *types.Empty, opts ...grpc.CallOption) (*rpc.HealthStatus, error) {
-	out := new(rpc.HealthStatus)
-	err := c.cc.Invoke(ctx, "/cloud.api.account.v1.AccountService/Health", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *accountServiceClient) Get(ctx context.Context, in *AccountRequest, opts ...grpc.CallOption) (*AccountProfile, error) {
@@ -333,24 +383,30 @@ func (c *accountServiceClient) Key(ctx context.Context, in *AccountRequest, opts
 	return out, nil
 }
 
+func (c *accountServiceClient) Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*types.Empty, error) {
+	out := new(types.Empty)
+	err := c.cc.Invoke(ctx, "/cloud.api.account.v1.AccountService/Withdraw", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 type AccountServiceServer interface {
-	Health(context.Context, *types.Empty) (*rpc.HealthStatus, error)
 	Get(context.Context, *AccountRequest) (*AccountProfile, error)
 	GetByAddress(context.Context, *Address) (*AccountProfile, error)
 	GetByOwner(context.Context, *AccountRequest) (*AccountProfile, error)
 	Create(context.Context, *AccountRequest) (*AccountProfile, error)
 	List(context.Context, *types.Empty) (*ListResponse, error)
 	Key(context.Context, *AccountRequest) (*AccountKey, error)
+	Withdraw(context.Context, *WithdrawRequest) (*types.Empty, error)
 }
 
 // UnimplementedAccountServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedAccountServiceServer struct {
 }
 
-func (*UnimplementedAccountServiceServer) Health(ctx context.Context, req *types.Empty) (*rpc.HealthStatus, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Health not implemented")
-}
 func (*UnimplementedAccountServiceServer) Get(ctx context.Context, req *AccountRequest) (*AccountProfile, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
@@ -369,27 +425,12 @@ func (*UnimplementedAccountServiceServer) List(ctx context.Context, req *types.E
 func (*UnimplementedAccountServiceServer) Key(ctx context.Context, req *AccountRequest) (*AccountKey, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Key not implemented")
 }
+func (*UnimplementedAccountServiceServer) Withdraw(ctx context.Context, req *WithdrawRequest) (*types.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Withdraw not implemented")
+}
 
 func RegisterAccountServiceServer(s *grpc.Server, srv AccountServiceServer) {
 	s.RegisterService(&_AccountService_serviceDesc, srv)
-}
-
-func _AccountService_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(types.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AccountServiceServer).Health(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/cloud.api.account.v1.AccountService/Health",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServiceServer).Health(ctx, req.(*types.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _AccountService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -500,14 +541,28 @@ func _AccountService_Key_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WithdrawRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).Withdraw(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cloud.api.account.v1.AccountService/Withdraw",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).Withdraw(ctx, req.(*WithdrawRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AccountService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "cloud.api.account.v1.AccountService",
 	HandlerType: (*AccountServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Health",
-			Handler:    _AccountService_Health_Handler,
-		},
 		{
 			MethodName: "Get",
 			Handler:    _AccountService_Get_Handler,
@@ -532,6 +587,10 @@ var _AccountService_serviceDesc = grpc.ServiceDesc{
 			MethodName: "Key",
 			Handler:    _AccountService_Key_Handler,
 		},
+		{
+			MethodName: "Withdraw",
+			Handler:    _AccountService_Withdraw_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "accounts/v1/account_service.proto",
@@ -540,7 +599,7 @@ var _AccountService_serviceDesc = grpc.ServiceDesc{
 func (m *AccountRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -548,32 +607,40 @@ func (m *AccountRequest) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *AccountRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AccountRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Id) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintAccountService(dAtA, i, uint64(len(m.Id)))
-		i += copy(dAtA[i:], m.Id)
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	if len(m.OwnerId) > 0 {
-		dAtA[i] = 0x12
-		i++
+		i -= len(m.OwnerId)
+		copy(dAtA[i:], m.OwnerId)
 		i = encodeVarintAccountService(dAtA, i, uint64(len(m.OwnerId)))
-		i += copy(dAtA[i:], m.OwnerId)
+		i--
+		dAtA[i] = 0x12
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintAccountService(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *Address) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -581,26 +648,33 @@ func (m *Address) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *Address) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Address) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Address) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintAccountService(dAtA, i, uint64(len(m.Address)))
-		i += copy(dAtA[i:], m.Address)
-	}
 	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	return i, nil
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintAccountService(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *ListResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -608,36 +682,87 @@ func (m *ListResponse) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *ListResponse) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ListResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	if len(m.Items) > 0 {
-		for _, msg := range m.Items {
-			dAtA[i] = 0xa
-			i++
-			i = encodeVarintAccountService(dAtA, i, uint64(msg.Size()))
-			n, err := msg.MarshalTo(dAtA[i:])
-			if err != nil {
-				return 0, err
+		for iNdEx := len(m.Items) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Items[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintAccountService(dAtA, i, uint64(size))
 			}
-			i += n
+			i--
+			dAtA[i] = 0xa
 		}
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	return len(dAtA) - i, nil
+}
+
+func (m *WithdrawRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
 	}
-	return i, nil
+	return dAtA[:n], nil
+}
+
+func (m *WithdrawRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *WithdrawRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.TransferId) > 0 {
+		i -= len(m.TransferId)
+		copy(dAtA[i:], m.TransferId)
+		i = encodeVarintAccountService(dAtA, i, uint64(len(m.TransferId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.OwnerId) > 0 {
+		i -= len(m.OwnerId)
+		copy(dAtA[i:], m.OwnerId)
+		i = encodeVarintAccountService(dAtA, i, uint64(len(m.OwnerId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func encodeVarintAccountService(dAtA []byte, offset int, v uint64) int {
+	offset -= sovAccountService(v)
+	base := offset
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
 		v >>= 7
 		offset++
 	}
 	dAtA[offset] = uint8(v)
-	return offset + 1
+	return base
 }
 func (m *AccountRequest) Size() (n int) {
 	if m == nil {
@@ -686,6 +811,26 @@ func (m *ListResponse) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovAccountService(uint64(l))
 		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *WithdrawRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.OwnerId)
+	if l > 0 {
+		n += 1 + l + sovAccountService(uint64(l))
+	}
+	l = len(m.TransferId)
+	if l > 0 {
+		n += 1 + l + sovAccountService(uint64(l))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -991,9 +1136,128 @@ func (m *ListResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *WithdrawRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowAccountService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: WithdrawRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: WithdrawRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field OwnerId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAccountService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAccountService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAccountService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.OwnerId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TransferId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowAccountService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthAccountService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthAccountService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TransferId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipAccountService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthAccountService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthAccountService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func skipAccountService(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
+	depth := 0
 	for iNdEx < l {
 		var wire uint64
 		for shift := uint(0); ; shift += 7 {
@@ -1025,10 +1289,8 @@ func skipAccountService(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			return iNdEx, nil
 		case 1:
 			iNdEx += 8
-			return iNdEx, nil
 		case 2:
 			var length int
 			for shift := uint(0); ; shift += 7 {
@@ -1049,55 +1311,30 @@ func skipAccountService(dAtA []byte) (n int, err error) {
 				return 0, ErrInvalidLengthAccountService
 			}
 			iNdEx += length
-			if iNdEx < 0 {
-				return 0, ErrInvalidLengthAccountService
-			}
-			return iNdEx, nil
 		case 3:
-			for {
-				var innerWire uint64
-				var start int = iNdEx
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return 0, ErrIntOverflowAccountService
-					}
-					if iNdEx >= l {
-						return 0, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					innerWire |= (uint64(b) & 0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				innerWireType := int(innerWire & 0x7)
-				if innerWireType == 4 {
-					break
-				}
-				next, err := skipAccountService(dAtA[start:])
-				if err != nil {
-					return 0, err
-				}
-				iNdEx = start + next
-				if iNdEx < 0 {
-					return 0, ErrInvalidLengthAccountService
-				}
-			}
-			return iNdEx, nil
+			depth++
 		case 4:
-			return iNdEx, nil
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupAccountService
+			}
+			depth--
 		case 5:
 			iNdEx += 4
-			return iNdEx, nil
 		default:
 			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
 		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthAccountService
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
 	}
-	panic("unreachable")
+	return 0, io.ErrUnexpectedEOF
 }
 
 var (
-	ErrInvalidLengthAccountService = fmt.Errorf("proto: negative length found during unmarshaling")
-	ErrIntOverflowAccountService   = fmt.Errorf("proto: integer overflow")
+	ErrInvalidLengthAccountService        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowAccountService          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupAccountService = fmt.Errorf("proto: unexpected end of group")
 )
