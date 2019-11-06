@@ -20,15 +20,15 @@ type ExtendedClaims struct {
 	jwt.StandardClaims
 }
 
-func AuthFromContext(ctx context.Context) (context.Context, string, error) {
+func AuthFromContext(ctx context.Context) (context.Context, error) {
 	secret, ok := SecretKeyFromContext(ctx)
 	if !ok {
-		return ctx, "", ErrInvalidSecret
+		return ctx, ErrInvalidSecret
 	}
 
 	jwtToken, err := grpcauth.AuthFromMD(ctx, "bearer")
 	if err != nil {
-		return ctx, "", ErrInvalidToken
+		return ctx, ErrInvalidToken
 	}
 
 	t, err := jwt.ParseWithClaims(jwtToken, &ExtendedClaims{}, func(t *jwt.Token) (interface{}, error) {
@@ -36,15 +36,15 @@ func AuthFromContext(ctx context.Context) (context.Context, string, error) {
 	})
 
 	if err != nil {
-		return ctx, "", err
+		return ctx, err
 	}
 
 	if !t.Valid {
-		return ctx, "", ErrInvalidToken
+		return ctx, ErrInvalidToken
 	}
 
 	ctx = NewContextWithUserID(ctx, t.Claims.(*ExtendedClaims).Subject)
 	ctx = NewContextWithType(ctx, t.Claims.(*ExtendedClaims).Type)
 
-	return ctx, jwtToken, nil
+	return ctx, nil
 }

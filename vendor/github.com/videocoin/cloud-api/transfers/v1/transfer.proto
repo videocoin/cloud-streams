@@ -51,7 +51,7 @@ message Transfer {
     TransferStatus status = 5;
 
     string to_address = 6;
-    double amount = 7;
+    bytes amount = 7;
 
     bytes tx_native_id = 10;
     bytes tx_erc20_id = 11;
