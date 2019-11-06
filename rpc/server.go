@@ -16,9 +16,9 @@ import (
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 )
 
 type RpcServerOpts struct {

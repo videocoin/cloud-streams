@@ -13,12 +13,13 @@ import (
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-streams/datastore"
+	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 )
 
 type PrivateRPCServerOpts struct {
@@ -191,7 +192,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	return streamResponse, nil
 }
 
-func toStreamResponse(stream *v1.Stream) (*privatev1.StreamResponse, error) {
+func toStreamResponse(stream *ds.Stream) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
 		return nil, err

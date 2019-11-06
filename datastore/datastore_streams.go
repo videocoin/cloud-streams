@@ -7,7 +7,6 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/opentracing/opentracing-go"
-	v1 "github.com/videocoin/cloud-api/streams/v1"
 
 	"github.com/jinzhu/gorm"
 )
@@ -21,11 +20,11 @@ type StreamDatastore struct {
 }
 
 func NewStreamDatastore(db *gorm.DB) (*StreamDatastore, error) {
-	db.AutoMigrate(&v1.Stream{})
+	db.AutoMigrate(Stream{})
 	return &StreamDatastore{db: db}, nil
 }
 
-func (ds *StreamDatastore) Create(ctx context.Context, stream *v1.Stream) (*v1.Stream, error) {
+func (ds *StreamDatastore) Create(ctx context.Context, stream *Stream) (*Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "Create")
 	defer span.Finish()
 
@@ -55,7 +54,7 @@ func (ds *StreamDatastore) Delete(ctx context.Context, id string) error {
 
 	span.SetTag("id", id)
 
-	stream := &v1.Stream{
+	stream := &Stream{
 		Id: id,
 	}
 
@@ -70,13 +69,13 @@ func (ds *StreamDatastore) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (ds *StreamDatastore) Get(ctx context.Context, id string) (*v1.Stream, error) {
+func (ds *StreamDatastore) Get(ctx context.Context, id string) (*Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "Get")
 	defer span.Finish()
 
 	span.SetTag("id", id)
 
-	stream := &v1.Stream{}
+	stream := &Stream{}
 
 	if err := ds.db.Where("id = ?", id).First(stream).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -89,8 +88,8 @@ func (ds *StreamDatastore) Get(ctx context.Context, id string) (*v1.Stream, erro
 	return stream, nil
 }
 
-func (ds *StreamDatastore) GetByUserID(ctx context.Context, userID string, streamID string) (*v1.Stream, error) {
-	stream := &v1.Stream{}
+func (ds *StreamDatastore) GetByUserID(ctx context.Context, userID string, streamID string) (*Stream, error) {
+	stream := &Stream{}
 
 	if err := ds.db.Where("user_id = ? AND id = ?", userID, streamID).First(stream).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -103,13 +102,13 @@ func (ds *StreamDatastore) GetByUserID(ctx context.Context, userID string, strea
 	return stream, nil
 }
 
-func (ds *StreamDatastore) List(ctx context.Context, userID string) ([]*v1.Stream, error) {
+func (ds *StreamDatastore) List(ctx context.Context, userID string) ([]*Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "List")
 	defer span.Finish()
 
 	span.SetTag("user_id", userID)
 
-	streams := []*v1.Stream{}
+	streams := []*Stream{}
 
 	if err := ds.db.Where("user_id = ?", userID).Find(&streams).Error; err != nil {
 		return nil, fmt.Errorf("failed to list streams by user id %s: %s", userID, err)
@@ -118,7 +117,7 @@ func (ds *StreamDatastore) List(ctx context.Context, userID string) ([]*v1.Strea
 	return streams, nil
 }
 
-func (ds *StreamDatastore) Update(ctx context.Context, stream *v1.Stream, updates map[string]interface{}) error {
+func (ds *StreamDatastore) Update(ctx context.Context, stream *Stream, updates map[string]interface{}) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "Update")
 	defer span.Finish()
 
