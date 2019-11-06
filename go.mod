@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/universal-translator v0.16.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.3.2
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/jinzhu/copier v0.0.0-20190625015134-976e0346caa8
 	github.com/jinzhu/gorm v1.9.10
 	github.com/kelseyhightower/envconfig v1.4.0
