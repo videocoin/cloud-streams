@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/util/metautils"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	notificationsv1 "github.com/videocoin/cloud-api/notifications/v1"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
+	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	tracerext "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-streams/manager"
@@ -44,17 +47,36 @@ func New(c *Config) (*EventBus, error) {
 }
 
 func (e *EventBus) Start() error {
-	err := e.mq.Publisher("streams.events")
+	err := e.registerPublishers()
 	if err != nil {
 		return err
 	}
 
-	err = e.mq.Consumer("streams.status", 1, false, e.handleStreamStatus)
+	err = e.registerConsumers()
 	if err != nil {
 		return err
 	}
 
 	return e.mq.Run()
+}
+
+func (e *EventBus) registerPublishers() error {
+	if err := e.mq.Publisher("streams.events"); err != nil {
+		return err
+	}
+
+	if err := e.mq.Publisher("notifications/send"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (e *EventBus) registerConsumers() error {
+	if err := e.mq.Consumer("streams.status", 1, false, e.handleStreamStatus); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (e *EventBus) Stop() error {
@@ -98,6 +120,20 @@ func (e *EventBus) EmitUpdateStream(ctx context.Context, id string) error {
 func (e *EventBus) EmitDeleteStream(ctx context.Context, id string) error {
 	e.logger.Debugf("emitting delete stream: %s", id)
 	return e.emitCUDStream(ctx, privatev1.EventTypeDelete, id)
+}
+
+func (e *EventBus) SendNotification(span opentracing.Span, req *notificationsv1.Notification) error {
+	headers := make(amqp.Table)
+	ext.SpanKindRPCServer.Set(span)
+	ext.Component.Set(span, "streams")
+
+	span.Tracer().Inject(
+		span.Context(),
+		opentracing.TextMap,
+		mqmux.RMQHeaderCarrier(headers),
+	)
+
+	return e.mq.PublishX("notifications/send", req, headers)
 }
 
 func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
@@ -151,7 +187,46 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 				logger.Errorf("failed to update stream status: %s", err)
 				return nil
 			}
+
+			if req.Status == v1.StreamStatusReady {
+				user, err := e.dm.GetUserByID(ctx, stream.UserId)
+				if err != nil {
+					logger.Errorf("failed to get user: %s", err)
+					return nil
+				}
+				err = e.sendStreamPublished(ctx, user.Email, stream.OutputUrl)
+				if err != nil {
+					logger.Errorf("failed to send email notification: %s", err)
+					return nil
+				}
+			}
 		}
+	}
+
+	return nil
+}
+
+func (e *EventBus) sendStreamPublished(ctx context.Context, by, url string) error {
+	span, _ := opentracing.StartSpanFromContext(ctx, "SendStreamPublished")
+	defer span.Finish()
+
+	md := metautils.ExtractIncoming(ctx)
+
+	params := map[string]string{
+		"by":       by,
+		"url":      url,
+		"internal": "",
+		"domain":   md.Get("x-forwarded-host"),
+	}
+
+	notification := &notificationsv1.Notification{
+		Target:   notificationsv1.NotificationTarget_EMAIL,
+		Template: "stream_published",
+		Params:   params,
+	}
+
+	if err := e.SendNotification(span, notification); err != nil {
+		return err
 	}
 
 	return nil
