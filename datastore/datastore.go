@@ -6,6 +6,7 @@ import (
 )
 
 type Datastore struct {
+	User   *UserDatastore
 	Stream *StreamDatastore
 }
 
@@ -25,6 +26,13 @@ func NewDatastore(uri string) (*Datastore, error) {
 	}
 
 	ds.Stream = streamDs
+
+	userDs, err := NewUserDatastore(db)
+	if err != nil {
+		return nil, err
+	}
+
+	ds.User = userDs
 
 	return ds, nil
 }
