@@ -55,6 +55,7 @@ github.com/grpc-ecosystem/go-grpc-prometheus
 # github.com/grpc-ecosystem/grpc-gateway v1.11.3
 github.com/grpc-ecosystem/grpc-gateway/runtime
 github.com/grpc-ecosystem/grpc-gateway/utilities
+github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options
 github.com/grpc-ecosystem/grpc-gateway/internal
 # github.com/jinzhu/copier v0.0.0-20190625015134-976e0346caa8
 github.com/jinzhu/copier
@@ -119,6 +120,8 @@ github.com/videocoin/cloud-api/streams/private/v1
 github.com/videocoin/cloud-api/accounts/v1
 github.com/videocoin/cloud-api/emitter/v1
 github.com/videocoin/cloud-api/rpc
+github.com/videocoin/cloud-api/users/v1
+github.com/videocoin/cloud-api/transfers/v1
 # github.com/videocoin/cloud-pkg v0.0.6 => ../cloud-pkg
 github.com/videocoin/cloud-pkg/logger
 github.com/videocoin/cloud-pkg/tracer

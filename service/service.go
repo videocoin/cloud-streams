@@ -3,6 +3,7 @@ package service
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
@@ -29,6 +30,14 @@ func NewService(cfg *Config) (*Service, error) {
 			Ds:     ds,
 			Logger: cfg.Logger.WithField("system", "manager"),
 		})
+
+	ulogger := cfg.Logger.WithField("system", "userscli")
+	uGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(ulogger)
+	usersConn, err := grpc.Dial(cfg.UsersRPCAddr, uGrpcDialOpts...)
+	if err != nil {
+		return nil, err
+	}
+	users := usersv1.NewUserServiceClient(usersConn)
 
 	alogger := cfg.Logger.WithField("system", "accountcli")
 	aGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(alogger)
@@ -62,6 +71,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Addr:            cfg.RPCAddr,
 		Ds:              ds,
 		Manager:         manager,
+		Users:           users,
 		Accounts:        accounts,
 		BaseInputURL:    cfg.BaseInputURL,
 		BaseOutputURL:   cfg.BaseOutputURL,
