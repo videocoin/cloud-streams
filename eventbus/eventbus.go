@@ -189,12 +189,7 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 			}
 
 			if req.Status == v1.StreamStatusReady {
-				user, err := e.dm.GetUserByID(ctx, stream.UserId)
-				if err != nil {
-					logger.Errorf("failed to get user: %s", err)
-					return nil
-				}
-				err = e.sendStreamPublished(ctx, user.Email, stream.OutputUrl)
+				err = e.sendStreamPublished(ctx, stream.UserId, stream.OutputUrl)
 				if err != nil {
 					logger.Errorf("failed to send email notification: %s", err)
 					return nil
