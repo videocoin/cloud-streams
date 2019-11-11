@@ -27,11 +27,16 @@ func newRequestValidator() *requestValidator {
 	validate := validator.New()
 	enTrans.RegisterDefaultTranslations(validate, *translator)
 
+	validate.RegisterTranslation(
+		"name",
+		*translator,
+		RegisterNameTranslation,
+		NameTranslation)
+
 	return &requestValidator{
 		validator:  validate,
 		translator: translator,
 	}
-
 }
 
 func (rv *requestValidator) validate(r interface{}) *rpc.MultiValidationError {
@@ -56,6 +61,15 @@ func (rv *requestValidator) validate(r interface{}) *rpc.MultiValidationError {
 	}
 
 	return nil
+}
+
+func RegisterNameTranslation(ut ut.Translator) error {
+	return ut.Add("email", "Name length must be greater than 0 and less or equal than 255", true)
+}
+
+func NameTranslation(ut ut.Translator, fe validator.FieldError) string {
+	t, _ := ut.T("name", fe.Field())
+	return t
 }
 
 func extractValueFromTag(tag string) string {
