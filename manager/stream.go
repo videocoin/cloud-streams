@@ -2,6 +2,7 @@ package manager
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"math/big"
@@ -14,6 +15,10 @@ import (
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	tracer "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-pkg/uuid4"
+)
+
+var (
+	ErrStreamCantBeDeleted = errors.New("stream can't be deleted")
 )
 
 func (m *Manager) CreateStream(
@@ -161,6 +166,12 @@ func (m *Manager) GetUserStream(ctx context.Context, userID string, streamID str
 	return stream, nil
 }
 
+func isRemovable(stream *v1.Stream) bool {
+	return stream.Status == v1.StreamStatusNew ||
+		stream.Status == v1.StreamStatusCompleted ||
+		stream.Status == v1.StreamStatusCancelled
+}
+
 func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID string) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.DeleteUserStream")
 	defer span.Finish()
@@ -172,6 +183,10 @@ func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID 
 	if err != nil {
 		tracer.SpanLogError(span, err)
 		return err
+	}
+
+	if !isRemovable(stream) {
+		return ErrStreamCantBeDeleted
 	}
 
 	if err := m.ds.Stream.Delete(ctx, stream.Id); err != nil {

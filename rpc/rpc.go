@@ -9,6 +9,7 @@ import (
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-streams/datastore"
+	"github.com/videocoin/cloud-streams/manager"
 )
 
 func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamProfile, error) {
@@ -73,6 +74,10 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
+		}
+
+		if err == manager.ErrStreamCantBeDeleted {
+			return nil, rpc.ErrRpcBadRequest
 		}
 
 		logFailedTo(logger, "delete user stream", err)
