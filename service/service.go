@@ -56,10 +56,11 @@ func NewService(cfg *Config) (*Service, error) {
 	emitter := emitterv1.NewEmitterServiceClient(emitterConn)
 
 	ebConfig := &eventbus.Config{
-		URI:    cfg.MQURI,
-		Name:   cfg.Name,
-		Logger: cfg.Logger.WithField("system", "eventbus"),
-		DM:     manager,
+		URI:     cfg.MQURI,
+		Name:    cfg.Name,
+		Logger:  cfg.Logger.WithField("system", "eventbus"),
+		DM:      manager,
+		Emitter: emitter,
 	}
 	eb, err := eventbus.New(ebConfig)
 	if err != nil {

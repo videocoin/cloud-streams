@@ -9,6 +9,7 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
+	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	notificationsv1 "github.com/videocoin/cloud-api/notifications/v1"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -18,16 +19,18 @@ import (
 )
 
 type Config struct {
-	Logger *logrus.Entry
-	URI    string
-	Name   string
-	DM     *manager.Manager
+	Logger  *logrus.Entry
+	URI     string
+	Name    string
+	DM      *manager.Manager
+	Emitter emitterv1.EmitterServiceClient
 }
 
 type EventBus struct {
-	logger *logrus.Entry
-	mq     *mqmux.WorkerMux
-	dm     *manager.Manager
+	logger  *logrus.Entry
+	mq      *mqmux.WorkerMux
+	dm      *manager.Manager
+	emitter emitterv1.EmitterServiceClient
 }
 
 func New(c *Config) (*EventBus, error) {
@@ -40,9 +43,10 @@ func New(c *Config) (*EventBus, error) {
 	}
 
 	return &EventBus{
-		logger: c.Logger,
-		mq:     mq,
-		dm:     c.DM,
+		logger:  c.Logger,
+		mq:      mq,
+		dm:      c.DM,
+		emitter: c.Emitter,
 	}, nil
 }
 
@@ -186,6 +190,17 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 			if err != nil {
 				logger.Errorf("failed to update stream status: %s", err)
 				return nil
+			}
+
+			if req.Status == v1.StreamStatusFailed {
+				_, err = e.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+					StreamContractId:      stream.StreamContractId,
+					StreamContractAddress: stream.StreamContractAddress,
+				})
+
+				if err != nil {
+					logger.Errorf("failed to end stream: %s", err)
+				}
 			}
 
 			if req.Status == v1.StreamStatusReady {
