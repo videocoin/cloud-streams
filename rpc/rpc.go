@@ -16,6 +16,11 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
 
+	if verr := s.validator.validate(req); verr != nil {
+		s.logger.Error(verr)
+		return nil, rpc.NewRpcValidationError(verr)
+	}
+
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
@@ -148,6 +153,11 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
+
+	if verr := s.validator.validate(req); verr != nil {
+		s.logger.Error(verr)
+		return nil, rpc.NewRpcValidationError(verr)
+	}
 
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
