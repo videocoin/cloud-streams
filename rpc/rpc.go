@@ -215,6 +215,10 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 
 	if req.Status != v1.StreamStatusNew {
 		updates["status"] = req.Status
+
+		if req.Status == v1.StreamStatusPrepared {
+			updates["input_status"] = v1.InputStatusPending
+		}
 	}
 
 	if req.StreamContractAddress != "" {
