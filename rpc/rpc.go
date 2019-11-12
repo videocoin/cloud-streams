@@ -342,6 +342,10 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		return nil, rpc.ErrRpcInternal
 	}
 
+	if stream.Status < v1.StreamStatusPrepared {
+		return nil, rpc.ErrRpcBadRequest
+	}
+
 	if stream.Status == v1.StreamStatusCompleted {
 		// nothing to do since it was already stopped
 		streamProfile, err := toStreamProfile(stream)
