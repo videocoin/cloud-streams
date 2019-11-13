@@ -88,9 +88,10 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 						logger.Info("deposit")
 
 						_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
-							UserId: stream.UserId,
-							To:     addr.Bytes(),
-							Value:  big.NewInt(1000000000000000000).Bytes(),
+							StreamId: stream.Id,
+							UserId:   stream.UserId,
+							To:       addr.Bytes(),
+							Value:    big.NewInt(1000000000000000000).Bytes(),
 						})
 						if err != nil {
 							logger.Error(err)
