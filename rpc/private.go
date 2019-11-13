@@ -85,7 +85,7 @@ func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponse(stream)
+	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -122,7 +122,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponse(stream)
+	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -151,7 +151,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	}
 
 	if stream.Status == v1.StreamStatusCompleted {
-		streamResponse, err := toStreamResponse(stream)
+		streamResponse, err := toStreamResponsePrivate(stream)
 		if err != nil {
 			logFailedTo(logger, "", err)
 			return nil, rpc.ErrRpcInternal
@@ -178,7 +178,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponse(stream)
+	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -191,7 +191,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	return streamResponse, nil
 }
 
-func toStreamResponse(stream *v1.Stream) (*privatev1.StreamResponse, error) {
+func toStreamResponsePrivate(stream *v1.Stream) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
 		return nil, err

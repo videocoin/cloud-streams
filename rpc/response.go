@@ -5,20 +5,20 @@ import (
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 )
 
-func toStreamProfile(stream *v1.Stream) (*v1.StreamProfile, error) {
-	profile := new(v1.StreamProfile)
-	if err := copier.Copy(profile, stream); err != nil {
+func toStreamResponse(stream *v1.Stream) (*v1.StreamResponse, error) {
+	response := new(v1.StreamResponse)
+	if err := copier.Copy(response, stream); err != nil {
 		return nil, err
 	}
 
-	return profile, nil
+	return response, nil
 }
 
-func toStreamProfiles(streams []*v1.Stream) (*v1.StreamProfiles, error) {
-	profiles := &v1.StreamProfiles{}
-	if err := copier.Copy(&profiles.Items, &streams); err != nil {
+func toStreamListResponse(streams []*v1.Stream) (*v1.StreamListResponse, error) {
+	response := &v1.StreamListResponse{}
+	if err := copier.Copy(&response.Items, &streams); err != nil {
 		return nil, err
 	}
 
-	return profiles, nil
+	return response, nil
 }
