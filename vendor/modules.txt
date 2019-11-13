@@ -114,7 +114,7 @@ github.com/uber/jaeger-client-go/transport
 github.com/uber/jaeger-client-go/utils
 # github.com/uber/jaeger-lib v2.0.0+incompatible
 github.com/uber/jaeger-lib/metrics
-# github.com/videocoin/cloud-api v0.2.14 => ../cloud-api
+# github.com/videocoin/cloud-api v0.2.15 => ../cloud-api
 github.com/videocoin/cloud-api/accounts/v1
 github.com/videocoin/cloud-api/emitter/v1
 github.com/videocoin/cloud-api/notifications/v1
