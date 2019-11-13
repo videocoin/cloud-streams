@@ -169,7 +169,8 @@ func (m *Manager) GetUserStream(ctx context.Context, userID string, streamID str
 func isRemovable(stream *v1.Stream) bool {
 	return stream.Status == v1.StreamStatusNew ||
 		stream.Status == v1.StreamStatusCompleted ||
-		stream.Status == v1.StreamStatusCancelled
+		stream.Status == v1.StreamStatusCancelled ||
+		stream.Status == v1.StreamStatusFailed
 }
 
 func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID string) error {
