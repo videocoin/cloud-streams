@@ -84,7 +84,7 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 					logger.Infof("balance is %d VID", toVID.Int64())
 					logger = logger.WithField("to_balance", toVID.Int64())
 
-					if toVID.Int64() <= int64(2) {
+					if toVID.Int64() <= int64(1) {
 						logger.Info("deposit")
 
 						_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
