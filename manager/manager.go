@@ -27,7 +27,7 @@ type Manager struct {
 }
 
 func NewManager(opts *ManagerOpts) *Manager {
-	sbTimeout := 5 * time.Second
+	sbTimeout := 10 * time.Second
 	return &Manager{
 		logger:    opts.Logger,
 		ds:        opts.Ds,
@@ -51,7 +51,8 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 	for {
 		select {
 		case <-m.sbTicker.C:
-			m.logger.Info("check stream contract balance")
+			m.logger.Info("checking stream contract balance")
+
 			ctx := context.Background()
 			streams, err := m.ds.Stream.StatusReadyList(ctx)
 			if err != nil {
@@ -81,8 +82,9 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 					toVID := new(big.Int).Div(toBalanceValue, big.NewInt(1000000000000000000))
 
 					logger.Infof("balance is %d VID", toVID.Int64())
+					logger = logger.WithField("to_balance", toVID.Int64())
 
-					if toVID.Cmp(big.NewInt(1)) <= 1 {
+					if toVID.Int64() <= int64(2) {
 						logger.Info("deposit")
 
 						_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{

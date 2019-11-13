@@ -43,7 +43,7 @@ func NewService(cfg *Config) (*Service, error) {
 	accounts := accountsv1.NewAccountServiceClient(accountsConn)
 
 	elogger := cfg.Logger.WithField("system", "emittercli")
-	eGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(elogger)
+	eGrpcDialOpts := grpcutil.DefaultClientDialOpts(elogger)
 	emitterConn, err := grpc.Dial(cfg.EmitterRPCAddr, eGrpcDialOpts...)
 	if err != nil {
 		return nil, err
