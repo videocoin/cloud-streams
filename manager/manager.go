@@ -63,32 +63,37 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 			for _, stream := range streams {
 				if stream.StreamContractAddress != "" && common.IsHexAddress(stream.StreamContractAddress) {
 					addr := common.HexToAddress(stream.StreamContractAddress)
-					balance, err := m.emitter.GetBalance(emptyCtx, &emitterv1.BalanceRequest{Address: addr.Bytes()})
+
+					logger := m.logger.
+						WithField("user_id", stream.Id).
+						WithField("to", stream.StreamContractAddress)
+
+					toBalance, err := m.emitter.GetBalance(
+						emptyCtx,
+						&emitterv1.BalanceRequest{Address: addr.Bytes()},
+					)
 					if err != nil {
-						m.logger.Error(err)
+						logger.Error(err)
 						continue
 					}
 
-					v := new(big.Int).SetBytes(balance.Value)
-					vid := new(big.Int).Div(v, big.NewInt(1000000000000000000))
-					if vid.Cmp(big.NewInt(1)) <= 1 {
-						m.logger.
-							WithField("user_id", stream.Id).
-							WithField("to", stream.StreamContractAddress).
-							Info("deposit")
+					toBalanceValue := new(big.Int).SetBytes(toBalance.Value)
+					toVID := new(big.Int).Div(toBalanceValue, big.NewInt(1000000000000000000))
+
+					logger.Infof("balance is %d VID", toVID.Int64())
+
+					if toVID.Cmp(big.NewInt(1)) <= 1 {
+						logger.Info("deposit")
+
 						_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
 							UserId: stream.UserId,
 							To:     addr.Bytes(),
 							Value:  big.NewInt(1000000000000000000).Bytes(),
 						})
 						if err != nil {
-							m.logger.Error(err)
+							logger.Error(err)
 							continue
 						}
-					} else {
-						m.logger.
-							WithField("addr", stream.StreamContractAddress).
-							Debugf("balance is %d", vid)
 					}
 				}
 			}
