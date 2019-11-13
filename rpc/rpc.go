@@ -12,7 +12,7 @@ import (
 	"github.com/videocoin/cloud-streams/manager"
 )
 
-func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamProfile, error) {
+func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
@@ -53,13 +53,13 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		opentracing.ContextWithSpan(ctx, span),
 		stream.Id)
 
-	streamProfile, err := toStreamProfile(stream)
+	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	return streamProfile, nil
+	return streamResponse, nil
 }
 
 func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
@@ -96,7 +96,7 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
+func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -119,16 +119,16 @@ func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamProfile, err := toStreamProfile(stream)
+	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	return streamProfile, nil
+	return streamResponse, nil
 }
 
-func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamProfiles, error) {
+func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamListResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 
 	userID, _, err := s.authenticate(ctx)
@@ -145,16 +145,16 @@ func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.Stream
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamProfiles, err := toStreamProfiles(streams)
+	streamListResponse, err := toStreamListResponse(streams)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	return streamProfiles, nil
+	return streamListResponse, nil
 }
 
-func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamProfile, error) {
+func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -192,7 +192,7 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamProfile, err := toStreamProfile(stream)
+	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -202,7 +202,7 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 		opentracing.ContextWithSpan(ctx, span),
 		stream.Id)
 
-	return streamProfile, nil
+	return streamResponse, nil
 }
 
 func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
@@ -251,7 +251,7 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
+func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -306,7 +306,7 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamProfile, err := toStreamProfile(stream)
+	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -316,10 +316,10 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamP
 		opentracing.ContextWithSpan(ctx, span),
 		stream.Id)
 
-	return streamProfile, nil
+	return streamResponse, nil
 }
 
-func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamProfile, error) {
+func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -348,13 +348,13 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 
 	if stream.Status == v1.StreamStatusCompleted {
 		// nothing to do since it was already stopped
-		streamProfile, err := toStreamProfile(stream)
+		streamResponse, err := toStreamResponse(stream)
 		if err != nil {
 			logFailedTo(logger, "", err)
 			return nil, rpc.ErrRpcInternal
 		}
 
-		return streamProfile, nil
+		return streamResponse, nil
 	}
 
 	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
@@ -376,7 +376,7 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamProfile, err := toStreamProfile(stream)
+	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -386,5 +386,5 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		opentracing.ContextWithSpan(ctx, span),
 		stream.Id)
 
-	return streamProfile, nil
+	return streamResponse, nil
 }
