@@ -234,6 +234,17 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 		updates["input_status"] = req.InputStatus
 	}
 
+	if req.Status == v1.StreamStatusFailed {
+		_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+			StreamContractId:      stream.StreamContractId,
+			StreamContractAddress: stream.StreamContractAddress,
+		})
+
+		if err != nil {
+			logFailedTo(logger, "end stream", err)
+		}
+	}
+
 	err = s.manager.UpdateStream(
 		ctx,
 		stream,
