@@ -3,10 +3,12 @@ package datastore
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/sirupsen/logrus"
 )
 
 type Datastore struct {
 	Stream *StreamDatastore
+	logger *logrus.Entry
 }
 
 func NewDatastore(uri string) (*Datastore, error) {

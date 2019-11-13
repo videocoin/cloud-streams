@@ -17,6 +17,7 @@ type Service struct {
 	rpc        *rpc.RpcServer
 	privateRPC *rpc.PrivateRPCServer
 	eb         *eventbus.EventBus
+	dm         *manager.Manager
 }
 
 func NewService(cfg *Config) (*Service, error) {
@@ -24,12 +25,6 @@ func NewService(cfg *Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	manager := manager.NewManager(
-		&manager.ManagerOpts{
-			Ds:     ds,
-			Logger: cfg.Logger.WithField("system", "manager"),
-		})
 
 	ulogger := cfg.Logger.WithField("system", "userscli")
 	uGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(ulogger)
@@ -54,6 +49,13 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 	emitter := emitterv1.NewEmitterServiceClient(emitterConn)
+
+	manager := manager.NewManager(
+		&manager.ManagerOpts{
+			Logger:  cfg.Logger.WithField("system", "manager"),
+			Ds:      ds,
+			Emitter: emitter,
+		})
 
 	ebConfig := &eventbus.Config{
 		URI:     cfg.MQURI,
@@ -105,6 +107,7 @@ func NewService(cfg *Config) (*Service, error) {
 		rpc:        publicRPC,
 		privateRPC: privateRPC,
 		eb:         eb,
+		dm:         manager,
 	}
 
 	return svc, nil
@@ -114,10 +117,14 @@ func (s *Service) Start() error {
 	go s.rpc.Start()
 	go s.privateRPC.Start()
 	go s.eb.Start()
+	s.dm.StartBackgroundTasks()
+
 	return nil
 }
 
 func (s *Service) Stop() error {
 	s.eb.Stop()
+	s.dm.StopBackgroundTasks()
+
 	return nil
 }

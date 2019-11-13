@@ -118,6 +118,19 @@ func (ds *StreamDatastore) List(ctx context.Context, userID string) ([]*v1.Strea
 	return streams, nil
 }
 
+func (ds *StreamDatastore) StatusReadyList(ctx context.Context) ([]*v1.Stream, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "StatusReadyList")
+	defer span.Finish()
+
+	streams := []*v1.Stream{}
+
+	if err := ds.db.Where("status = ?", v1.StreamStatusReady).Find(&streams).Error; err != nil {
+		return nil, fmt.Errorf("failed to list streams: %s", err)
+	}
+
+	return streams, nil
+}
+
 func (ds *StreamDatastore) Update(ctx context.Context, stream *v1.Stream, updates map[string]interface{}) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "Update")
 	defer span.Finish()
