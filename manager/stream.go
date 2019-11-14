@@ -130,11 +130,16 @@ func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates m
 		stream.CompletedAt = pointer.ToTime(value.(time.Time))
 	}
 
+	if stream.Status == v1.StreamStatusCompleted ||
+		stream.Status == v1.StreamStatusFailed ||
+		stream.Status == v1.StreamStatusCancelled {
+		stream.InputStatus = v1.InputStatusNone
+		updates["input_status"] = stream.InputStatus
+	}
+
 	if stream.Status == v1.StreamStatusCompleted && stream.CompletedAt == nil {
 		stream.CompletedAt = pointer.ToTime(time.Now())
-		stream.InputStatus = v1.InputStatusNone
 		updates["completed_at"] = stream.CompletedAt
-		updates["input_status"] = stream.InputStatus
 	}
 
 	if stream.Status == v1.StreamStatusReady && stream.ReadyAt == nil {
