@@ -2,9 +2,11 @@ package rpc
 
 import (
 	"context"
+	"math/big"
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
+	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -275,16 +277,19 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
 
-	// account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
-	// if err != nil {
-	// 	logFailedTo(logger, "get account", err)
-	// 	return nil, rpc.ErrRpcInternal
-	// }
+	account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
+	if err != nil {
+		logFailedTo(logger, "get account", err)
+		return nil, rpc.ErrRpcInternal
+	}
 
-	// // temp balance limit force on api level
-	// if account.Balance < 20 || account.Balance > 50 {
-	// 	return nil, rpc.NewRpcPermissionError("hit balance limitation")
-	// }
+	logger.Infof("balance is %s", account.Balance)
+
+	balance, ok := new(big.Int).SetString(account.Balance, 10)
+	balanceVID := new(big.Int).Div(balance, big.NewInt(1000000000000000000))
+	if !ok || balanceVID.Cmp(big.NewInt(20)) == -1 {
+		return nil, rpc.NewRpcPermissionError("hit balance limitation")
+	}
 
 	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
 	if err != nil {
