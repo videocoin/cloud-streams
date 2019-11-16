@@ -13,6 +13,7 @@ import (
 	notificationsv1 "github.com/videocoin/cloud-api/notifications/v1"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
+	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	tracerext "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-streams/manager"
@@ -23,6 +24,7 @@ type Config struct {
 	URI     string
 	Name    string
 	DM      *manager.Manager
+	Users   usersv1.UserServiceClient
 	Emitter emitterv1.EmitterServiceClient
 }
 
@@ -30,6 +32,7 @@ type EventBus struct {
 	logger  *logrus.Entry
 	mq      *mqmux.WorkerMux
 	dm      *manager.Manager
+	users   usersv1.UserServiceClient
 	emitter emitterv1.EmitterServiceClient
 }
 
@@ -46,6 +49,7 @@ func New(c *Config) (*EventBus, error) {
 		logger:  c.Logger,
 		mq:      mq,
 		dm:      c.DM,
+		users:   c.Users,
 		emitter: c.Emitter,
 	}, nil
 }
@@ -181,14 +185,14 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 
 			stream, err := e.dm.GetStreamByID(ctx, req.StreamID)
 			if err != nil {
-				logger.Errorf("failed to get stream: %s", err)
+				logger.WithError(err).Error("failed to get stream")
 				return nil
 			}
 
 			updates := map[string]interface{}{"status": req.Status}
 			err = e.dm.UpdateStream(ctx, stream, updates)
 			if err != nil {
-				logger.Errorf("failed to update stream status: %s", err)
+				logger.WithError(err).Error("failed to update stream status")
 				return nil
 			}
 
@@ -200,14 +204,21 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 				})
 
 				if err != nil {
-					logger.Errorf("failed to end stream: %s", err)
+					logger.WithError(err).Error("failed to end stream")
 				}
 			}
 
 			if req.Status == v1.StreamStatusReady {
-				err = e.sendStreamPublished(ctx, stream.UserId, stream.OutputUrl)
+				user, err := e.users.GetById(ctx, &usersv1.UserRequest{
+					Id: stream.UserId,
+				})
 				if err != nil {
-					logger.Errorf("failed to send email notification: %s", err)
+					logger.WithError(err).Error("failed to get user by id")
+					return nil
+				}
+				err = e.sendStreamPublished(ctx, user.Email, stream.OutputUrl)
+				if err != nil {
+					logger.WithError(err).Error("failed to send email notification")
 					return nil
 				}
 			}

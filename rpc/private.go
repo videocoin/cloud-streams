@@ -192,6 +192,14 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	return streamResponse, nil
 }
 
+func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+	return nil, nil
+}
+
+func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+	return nil, nil
+}
+
 func toStreamResponsePrivate(stream *v1.Stream) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
