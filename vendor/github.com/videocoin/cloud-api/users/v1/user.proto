@@ -29,6 +29,7 @@ enum UserRole {
     option (gogoproto.enum_customname) = "UserRole";
 
     USER_ROLE_REGULAR = 0 [(gogoproto.enumvalue_customname) = "UserRoleRegular"];
+    USER_ROLE_MINER   = 1 [(gogoproto.enumvalue_customname) = "UserRoleMiner"];
     USER_ROLE_QA      = 3 [(gogoproto.enumvalue_customname) = "UserRoleQa"];
     USER_ROLE_MANAGER = 6 [(gogoproto.enumvalue_customname) = "UserRoleManager"];
     USER_ROLE_SUPER   = 9 [(gogoproto.enumvalue_customname) = "UserRoleSuper"];
@@ -68,6 +69,7 @@ message UserProfile {
     string name = 3;
     bool is_active = 4;
     cloud.api.account.v1.AccountProfile account = 5;
+    UserRole role = 6;
 }
 
 message UserApiToken {

@@ -52,6 +52,8 @@ service UserService {
         };
     }
 
+    rpc GetById(UserRequest) returns (UserProfile) {}
+
     rpc Activate(UserRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             post: "/api/v1/user/{id}/activate",
