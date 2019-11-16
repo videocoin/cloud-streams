@@ -238,6 +238,7 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 
 	if req.Status == v1.StreamStatusFailed {
 		_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+			UserId:                stream.UserId,
 			StreamContractId:      stream.StreamContractId,
 			StreamContractAddress: stream.StreamContractAddress,
 		})
@@ -374,6 +375,7 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 	}
 
 	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+		UserId:                stream.UserId,
 		StreamContractId:      stream.StreamContractId,
 		StreamContractAddress: stream.StreamContractAddress,
 	})

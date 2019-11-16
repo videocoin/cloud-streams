@@ -16,9 +16,9 @@ import (
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 )
 
 type PrivateRPCServerOpts struct {
@@ -161,6 +161,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	}
 
 	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+		UserId:                stream.UserId,
 		StreamContractId:      stream.StreamContractId,
 		StreamContractAddress: stream.StreamContractAddress,
 	})

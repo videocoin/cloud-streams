@@ -194,6 +194,7 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 
 			if req.Status == v1.StreamStatusFailed {
 				_, err = e.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+					UserId:                stream.UserId,
 					StreamContractId:      stream.StreamContractId,
 					StreamContractAddress: stream.StreamContractAddress,
 				})
