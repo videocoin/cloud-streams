@@ -53,6 +53,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: accountsRpcAddr
+            - name: PROFILES_RPC_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: profilesRpcAddr
             - name: EMITTER_RPC_ADDR
               valueFrom:
                 configMapKeyRef:

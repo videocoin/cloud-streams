@@ -53,6 +53,7 @@ function get_vars() {
     readonly MQ_URI=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/secrets/mqUri`
     readonly USERS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/usersRpcAddr`
     readonly ACCOUNTS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr`
+    readonly PROFILES_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/profilesRpcAddr`
     readonly EMITTER_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/emitterRpcAddr`
     readonly BASE_INPUT_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/baseInputUrl`
     readonly BASE_OUTPUT_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/baseOutputUrl`
@@ -70,6 +71,7 @@ function deploy() {
         --set image.tag="${VERSION}" \
         --set config.usersRpcAddr="${USERS_RPC_ADDR}" \
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
+        --set config.profilesRpcAddr="${PROFILES_RPC_ADDR}" \
         --set config.emitterRpcAddr="${EMITTER_RPC_ADDR}" \
         --set config.baseInputUrl="${BASE_INPUT_URL}" \
         --set config.baseOutputUrl="${BASE_OUTPUT_URL}" \
