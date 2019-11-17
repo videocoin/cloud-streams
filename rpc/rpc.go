@@ -8,6 +8,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-streams/datastore"
@@ -22,6 +23,13 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	if verr := s.validator.validate(req); verr != nil {
 		s.logger.Error(verr)
 		return nil, rpc.NewRpcValidationError(verr)
+	}
+
+	_, err := s.profiles.Get(ctx, &profilesv1.ProfileRequest{
+		Id: req.ProfileId,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	userID, _, err := s.authenticate(ctx)

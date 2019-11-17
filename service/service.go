@@ -3,13 +3,13 @@ package service
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"github.com/videocoin/cloud-streams/rpc"
-	"google.golang.org/grpc"
 )
 
 type Service struct {
@@ -26,29 +26,29 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	ulogger := cfg.Logger.WithField("system", "userscli")
-	uGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(ulogger)
-	usersConn, err := grpc.Dial(cfg.UsersRPCAddr, uGrpcDialOpts...)
+	conn, err := grpcutil.Connect(cfg.UsersRPCAddr, cfg.Logger.WithField("system", "userscli"))
 	if err != nil {
 		return nil, err
 	}
-	users := usersv1.NewUserServiceClient(usersConn)
+	users := usersv1.NewUserServiceClient(conn)
 
-	alogger := cfg.Logger.WithField("system", "accountcli")
-	aGrpcDialOpts := grpcutil.ClientDialOptsWithRetry(alogger)
-	accountsConn, err := grpc.Dial(cfg.AccountsRPCAddr, aGrpcDialOpts...)
+	conn, err = grpcutil.Connect(cfg.AccountsRPCAddr, cfg.Logger.WithField("system", "accountcli"))
 	if err != nil {
 		return nil, err
 	}
-	accounts := accountsv1.NewAccountServiceClient(accountsConn)
+	accounts := accountsv1.NewAccountServiceClient(conn)
 
-	elogger := cfg.Logger.WithField("system", "emittercli")
-	eGrpcDialOpts := grpcutil.DefaultClientDialOpts(elogger)
-	emitterConn, err := grpc.Dial(cfg.EmitterRPCAddr, eGrpcDialOpts...)
+	conn, err = grpcutil.Connect(cfg.EmitterRPCAddr, cfg.Logger.WithField("system", "emittercli"))
 	if err != nil {
 		return nil, err
 	}
-	emitter := emitterv1.NewEmitterServiceClient(emitterConn)
+	emitter := emitterv1.NewEmitterServiceClient(conn)
+
+	conn, err = grpcutil.Connect(cfg.ProfilesRPCAddr, cfg.Logger.WithField("system", "profilescli"))
+	if err != nil {
+		return nil, err
+	}
+	profiles := profilesv1.NewProfilesServiceClient(conn)
 
 	manager := manager.NewManager(
 		&manager.ManagerOpts{
@@ -77,6 +77,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Manager:         manager,
 		Users:           users,
 		Accounts:        accounts,
+		Profiles:        profiles,
 		BaseInputURL:    cfg.BaseInputURL,
 		BaseOutputURL:   cfg.BaseOutputURL,
 		RTMPURL:         cfg.RTMPURL,
