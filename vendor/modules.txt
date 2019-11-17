@@ -124,6 +124,7 @@ github.com/videocoin/cloud-api/notifications/v1
 github.com/videocoin/cloud-api/streams/private/v1
 github.com/videocoin/cloud-api/users/v1
 github.com/videocoin/cloud-api/accounts/v1
+github.com/videocoin/cloud-api/profiles/v1
 github.com/videocoin/cloud-api/rpc
 github.com/videocoin/cloud-api/transfers/v1
 # github.com/videocoin/cloud-pkg v0.0.6 => ../cloud-pkg
