@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
@@ -32,6 +33,7 @@ type RpcServerOpts struct {
 	Ds              *ds.Datastore
 	Users           usersv1.UserServiceClient
 	Accounts        accountsv1.AccountServiceClient
+	Profiles        profilesv1.ProfilesServiceClient
 	Emitter         emitterv1.EmitterServiceClient
 	EventBus        *eventbus.EventBus
 	Logger          *logrus.Entry
@@ -48,6 +50,7 @@ type RpcServer struct {
 	ds              *ds.Datastore
 	users           usersv1.UserServiceClient
 	accounts        accountsv1.AccountServiceClient
+	profiles        profilesv1.ProfilesServiceClient
 	emitter         emitterv1.EmitterServiceClient
 	manager         *manager.Manager
 	logger          *logrus.Entry
@@ -73,6 +76,7 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		ds:              opts.Ds,
 		users:           opts.Users,
 		accounts:        opts.Accounts,
+		profiles:        opts.Profiles,
 		emitter:         opts.Emitter,
 		manager:         opts.Manager,
 		baseInputURL:    opts.BaseInputURL,
