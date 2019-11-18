@@ -13,24 +13,14 @@ import (
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/manager"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/codes"
 )
 
 func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
-
-	if verr := s.validator.validate(req); verr != nil {
-		s.logger.Error(verr)
-		return nil, rpc.NewRpcValidationError(verr)
-	}
-
-	_, err := s.profiles.Get(ctx, &profilesv1.ProfileRequest{
-		Id: req.ProfileId,
-	})
-	if err != nil {
-		return nil, err
-	}
 
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
@@ -43,6 +33,30 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	if verr := s.validator.validate(req); verr != nil {
 		s.logger.Warning(verr)
 		return nil, rpc.NewRpcValidationError(verr)
+	}
+
+	_, err = s.profiles.Get(ctx, &profilesv1.ProfileRequest{
+		Id: req.ProfileId,
+	})
+	if err != nil {
+		s.logger.Error(err)
+
+		if s, ok := status.FromError(err); ok {
+			if s.Code() == codes.NotFound {
+				respErr := &rpc.MultiValidationError{
+					Errors: []*rpc.ValidationError{
+						&rpc.ValidationError{
+							Field:   "profile_id",
+							Message: "profile id does not exist",
+						},
+					},
+				}
+	
+				return nil, rpc.NewRpcValidationError(respErr)
+			}
+		}
+
+		return nil, rpc.ErrRpcInternal
 	}
 
 	stream, err := s.manager.CreateStream(
@@ -169,14 +183,14 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	if verr := s.validator.validate(req); verr != nil {
-		s.logger.Error(verr)
-		return nil, rpc.NewRpcValidationError(verr)
-	}
-
 	userID, _, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if verr := s.validator.validate(req); verr != nil {
+		s.logger.Error(verr)
+		return nil, rpc.NewRpcValidationError(verr)
 	}
 
 	span.SetTag("user_id", userID)
