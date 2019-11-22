@@ -15,8 +15,9 @@ type Config struct {
 	EmitterRPCAddr  string `default:"0.0.0.0:5003" envconfig:"EMITTER_RPC_ADDR"`
 	ProfilesRPCAddr string `default:"0.0.0.0:5004" envconfig:"PROFILES_RPC_ADDR"`
 
-	DBURI string `default:"root:root@/videocoin?charset=utf8&parseTime=True&loc=Local" envconfig:"DBURI"`
-	MQURI string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
+	DBURI    string `default:"root:root@/videocoin?charset=utf8&parseTime=True&loc=Local" envconfig:"DBURI"`
+	MQURI    string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
+	RedisURI string `default:"redis://:@127.0.0.1:6379/1" envconfig:"REDISURI"`
 
 	AuthTokenSecret string `required:"true" envconfig:"AUTH_TOKEN_SECRET"`
 

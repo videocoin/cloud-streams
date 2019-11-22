@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-
 	"github.com/sirupsen/logrus"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	"github.com/videocoin/cloud-pkg/dlock"
 	ds "github.com/videocoin/cloud-streams/datastore"
 )
 
@@ -16,12 +16,14 @@ type ManagerOpts struct {
 	Ds      *ds.Datastore
 	Logger  *logrus.Entry
 	Emitter emitterv1.EmitterServiceClient
+	DLock   *dlock.Locker
 }
 
 type Manager struct {
+	logger    *logrus.Entry
 	ds        *ds.Datastore
 	emitter   emitterv1.EmitterServiceClient
-	logger    *logrus.Entry
+	dlock     *dlock.Locker
 	sbTicker  *time.Ticker
 	sbTimeout time.Duration
 }
@@ -32,6 +34,7 @@ func NewManager(opts *ManagerOpts) *Manager {
 		logger:    opts.Logger,
 		ds:        opts.Ds,
 		emitter:   opts.Emitter,
+		dlock:     opts.DLock,
 		sbTimeout: sbTimeout,
 		sbTicker:  time.NewTicker(sbTimeout),
 	}
@@ -51,6 +54,18 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 	for {
 		select {
 		case <-m.sbTicker.C:
+			lockKey := "streams/tasks/check-stream-balance/lock"
+			lock, err := m.dlock.Obtain(lockKey)
+			if err != nil {
+				return err
+			}
+			if lock == nil {
+				m.logger.Errorf("failed to obtain lock %s", lockKey)
+				return dlock.ErrObtainLock
+			}
+
+			defer lock.Unlock()
+
 			m.logger.Info("checking stream contract balance")
 
 			ctx := context.Background()

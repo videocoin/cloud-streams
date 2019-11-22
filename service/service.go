@@ -5,6 +5,7 @@ import (
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
+	"github.com/videocoin/cloud-pkg/dlock"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
@@ -22,6 +23,11 @@ type Service struct {
 
 func NewService(cfg *Config) (*Service, error) {
 	ds, err := ds.NewDatastore(cfg.DBURI)
+	if err != nil {
+		return nil, err
+	}
+
+	dlock, err := dlock.New(cfg.RedisURI)
 	if err != nil {
 		return nil, err
 	}
@@ -55,6 +61,7 @@ func NewService(cfg *Config) (*Service, error) {
 			Logger:  cfg.Logger.WithField("system", "manager"),
 			Ds:      ds,
 			Emitter: emitter,
+			DLock:   dlock,
 		})
 
 	ebConfig := &eventbus.Config{
