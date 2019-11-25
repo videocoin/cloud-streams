@@ -7,7 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
-	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 )
 
@@ -112,30 +111,15 @@ func (m *Manager) startCheckStreamAliveTask() error {
 				if stream.ReadyAt != nil {
 					completedAt := stream.ReadyAt.Add(time.Duration(m.maxLiveStreamTime) * time.Second)
 					if completedAt.Before(time.Now()) {
-						m.logger.WithField("id", stream.Id).Info("completing stream")
+						logger := m.logger.WithField("id", stream.Id)
+						logger.Info("completing stream")
 
-						_, err = m.emitter.EndStream(emptyCtx, &emitterv1.EndStreamRequest{
-							UserId:                stream.UserId,
-							StreamContractId:      stream.StreamContractId,
-							StreamContractAddress: stream.StreamContractAddress,
-						})
-
+						_, err := m.StopStream(emptyCtx, stream.Id, "")
 						if err != nil {
-							m.logger.Errorf("failed to end stream: %s", err)
-							continue
+							logger.Errorf("failed to complete stream: %s", err)
 						}
 
-						err = m.UpdateStream(
-							emptyCtx,
-							stream,
-							map[string]interface{}{"status": v1.StreamStatusCompleted},
-						)
-						if err != nil {
-							m.logger.Errorf("failed to update stream: %s", err)
-							continue
-						}
-
-						m.eb.EmitUpdateStream(emptyCtx, stream.Id)
+						logger.Info("stream has been completed")
 					}
 				}
 			}
