@@ -3,9 +3,11 @@ package manager
 import (
 	"context"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 )
 
@@ -80,65 +82,65 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 	return nil
 }
 
-// func (m *Manager) startCheckStreamAliveTask() error {
-// 	for {
-// 		select {
-// 		case <-m.sbTicker.C:
-// 			lockKey := "streams/tasks/check-stream-alive/lock"
-// 			lock, err := m.dlock.Obtain(lockKey)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			if lock == nil {
-// 				m.logger.Errorf("failed to obtain lock %s", lockKey)
-// 				return dlock.ErrObtainLock
-// 			}
+func (m *Manager) startCheckStreamAliveTask() error {
+	for {
+		select {
+		case <-m.sbTicker.C:
+			lockKey := "streams/tasks/check-stream-alive/lock"
+			lock, err := m.dlock.Obtain(lockKey)
+			if err != nil {
+				return err
+			}
+			if lock == nil {
+				m.logger.Errorf("failed to obtain lock %s", lockKey)
+				return dlock.ErrObtainLock
+			}
 
-// 			defer lock.Unlock()
+			defer lock.Unlock()
 
-// 			m.logger.Info("checking stream is alive")
+			m.logger.Info("checking stream is alive")
 
-// 			ctx := context.Background()
-// 			streams, err := m.ds.Stream.StatusReadyList(ctx)
-// 			if err != nil {
-// 				m.logger.Error(err)
-// 				continue
-// 			}
+			emptyCtx := context.Background()
 
-// 			emptyCtx := context.Background()
-// 			for _, stream := range streams {
-// 				if stream.ReadyAt != nil {
-// 					completedAt := stream.ReadyAt.Add(time.Duration(m.maxLiveStreamTime) * time.Second)
-// 					if completedAt.Before(time.Now()) {
-// 						m.logger.WithField("id", stream.Id).Info("completing stream")
+			streams, err := m.ds.Stream.StatusReadyList(emptyCtx)
+			if err != nil {
+				m.logger.Error(err)
+				continue
+			}
 
-// 						_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-// 							UserId:                stream.UserId,
-// 							StreamContractId:      stream.StreamContractId,
-// 							StreamContractAddress: stream.StreamContractAddress,
-// 						})
+			for _, stream := range streams {
+				if stream.ReadyAt != nil {
+					completedAt := stream.ReadyAt.Add(time.Duration(m.maxLiveStreamTime) * time.Second)
+					if completedAt.Before(time.Now()) {
+						m.logger.WithField("id", stream.Id).Info("completing stream")
 
-// 						if err != nil {
-// 							m.logger.Errorf("failed to end stream: %s", err)
-// 							continue
-// 						}
+						_, err = m.emitter.EndStream(emptyCtx, &emitterv1.EndStreamRequest{
+							UserId:                stream.UserId,
+							StreamContractId:      stream.StreamContractId,
+							StreamContractAddress: stream.StreamContractAddress,
+						})
 
-// 						err = m.UpdateStream(
-// 							ctx,
-// 							stream,
-// 							map[string]interface{}{"status": v1.StreamStatusCompleted},
-// 						)
-// 						if err != nil {
-// 							m.logger.Errorf("failed to update stream: %s", err)
-// 							continue
-// 						}
+						if err != nil {
+							m.logger.Errorf("failed to end stream: %s", err)
+							continue
+						}
 
-// 						// m.eb.EmitUpdateStream(emptyCtx, stream.Id)
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
+						err = m.UpdateStream(
+							emptyCtx,
+							stream,
+							map[string]interface{}{"status": v1.StreamStatusCompleted},
+						)
+						if err != nil {
+							m.logger.Errorf("failed to update stream: %s", err)
+							continue
+						}
 
-// 	return nil
-// }
+						m.eb.EmitUpdateStream(emptyCtx, stream.Id)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}

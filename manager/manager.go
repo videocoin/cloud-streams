@@ -61,6 +61,8 @@ func NewManager(opts *ManagerOpts) *Manager {
 
 func (m *Manager) StartBackgroundTasks() error {
 	go m.startCheckStreamBalanceTask()
+	go m.startCheckStreamAliveTask()
+
 	return nil
 }
 
