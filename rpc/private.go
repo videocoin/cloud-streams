@@ -150,7 +150,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	if stream.Status == v1.StreamStatusCompleted {
+	if stream.Status == v1.StreamStatusCompleted || stream.Status == v1.StreamStatusFailed {
 		streamResponse, err := toStreamResponsePrivate(stream)
 		if err != nil {
 			logFailedTo(logger, "", err)
