@@ -47,6 +47,7 @@ func NewManager(opts *ManagerOpts) *Manager {
 		ds:                opts.Ds,
 		emitter:           opts.Emitter,
 		accounts:          opts.Accounts,
+		users:             opts.Users,
 		dlock:             opts.DLock,
 		eb:                opts.EB,
 		sbTimeout:         sbTimeout,
