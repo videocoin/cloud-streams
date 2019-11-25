@@ -25,5 +25,7 @@ type Config struct {
 	BaseOutputURL string `required:"true" envconfig:"BASE_OUTPUT_URL"`
 	RTMPURL       string `required:"true" envconfig:"RTMP_URL"`
 
+	MaxLiveStreamTime int64 `required:"true" envconfig:"MAX_LIVESTREAM_TIME" default:"43200"`
+
 	Logger *logrus.Entry `envconfig:"-"`
 }

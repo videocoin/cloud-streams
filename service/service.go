@@ -56,19 +56,10 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	profiles := profilesv1.NewProfilesServiceClient(conn)
 
-	manager := manager.NewManager(
-		&manager.ManagerOpts{
-			Logger:  cfg.Logger.WithField("system", "manager"),
-			Ds:      ds,
-			Emitter: emitter,
-			DLock:   dlock,
-		})
-
 	ebConfig := &eventbus.Config{
 		URI:     cfg.MQURI,
 		Name:    cfg.Name,
 		Logger:  cfg.Logger.WithField("system", "eventbus"),
-		DM:      manager,
 		Emitter: emitter,
 		Users:   users,
 	}
@@ -76,6 +67,18 @@ func NewService(cfg *Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	managerOpts := &manager.ManagerOpts{
+		Logger:            cfg.Logger.WithField("system", "manager"),
+		Ds:                ds,
+		Emitter:           emitter,
+		Accounts:          accounts,
+		Users:             users,
+		EB:                eb,
+		DLock:             dlock,
+		MaxLiveStreamTime: cfg.MaxLiveStreamTime,
+	}
+	manager := manager.NewManager(managerOpts)
 
 	rpcConfig := &rpc.RpcServerOpts{
 		Logger:          cfg.Logger,

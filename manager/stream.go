@@ -10,11 +10,12 @@ import (
 	"time"
 
 	"github.com/AlekSi/pointer"
-
 	"github.com/opentracing/opentracing-go"
+	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	tracer "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-pkg/uuid4"
+	"github.com/videocoin/cloud-streams/datastore"
 )
 
 var (
@@ -171,13 +172,6 @@ func (m *Manager) GetUserStream(ctx context.Context, userID string, streamID str
 	return stream, nil
 }
 
-func isRemovable(stream *v1.Stream) bool {
-	return stream.Status == v1.StreamStatusNew ||
-		stream.Status == v1.StreamStatusCompleted ||
-		stream.Status == v1.StreamStatusCancelled ||
-		stream.Status == v1.StreamStatusFailed
-}
-
 func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID string) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.DeleteUserStream")
 	defer span.Finish()
@@ -201,4 +195,125 @@ func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID 
 	}
 
 	return nil
+}
+
+func (m *Manager) RunStream(ctx context.Context, streamID string, userID string) (*v1.Stream, error) {
+	logger := m.logger.WithField("id", streamID)
+
+	if userID != "" {
+		logger = logger.WithField("user_id", userID)
+
+		err := m.checkBalance(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var (
+		stream *v1.Stream
+		err    error
+	)
+
+	if userID != "" {
+		stream, err = m.GetUserStream(ctx, userID, streamID)
+	} else {
+		stream, err = m.GetStreamByID(ctx, streamID)
+	}
+
+	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, err
+		}
+
+		return nil, fmt.Errorf("failed to get user stream: %s", err)
+	}
+
+	if userID == "" && stream.UserId != "" {
+		logger = logger.WithField("user_id", stream.UserId)
+
+		err := m.checkBalance(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	updates := map[string]interface{}{"status": v1.StreamStatusPreparing}
+	err = m.UpdateStream(ctx, stream, updates)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update stream: %s", err)
+	}
+
+	_, err = m.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
+		StreamId:         stream.Id,
+		UserId:           userID,
+		StreamContractId: stream.StreamContractId,
+		ProfilesIds:      []string{stream.ProfileId},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to init stream: %s", err)
+	}
+
+	go m.eb.EmitUpdateStream(ctx, streamID)
+
+	return stream, nil
+}
+
+func (m *Manager) StopStream(ctx context.Context, streamID string, userID string) (*v1.Stream, error) {
+	logger := m.logger.WithField("id", streamID)
+
+	if userID != "" {
+		logger = logger.WithField("user_id", userID)
+
+		err := m.checkBalance(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var (
+		stream *v1.Stream
+		err    error
+	)
+
+	if userID != "" {
+		stream, err = m.GetUserStream(ctx, userID, streamID)
+	} else {
+		stream, err = m.GetStreamByID(ctx, streamID)
+	}
+
+	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, err
+		}
+
+		return nil, fmt.Errorf("failed to get user stream: %s", err)
+	}
+
+	if stream.Status < v1.StreamStatusPrepared {
+		return nil, ErrEndStreamNotAllowed
+	}
+
+	if stream.Status == v1.StreamStatusCompleted {
+		return stream, nil
+	}
+
+	_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+		UserId:                stream.UserId,
+		StreamContractId:      stream.StreamContractId,
+		StreamContractAddress: stream.StreamContractAddress,
+	})
+
+	if err != nil {
+		logger.Errorf("failed to end stream: %s", err)
+	}
+
+	updates := map[string]interface{}{"status": v1.StreamStatusCompleted}
+	err = m.UpdateStream(ctx, stream, updates)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update stream: %s", err)
+	}
+
+	go m.eb.EmitUpdateStream(ctx, streamID)
+
+	return stream, nil
 }

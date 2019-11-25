@@ -197,48 +197,26 @@ func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	stream, err := s.manager.RunStream(ctx, req.Id, "")
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}
 
-		logFailedTo(logger, "get stream", err)
+		if err == manager.ErrHitBalanceLimitation {
+			return nil, rpc.NewRpcPermissionError(err.Error())
+		}
+
 		return nil, rpc.ErrRpcInternal
 	}
 
-	err = s.manager.UpdateStream(
-		ctx,
-		stream,
-		map[string]interface{}{"status": v1.StreamStatusPreparing},
-	)
-	if err != nil {
-		logFailedTo(logger, "update stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	_, err = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
-		StreamId:         stream.Id,
-		UserId:           stream.UserId,
-		StreamContractId: stream.StreamContractId,
-		ProfilesIds:      []string{stream.ProfileId},
-	})
-	if err != nil {
-		logFailedTo(logger, "init stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	streamResponse, err := toStreamResponsePrivate(stream)
+	resp, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
-
-	return streamResponse, nil
+	return resp, nil
 }
 
 func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
@@ -246,62 +224,26 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	stream, err := s.manager.StopStream(ctx, req.Id, "")
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}
 
-		logFailedTo(logger, "get stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	if stream.Status < v1.StreamStatusPrepared {
-		return nil, rpc.ErrRpcBadRequest
-	}
-
-	if stream.Status == v1.StreamStatusCompleted {
-		// nothing to do since it was already stopped
-		streamResponse, err := toStreamResponsePrivate(stream)
-		if err != nil {
-			logFailedTo(logger, "", err)
-			return nil, rpc.ErrRpcInternal
+		if err == manager.ErrEndStreamNotAllowed {
+			return nil, rpc.ErrRpcBadRequest
 		}
 
-		return streamResponse, nil
-	}
-
-	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-		UserId:                stream.UserId,
-		StreamContractId:      stream.StreamContractId,
-		StreamContractAddress: stream.StreamContractAddress,
-	})
-
-	if err != nil {
-		logFailedTo(logger, "end stream", err)
-	}
-
-	err = s.manager.UpdateStream(
-		ctx,
-		stream,
-		map[string]interface{}{"status": v1.StreamStatusCompleted},
-	)
-	if err != nil {
-		logFailedTo(logger, "update stream", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponsePrivate(stream)
+	resp, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
-
-	return streamResponse, nil
+	return resp, nil
 }
 
 func toStreamResponsePrivate(stream *v1.Stream) (*privatev1.StreamResponse, error) {

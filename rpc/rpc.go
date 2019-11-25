@@ -2,19 +2,17 @@ package rpc
 
 import (
 	"context"
-	"math/big"
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
-	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/manager"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
@@ -51,7 +49,7 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 						},
 					},
 				}
-	
+
 				return nil, rpc.NewRpcValidationError(respErr)
 			}
 		}
@@ -300,62 +298,26 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
 
-	account, err := s.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
-	if err != nil {
-		logFailedTo(logger, "get account", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	logger.Infof("balance is %s", account.Balance)
-
-	balance, ok := new(big.Int).SetString(account.Balance, 10)
-	balanceVID := new(big.Int).Div(balance, big.NewInt(1000000000000000000))
-	if !ok || balanceVID.Cmp(big.NewInt(20)) == -1 {
-		return nil, rpc.NewRpcPermissionError("hit balance limitation")
-	}
-
-	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
+	stream, err := s.manager.RunStream(ctx, req.Id, userID)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}
 
-		logFailedTo(logger, "get user stream", err)
+		if err == manager.ErrHitBalanceLimitation {
+			return nil, rpc.NewRpcPermissionError(err.Error())
+		}
+
 		return nil, rpc.ErrRpcInternal
 	}
 
-	err = s.manager.UpdateStream(
-		ctx,
-		stream,
-		map[string]interface{}{"status": v1.StreamStatusPreparing},
-	)
-	if err != nil {
-		logFailedTo(logger, "update stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	_, err = s.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
-		StreamId:         stream.Id,
-		UserId:           userID,
-		StreamContractId: stream.StreamContractId,
-		ProfilesIds:      []string{stream.ProfileId},
-	})
-	if err != nil {
-		logFailedTo(logger, "init stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	streamResponse, err := toStreamResponse(stream)
+	resp, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
-
-	return streamResponse, nil
+	return resp, nil
 }
 
 func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
@@ -371,60 +333,24 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
 
-	stream, err := s.manager.GetUserStream(ctx, userID, req.Id)
+	stream, err := s.manager.StopStream(ctx, req.Id, userID)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}
 
-		logFailedTo(logger, "get user stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	if stream.Status < v1.StreamStatusPrepared {
-		return nil, rpc.ErrRpcBadRequest
-	}
-
-	if stream.Status == v1.StreamStatusCompleted {
-		// nothing to do since it was already stopped
-		streamResponse, err := toStreamResponse(stream)
-		if err != nil {
-			logFailedTo(logger, "", err)
-			return nil, rpc.ErrRpcInternal
+		if err == manager.ErrEndStreamNotAllowed {
+			return nil, rpc.ErrRpcBadRequest
 		}
 
-		return streamResponse, nil
-	}
-
-	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-		UserId:                stream.UserId,
-		StreamContractId:      stream.StreamContractId,
-		StreamContractAddress: stream.StreamContractAddress,
-	})
-
-	if err != nil {
-		logFailedTo(logger, "end stream", err)
-	}
-
-	err = s.manager.UpdateStream(
-		ctx,
-		stream,
-		map[string]interface{}{"status": v1.StreamStatusCompleted},
-	)
-	if err != nil {
-		logFailedTo(logger, "update stream", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponse(stream)
+	resp, err := toStreamResponse(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
-
-	return streamResponse, nil
+	return resp, nil
 }

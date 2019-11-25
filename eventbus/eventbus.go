@@ -12,28 +12,27 @@ import (
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	notificationsv1 "github.com/videocoin/cloud-api/notifications/v1"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
-	v1 "github.com/videocoin/cloud-api/streams/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/mqmux"
 	tracerext "github.com/videocoin/cloud-pkg/tracer"
-	"github.com/videocoin/cloud-streams/manager"
 )
+
+type StreamStatusHandler func(context.Context, *privatev1.Event) error
 
 type Config struct {
 	Logger  *logrus.Entry
 	URI     string
 	Name    string
-	DM      *manager.Manager
 	Users   usersv1.UserServiceClient
 	Emitter emitterv1.EmitterServiceClient
 }
 
 type EventBus struct {
-	logger  *logrus.Entry
-	mq      *mqmux.WorkerMux
-	dm      *manager.Manager
-	users   usersv1.UserServiceClient
-	emitter emitterv1.EmitterServiceClient
+	logger              *logrus.Entry
+	mq                  *mqmux.WorkerMux
+	users               usersv1.UserServiceClient
+	emitter             emitterv1.EmitterServiceClient
+	StreamStatusHandler StreamStatusHandler
 }
 
 func New(c *Config) (*EventBus, error) {
@@ -48,7 +47,6 @@ func New(c *Config) (*EventBus, error) {
 	return &EventBus{
 		logger:  c.Logger,
 		mq:      mq,
-		dm:      c.DM,
 		users:   c.Users,
 		emitter: c.Emitter,
 	}, nil
@@ -80,11 +78,7 @@ func (e *EventBus) registerPublishers() error {
 }
 
 func (e *EventBus) registerConsumers() error {
-	if err := e.mq.Consumer("streams.status", 1, false, e.handleStreamStatus); err != nil {
-		return err
-	}
-
-	return nil
+	return e.mq.Consumer("streams.status", 1, false, e.handleStreamStatus)
 }
 
 func (e *EventBus) Stop() error {
@@ -173,62 +167,14 @@ func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
 	e.logger.Infof("handling request %+v", req)
 
 	ctx := opentracing.ContextWithSpan(context.Background(), span)
-
-	switch req.Type {
-	case privatev1.EventTypeUpdateStatus:
-		{
-			logger := e.logger.WithFields(logrus.Fields{
-				"status":    req.Status.String(),
-				"stream_id": req.StreamID,
-			})
-			logger.Info("updating status")
-
-			stream, err := e.dm.GetStreamByID(ctx, req.StreamID)
-			if err != nil {
-				logger.WithError(err).Error("failed to get stream")
-				return nil
-			}
-
-			updates := map[string]interface{}{"status": req.Status}
-			err = e.dm.UpdateStream(ctx, stream, updates)
-			if err != nil {
-				logger.WithError(err).Error("failed to update stream status")
-				return nil
-			}
-
-			if req.Status == v1.StreamStatusFailed {
-				_, err = e.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-					UserId:                stream.UserId,
-					StreamContractId:      stream.StreamContractId,
-					StreamContractAddress: stream.StreamContractAddress,
-				})
-
-				if err != nil {
-					logger.WithError(err).Error("failed to end stream")
-				}
-			}
-
-			if req.Status == v1.StreamStatusReady {
-				user, err := e.users.GetById(ctx, &usersv1.UserRequest{
-					Id: stream.UserId,
-				})
-				if err != nil {
-					logger.WithError(err).Error("failed to get user by id")
-					return nil
-				}
-				err = e.sendStreamPublished(ctx, user.Email, stream.OutputUrl)
-				if err != nil {
-					logger.WithError(err).Error("failed to send email notification")
-					return nil
-				}
-			}
-		}
+	if e.StreamStatusHandler != nil {
+		return e.StreamStatusHandler(ctx, req)
 	}
 
 	return nil
 }
 
-func (e *EventBus) sendStreamPublished(ctx context.Context, by, url string) error {
+func (e *EventBus) EmitStreamPublished(ctx context.Context, by, url string) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "SendStreamPublished")
 	defer span.Finish()
 
