@@ -150,16 +150,6 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	if stream.Status == v1.StreamStatusCompleted || stream.Status == v1.StreamStatusFailed {
-		streamResponse, err := toStreamResponsePrivate(stream)
-		if err != nil {
-			logFailedTo(logger, "", err)
-			return nil, rpc.ErrRpcInternal
-		}
-
-		return streamResponse, nil
-	}
-
 	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 		UserId:                stream.UserId,
 		StreamContractId:      stream.StreamContractId,
@@ -169,25 +159,11 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		logFailedTo(logger, "end stream", err)
 	}
 
-	err = s.manager.UpdateStream(
-		ctx,
-		stream,
-		map[string]interface{}{"status": v1.StreamStatusCompleted},
-	)
-	if err != nil {
-		logFailedTo(logger, "update stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
 	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
 	}
-
-	go s.eb.EmitUpdateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		streamResponse.ID)
 
 	return streamResponse, nil
 }
