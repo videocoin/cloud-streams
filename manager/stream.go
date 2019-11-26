@@ -116,7 +116,11 @@ func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates m
 	}
 
 	if value, ok := updates["status"]; ok {
-		stream.Status = value.(v1.StreamStatus)
+		if stream.Status != v1.StreamStatusFailed &&
+			stream.Status != v1.StreamStatusCompleted &&
+			stream.Status != v1.StreamStatusCancelled {
+			stream.Status = value.(v1.StreamStatus)
+		}
 	}
 
 	if value, ok := updates["input_status"]; ok {
