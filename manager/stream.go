@@ -259,17 +259,6 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 }
 
 func (m *Manager) StopStream(ctx context.Context, streamID string, userID string) (*v1.Stream, error) {
-	logger := m.logger.WithField("id", streamID)
-
-	if userID != "" {
-		logger = logger.WithField("user_id", userID)
-
-		err := m.checkBalance(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	var (
 		stream *v1.Stream
 		err    error
@@ -297,23 +286,11 @@ func (m *Manager) StopStream(ctx context.Context, streamID string, userID string
 		return stream, nil
 	}
 
-	_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-		UserId:                stream.UserId,
-		StreamContractId:      stream.StreamContractId,
-		StreamContractAddress: stream.StreamContractAddress,
-	})
-
-	if err != nil {
-		logger.Errorf("failed to end stream: %s", err)
-	}
-
 	updates := map[string]interface{}{"status": v1.StreamStatusCompleted}
 	err = m.UpdateStream(ctx, stream, updates)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update stream: %s", err)
 	}
-
-	go m.eb.EmitUpdateStream(ctx, streamID)
 
 	return stream, nil
 }
