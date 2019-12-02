@@ -24,7 +24,7 @@ type ManagerOpts struct {
 	Users             usersv1.UserServiceClient
 	DLock             *dlock.Locker
 	EB                *eventbus.EventBus
-	MaxLiveStreamTime int64
+	MaxLiveStreamTime time.Duration
 }
 
 type Manager struct {
@@ -37,7 +37,7 @@ type Manager struct {
 	eb                *eventbus.EventBus
 	sbTicker          *time.Ticker
 	sbTimeout         time.Duration
-	maxLiveStreamTime int64
+	maxLiveStreamTime time.Duration
 }
 
 func NewManager(opts *ManagerOpts) *Manager {

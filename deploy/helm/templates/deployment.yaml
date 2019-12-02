@@ -78,6 +78,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: rtmpUrl
+            - name: MAX_LIVESTREAM_TIME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: hlsPlaylistLength
             - name: DBURI
               valueFrom:
                 secretKeyRef:

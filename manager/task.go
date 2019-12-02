@@ -109,7 +109,7 @@ func (m *Manager) startCheckStreamAliveTask() error {
 
 			for _, stream := range streams {
 				if stream.ReadyAt != nil {
-					completedAt := stream.ReadyAt.Add(time.Duration(m.maxLiveStreamTime) * time.Second)
+					completedAt := stream.ReadyAt.Add(m.maxLiveStreamTime)
 					if completedAt.Before(time.Now()) {
 						logger := m.logger.WithField("id", stream.Id)
 						logger.Info("completing stream")
