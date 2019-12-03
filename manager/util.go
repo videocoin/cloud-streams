@@ -7,6 +7,7 @@ import (
 
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
+	ds "github.com/videocoin/cloud-streams/datastore"
 )
 
 func (m *Manager) checkBalance(ctx context.Context, userID string) error {
@@ -24,7 +25,7 @@ func (m *Manager) checkBalance(ctx context.Context, userID string) error {
 	return nil
 }
 
-func isRemovable(stream *v1.Stream) bool {
+func isRemovable(stream *ds.Stream) bool {
 	return stream.Status == v1.StreamStatusNew ||
 		stream.Status == v1.StreamStatusCompleted ||
 		stream.Status == v1.StreamStatusCancelled ||
