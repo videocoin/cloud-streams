@@ -13,6 +13,7 @@ import (
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-streams/datastore"
+	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
@@ -222,7 +223,7 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	return resp, nil
 }
 
-func toStreamResponsePrivate(stream *v1.Stream) (*privatev1.StreamResponse, error) {
+func toStreamResponsePrivate(stream *ds.Stream) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
 		return nil, err

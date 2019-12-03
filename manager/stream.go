@@ -16,6 +16,7 @@ import (
 	tracer "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-pkg/uuid4"
 	"github.com/videocoin/cloud-streams/datastore"
+	ds "github.com/videocoin/cloud-streams/datastore"
 )
 
 var (
@@ -30,7 +31,7 @@ func (m *Manager) CreateStream(
 	inputURL string,
 	outputURL string,
 	rtmpURL string,
-) (*v1.Stream, error) {
+) (*ds.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.CreateStream")
 	defer span.Finish()
 
@@ -48,7 +49,7 @@ func (m *Manager) CreateStream(
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	streamContractID := big.NewInt(int64(rand.Intn(math.MaxInt64)))
-	stream, err := m.ds.Stream.Create(ctx, &v1.Stream{
+	stream, err := m.ds.Stream.Create(ctx, &ds.Stream{
 		Id:               id,
 		UserId:           userID,
 		Name:             name,
@@ -75,7 +76,7 @@ func (m *Manager) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (m *Manager) GetStreamByID(ctx context.Context, id string) (*v1.Stream, error) {
+func (m *Manager) GetStreamByID(ctx context.Context, id string) (*ds.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.GetStreamByID")
 	defer span.Finish()
 
@@ -88,7 +89,7 @@ func (m *Manager) GetStreamByID(ctx context.Context, id string) (*v1.Stream, err
 	return stream, nil
 }
 
-func (m *Manager) GetStreamListByUserID(ctx context.Context, userID string) ([]*v1.Stream, error) {
+func (m *Manager) GetStreamListByUserID(ctx context.Context, userID string) ([]*ds.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.GetStreamListByUserID")
 	defer span.Finish()
 
@@ -103,7 +104,7 @@ func (m *Manager) GetStreamListByUserID(ctx context.Context, userID string) ([]*
 	return streams, nil
 }
 
-func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates map[string]interface{}) error {
+func (m *Manager) UpdateStream(ctx context.Context, stream *ds.Stream, updates map[string]interface{}) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.UpdateStream")
 	defer span.Finish()
 
@@ -160,7 +161,7 @@ func (m *Manager) UpdateStream(ctx context.Context, stream *v1.Stream, updates m
 	return nil
 }
 
-func (m *Manager) GetUserStream(ctx context.Context, userID string, streamID string) (*v1.Stream, error) {
+func (m *Manager) GetUserStream(ctx context.Context, userID string, streamID string) (*ds.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.GetUserStream")
 	defer span.Finish()
 
@@ -201,7 +202,7 @@ func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID 
 	return nil
 }
 
-func (m *Manager) RunStream(ctx context.Context, streamID string, userID string) (*v1.Stream, error) {
+func (m *Manager) RunStream(ctx context.Context, streamID string, userID string) (*ds.Stream, error) {
 	logger := m.logger.WithField("id", streamID)
 
 	if userID != "" {
@@ -214,7 +215,7 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	}
 
 	var (
-		stream *v1.Stream
+		stream *ds.Stream
 		err    error
 	)
 
@@ -262,9 +263,9 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	return stream, nil
 }
 
-func (m *Manager) StopStream(ctx context.Context, streamID string, userID string) (*v1.Stream, error) {
+func (m *Manager) StopStream(ctx context.Context, streamID string, userID string) (*ds.Stream, error) {
 	var (
-		stream *v1.Stream
+		stream *ds.Stream
 		err    error
 	)
 

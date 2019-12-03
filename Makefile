@@ -33,13 +33,13 @@ docker-push:
 	docker push gcr.io/${GCP_PROJECT}/${NAME}:${VERSION}
 
 dbm-status:
-	goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" status
+	./tools/${GOOS}/goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" status
 
 dbm-up:
-	goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" up
+	./tools/${GOOS}/goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" up
 
 dbm-down:
-	goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" down
+	./tools/${GOOS}/goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" down
 
 release: docker-build docker-push
 
