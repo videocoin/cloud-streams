@@ -1,6 +1,6 @@
 -- +goose Up
 -- SQL in this section is executed when the migration is applied.
-CREATE TABLE `streams2` (
+CREATE TABLE `streams` (
   `id` char(36) NOT NULL,
   `user_id` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
@@ -22,4 +22,4 @@ CREATE TABLE `streams2` (
 
 -- +goose Down
 -- SQL in this section is executed when the migration is rolled back.
-DROP TABLE streams2;
+DROP TABLE streams;

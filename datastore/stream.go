@@ -42,7 +42,6 @@ type StreamDatastore struct {
 }
 
 func NewStreamDatastore(db *gorm.DB) (*StreamDatastore, error) {
-	db.AutoMigrate(&Stream{})
 	return &StreamDatastore{db: db}, nil
 }
 
