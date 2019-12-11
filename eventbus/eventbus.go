@@ -71,7 +71,7 @@ func (e *EventBus) registerPublishers() error {
 		return err
 	}
 
-	if err := e.mq.Publisher("notifications/send"); err != nil {
+	if err := e.mq.Publisher("notifications.send"); err != nil {
 		return err
 	}
 	return nil
@@ -135,7 +135,7 @@ func (e *EventBus) SendNotification(span opentracing.Span, req *notificationsv1.
 		mqmux.RMQHeaderCarrier(headers),
 	)
 
-	return e.mq.PublishX("notifications/send", req, headers)
+	return e.mq.PublishX("notifications.send", req, headers)
 }
 
 func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
