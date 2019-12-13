@@ -65,6 +65,8 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		s.baseInputURL,
 		s.baseOutputURL,
 		s.rtmpURL,
+		req.InputType,
+		req.OutputType,
 	)
 	if err != nil {
 		logFailedTo(logger, "create stream", err)

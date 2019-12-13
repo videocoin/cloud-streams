@@ -2,16 +2,15 @@ package datastore
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
 
-	"database/sql"
 	"github.com/golang/protobuf/ptypes"
+	"github.com/jinzhu/gorm"
 	"github.com/opentracing/opentracing-go"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
-
-	"github.com/jinzhu/gorm"
 )
 
 var (
@@ -35,6 +34,8 @@ type Stream struct {
 	UpdatedAt             *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
 	ReadyAt               *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
 	CompletedAt           *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
+	InputType             v1.InputType    `gorm:"type:string"`
+	OutputType            v1.OutputType   `gorm:"type:string"`
 }
 
 type StreamDatastore struct {

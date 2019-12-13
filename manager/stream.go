@@ -31,6 +31,8 @@ func (m *Manager) CreateStream(
 	inputURL string,
 	outputURL string,
 	rtmpURL string,
+	inputType v1.InputType,
+	outputType v1.OutputType,
 ) (*ds.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.CreateStream")
 	defer span.Finish()
@@ -38,6 +40,8 @@ func (m *Manager) CreateStream(
 	span.SetTag("name", name)
 	span.SetTag("user_id", userID)
 	span.SetTag("profile_id", profileID)
+	span.SetTag("input_type", inputType.String())
+	span.SetTag("output_type", outputType.String())
 
 	id, err := uuid4.New()
 	if err != nil {
@@ -59,6 +63,8 @@ func (m *Manager) CreateStream(
 		RtmpUrl:          fmt.Sprintf("%s/%s", rtmpURL, id),
 		StreamContractId: streamContractID.Uint64(),
 		Status:           v1.StreamStatusNew,
+		InputType:        inputType,
+		OutputType:       outputType,
 	})
 	if err != nil {
 		tracer.SpanLogError(span, err)
