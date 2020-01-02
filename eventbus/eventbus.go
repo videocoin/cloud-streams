@@ -104,8 +104,10 @@ func (e *EventBus) emitCUDStream(ctx context.Context, t privatev1.EventType, id 
 	}
 	err := e.mq.PublishX("streams.events", event, headers)
 	if err != nil {
+		e.logger.Errorf("failed to publish to streams.events: %s", err)
 		return err
 	}
+
 	return nil
 }
 
