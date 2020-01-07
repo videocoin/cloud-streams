@@ -13,7 +13,7 @@ import (
 	"github.com/videocoin/cloud-streams/eventbus"
 )
 
-var ErrHitBalanceLimitation = errors.New("hit balance limitation")
+var ErrHitBalanceLimitation = errors.New("account has insufficient funds to start streaming")
 var ErrEndStreamNotAllowed = errors.New("not allowed to end stream")
 
 type ManagerOpts struct {
