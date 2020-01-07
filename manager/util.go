@@ -16,6 +16,10 @@ func (m *Manager) checkBalance(ctx context.Context, userID string) error {
 		return fmt.Errorf("failed to get account: %s", err)
 	}
 
+	if account.Balance == "" {
+		return ErrHitBalanceLimitation
+	}
+
 	balance, ok := new(big.Int).SetString(account.Balance, 10)
 	balanceVID := new(big.Int).Div(balance, big.NewInt(1000000000000000000))
 	if !ok || balanceVID.Cmp(big.NewInt(20)) == -1 {
