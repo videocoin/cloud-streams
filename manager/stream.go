@@ -303,5 +303,7 @@ func (m *Manager) StopStream(ctx context.Context, streamID string, userID string
 		return nil, fmt.Errorf("failed to update stream: %s", err)
 	}
 
+	go m.eb.EmitUpdateStream(ctx, streamID)
+
 	return stream, nil
 }
