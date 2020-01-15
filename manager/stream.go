@@ -11,6 +11,7 @@ import (
 
 	"github.com/AlekSi/pointer"
 	"github.com/opentracing/opentracing-go"
+	"github.com/sirupsen/logrus"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	tracer "github.com/videocoin/cloud-pkg/tracer"
@@ -291,6 +292,21 @@ func (m *Manager) StopStream(ctx context.Context, streamID string, userID string
 
 	if stream.Status < v1.StreamStatusPrepared {
 		return nil, ErrEndStreamNotAllowed
+	}
+
+	if stream.Status == v1.StreamStatusPrepared {
+		_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+			UserId:                stream.UserId,
+			StreamContractId:      stream.StreamContractId,
+			StreamContractAddress: stream.StreamContractAddress,
+		})
+		if err != nil {
+			m.logger.WithFields(logrus.Fields{
+				"user_id":                 stream.UserId,
+				"stream_contract_id":      stream.StreamContractId,
+				"stream_contract_address": stream.StreamContractAddress,
+			}).WithError(err).Error("failed to end stream")
+		}
 	}
 
 	if stream.Status == v1.StreamStatusCompleted {
