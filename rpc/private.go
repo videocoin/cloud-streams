@@ -223,6 +223,40 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	return resp, nil
 }
 
+func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.UpdateStatusRequest) (*privatev1.StreamResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	span.SetTag("id", req.ID)
+	logger := s.logger.WithField("id", req.ID)
+
+	stream, err := s.manager.GetStreamByID(ctx, req.ID)
+	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get stream", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	updates := map[string]interface{}{
+		"status": req.Status,
+	}
+
+	err = s.manager.UpdateStream(ctx, stream, updates)
+	if err != nil {
+		logFailedTo(logger, "update stream", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	resp, err := toStreamResponsePrivate(stream)
+	if err != nil {
+		logFailedTo(logger, "", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return resp, nil
+}
+
 func toStreamResponsePrivate(stream *ds.Stream) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
