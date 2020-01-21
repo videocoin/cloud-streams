@@ -4,6 +4,7 @@ import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
+	profilesManagerv1 "github.com/videocoin/cloud-api/profiles/manager/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 	"github.com/videocoin/cloud-pkg/grpcutil"
@@ -56,6 +57,12 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	profiles := profilesv1.NewProfilesServiceClient(conn)
 
+	conn, err = grpcutil.Connect(cfg.ProfilesManagerRPCAddr, cfg.Logger.WithField("system", "profilesmanagercli"))
+	if err != nil {
+		return nil, err
+	}
+	profilesManager := profilesManagerv1.NewProfileManagerServiceClient(conn)
+
 	ebConfig := &eventbus.Config{
 		URI:     cfg.MQURI,
 		Name:    cfg.Name,
@@ -74,6 +81,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Emitter:           emitter,
 		Accounts:          accounts,
 		Users:             users,
+		Profiles:          profilesManager,
 		EB:                eb,
 		DLock:             dlock,
 		MaxLiveStreamTime: cfg.MaxLiveStreamTime,

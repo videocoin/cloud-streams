@@ -8,6 +8,7 @@ import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/manager/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 	"github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
@@ -22,6 +23,7 @@ type ManagerOpts struct {
 	Emitter           emitterv1.EmitterServiceClient
 	Accounts          accountsv1.AccountServiceClient
 	Users             usersv1.UserServiceClient
+	Profiles          profilesv1.ProfileManagerServiceClient
 	DLock             *dlock.Locker
 	EB                *eventbus.EventBus
 	MaxLiveStreamTime time.Duration
@@ -33,6 +35,7 @@ type Manager struct {
 	emitter           emitterv1.EmitterServiceClient
 	accounts          accountsv1.AccountServiceClient
 	users             usersv1.UserServiceClient
+	profiles          profilesv1.ProfileManagerServiceClient
 	dlock             *dlock.Locker
 	eb                *eventbus.EventBus
 	sbTicker          *time.Ticker
@@ -48,6 +51,7 @@ func NewManager(opts *ManagerOpts) *Manager {
 		emitter:           opts.Emitter,
 		accounts:          opts.Accounts,
 		users:             opts.Users,
+		profiles:          opts.Profiles,
 		dlock:             opts.DLock,
 		eb:                opts.EB,
 		sbTimeout:         sbTimeout,

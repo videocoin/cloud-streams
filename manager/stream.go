@@ -13,6 +13,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/manager/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	tracer "github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-pkg/uuid4"
@@ -255,11 +256,19 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 		return nil, fmt.Errorf("failed to update stream: %s", err)
 	}
 
+	profile, err := m.profiles.Get(ctx, &profilesv1.ProfileRequest{
+		Id: stream.ProfileId,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get profile: %s", err)
+	}
+
 	_, err = m.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
 		StreamId:         stream.Id,
 		UserId:           userID,
 		StreamContractId: stream.StreamContractId,
 		ProfilesIds:      []string{stream.ProfileId},
+		Deposit:          profile.Deposit,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to init stream: %s", err)
