@@ -30,6 +30,7 @@ message InitStreamRequest {
     string user_id = 2;
     uint64 stream_contract_id = 3;
     repeated string profiles_ids = 4;
+    string deposit = 5;
 }
 
 message EndStreamRequest {
@@ -43,6 +44,7 @@ message AddInputChunkIdRequest {
     uint64 stream_contract_id = 1;
     uint64 chunk_id = 2;
     double chunk_duration = 3;
+    string reward = 4;
 }
 
 message BalanceRequest {
