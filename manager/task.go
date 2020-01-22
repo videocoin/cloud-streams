@@ -4,9 +4,11 @@ import (
 	"context"
 	"math/big"
 	"time"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/manager/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 )
 
@@ -59,14 +61,41 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 					logger.Infof("balance is %d VID", toVID.Int64())
 					logger = logger.WithField("to_balance", toVID.Int64())
 
-					if toVID.Int64() <= int64(1) {
+					profile, err := m.profiles.Get(ctx, &profilesv1.ProfileRequest{
+						Id: stream.ProfileId,
+					})
+					if err != nil {
+						logger.Error(err)
+						continue
+					}
+
+					deposit := big.NewInt(1000000000000000000).Bytes()
+					if profile.Deposit != "" {
+						d, err := strconv.ParseFloat(profile.Deposit, 32)
+						if err != nil {
+							logger.Error(err)
+							continue
+						}
+						deposit = big.NewInt(int64(d * 1000000000000000000)).Bytes()
+					}
+					reward := big.NewInt(1000000000000000000)
+					if profile.Reward != "" {
+						r, err := strconv.ParseFloat(profile.Reward, 32)
+						if err != nil {
+							logger.Error(err)
+							continue
+						}
+						reward = big.NewInt(int64(r * 1000000000000000000))
+
+					}
+					if toBalanceValue.Int64() <= reward.Int64() {
 						logger.Info("deposit")
 
 						_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
 							StreamId: stream.Id,
 							UserId:   stream.UserId,
 							To:       addr.Bytes(),
-							Value:    big.NewInt(1000000000000000000).Bytes(),
+							Value:    deposit,
 						})
 						if err != nil {
 							logger.Error(err)
