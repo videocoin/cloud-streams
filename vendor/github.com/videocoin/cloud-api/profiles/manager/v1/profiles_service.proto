@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package cloud.api.profiles.manager.v1;
+
+import "github.com/videocoin/cloud-api/profiles/v1/profile.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option go_package = "v1";
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_registration) = true;
+option (gogoproto.messagename_all) = true;
+
+service ProfileManagerService {
+	rpc Get(ProfileRequest) returns (ProfileResponse)  {
+        option (google.api.http) = {
+            get: "/api/v1/manager/profiles/{id}"
+        };
+    }
+	rpc Create(ProfileCreateRequest) returns (ProfileResponse)  {
+        option (google.api.http) = {
+            post: "/api/v1/manager/profiles"
+            body: "*"
+        };        
+    }
+    rpc List(google.protobuf.Empty) returns (ProfileListResponse)  {
+        option (google.api.http) = {
+            get: "/api/v1/manager/profiles"
+        };
+    }
+}
+
+message ProfileRequest {
+    string id = 1 [
+		(gogoproto.moretags) = "validate:\"required\""
+	];
+}
+
+message ProfileCreateRequest {
+    string name = 1;
+    string description = 2;
+    profiles.v1.Spec spec = 3;
+    string rel = 4;
+    string deposit = 5;
+    string reward = 6;
+}
+
+message ProfileResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    bool is_enabled = 4;
+    profiles.v1.Spec spec = 5;
+    string rel = 6;
+    string deposit = 7;
+    string reward = 8;
+}
+
+message ProfileListResponse {
+    repeated ProfileResponse items = 1;
+}
