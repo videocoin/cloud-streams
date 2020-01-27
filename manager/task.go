@@ -69,23 +69,24 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 						continue
 					}
 
-					deposit := big.NewInt(1000000000000000000).Bytes()
+					i, e := big.NewInt(10), big.NewInt(19)
+					deposit := i.Exp(i, e, nil).Bytes()
 					if profile.Deposit != "" {
-						d, err := strconv.ParseFloat(profile.Deposit, 32)
+						d, err := strconv.ParseInt(profile.Deposit, 10, 64)
 						if err != nil {
 							logger.Error(err)
 							continue
 						}
-						deposit = big.NewInt(int64(d * 1000000000000000000)).Bytes()
+						deposit = big.NewInt(d).Bytes()
 					}
-					reward := big.NewInt(1000000000000000000)
+					reward := big.NewInt(10000000000000000)
 					if profile.Reward != "" {
-						r, err := strconv.ParseFloat(profile.Reward, 32)
+						r, err := strconv.ParseInt(profile.Reward, 10, 64)
 						if err != nil {
 							logger.Error(err)
 							continue
 						}
-						reward = big.NewInt(int64(r * 1000000000000000000))
+						reward = big.NewInt(r)
 
 					}
 					if toBalanceValue.Int64() <= reward.Int64() {
