@@ -151,13 +151,19 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-		UserId:                stream.UserId,
-		StreamContractId:      stream.StreamContractId,
-		StreamContractAddress: stream.StreamContractAddress,
-	})
+	stream, err = s.manager.StopStream(ctx, req.Id, "")
 	if err != nil {
-		logFailedTo(logger, "end stream", err)
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		if err == manager.ErrEndStreamNotAllowed {
+			return nil, rpc.ErrRpcBadRequest
+		}
+
+		logger.Errorf("failed to stop stream: %s", err)
+
+		return nil, rpc.ErrRpcInternal
 	}
 
 	streamResponse, err := toStreamResponsePrivate(stream)
