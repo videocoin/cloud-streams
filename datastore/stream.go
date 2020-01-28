@@ -34,6 +34,7 @@ type Stream struct {
 	UpdatedAt             *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
 	ReadyAt               *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
 	CompletedAt           *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
+	DeletedAt             *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
 	InputType             v1.InputType    `gorm:"type:string"`
 	OutputType            v1.OutputType   `gorm:"type:string"`
 }
