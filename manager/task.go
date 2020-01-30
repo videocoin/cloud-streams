@@ -4,7 +4,6 @@ import (
 	"context"
 	"math/big"
 	"time"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
@@ -72,24 +71,27 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 					i, e := big.NewInt(10), big.NewInt(19)
 					deposit := i.Exp(i, e, nil).Bytes()
 					if profile.Deposit != "" {
-						d, err := strconv.ParseInt(profile.Deposit, 10, 64)
-						if err != nil {
-							logger.Error(err)
+						d := new(big.Int)
+						d.SetString(profile.Deposit, 10)
+						if d == nil {
+							logger.Errorf("Can't parse deposit %s", profile.Deposit)
 							continue
 						}
-						deposit = big.NewInt(d).Bytes()
+						deposit = d.Bytes()
 					}
 					reward := big.NewInt(10000000000000000)
 					if profile.Reward != "" {
-						r, err := strconv.ParseInt(profile.Reward, 10, 64)
-						if err != nil {
-							logger.Error(err)
+						r := new(big.Int)
+						r.SetString(profile.Reward, 10)
+						if r == nil {
+							logger.Errorf("Can't parse reward %s", profile.Reward)
 							continue
 						}
-						reward = big.NewInt(r)
+						reward = r
 
 					}
-					if toBalanceValue.Int64() <= reward.Int64() {
+					cmp := toBalanceValue.Cmp(reward)
+					if cmp <= 0 {
 						logger.Info("deposit")
 
 						_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
