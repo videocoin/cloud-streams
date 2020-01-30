@@ -335,7 +335,7 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
 
-	stream, err := s.manager.StopStream(ctx, req.Id, userID)
+	stream, err := s.manager.StopStream(ctx, req.Id, userID, v1.StreamStatusCancelled)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound

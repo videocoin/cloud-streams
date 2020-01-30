@@ -270,7 +270,12 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	return stream, nil
 }
 
-func (m *Manager) StopStream(ctx context.Context, streamID string, userID string) (*ds.Stream, error) {
+func (m *Manager) StopStream(
+	ctx context.Context,
+	streamID string,
+	userID string,
+	streamStatus v1.StreamStatus,
+) (*ds.Stream, error) {
 	var (
 		stream *ds.Stream
 		err    error
@@ -313,7 +318,7 @@ func (m *Manager) StopStream(ctx context.Context, streamID string, userID string
 		return stream, nil
 	}
 
-	updates := map[string]interface{}{"status": v1.StreamStatusCompleted}
+	updates := map[string]interface{}{"status": streamStatus}
 	err = m.UpdateStream(ctx, stream, updates)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update stream: %s", err)

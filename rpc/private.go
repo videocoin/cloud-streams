@@ -151,7 +151,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	stream, err = s.manager.StopStream(ctx, req.Id, "")
+	stream, err = s.manager.StopStream(ctx, req.Id, "", v1.StreamStatusCompleted)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -207,7 +207,7 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	stream, err := s.manager.StopStream(ctx, req.Id, "")
+	stream, err := s.manager.StopStream(ctx, req.Id, "", v1.StreamStatusCancelled)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound

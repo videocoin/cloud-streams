@@ -7,6 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 )
 
@@ -114,7 +115,7 @@ func (m *Manager) startCheckStreamAliveTask() error {
 						logger := m.logger.WithField("id", stream.Id)
 						logger.Info("completing stream")
 
-						_, err := m.StopStream(emptyCtx, stream.Id, "")
+						_, err := m.StopStream(emptyCtx, stream.Id, "", streamsv1.StreamStatusCompleted)
 						if err != nil {
 							logger.Errorf("failed to complete stream: %s", err)
 						}
