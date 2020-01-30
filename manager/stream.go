@@ -299,7 +299,9 @@ func (m *Manager) StopStream(
 		return nil, ErrEndStreamNotAllowed
 	}
 
-	if stream.Status == v1.StreamStatusPrepared || stream.Status == v1.StreamStatusReady {
+	if stream.Status == v1.StreamStatusPrepared ||
+		stream.Status == v1.StreamStatusPending ||
+		stream.Status == v1.StreamStatusReady {
 		_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 			UserId:                stream.UserId,
 			StreamContractId:      stream.StreamContractId,
