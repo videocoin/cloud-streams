@@ -38,13 +38,13 @@ type Manager struct {
 	profiles          profilesv1.ProfileManagerServiceClient
 	dlock             *dlock.Locker
 	eb                *eventbus.EventBus
-	sbTicker          *time.Ticker
+	sbTickerBalance   *time.Ticker
+	sbTickerAlive     *time.Ticker
 	sbTimeout         time.Duration
 	maxLiveStreamTime time.Duration
 }
 
 func NewManager(opts *ManagerOpts) *Manager {
-	sbTimeout := 10 * time.Second
 	m := &Manager{
 		logger:            opts.Logger,
 		ds:                opts.Ds,
@@ -54,8 +54,9 @@ func NewManager(opts *ManagerOpts) *Manager {
 		profiles:          opts.Profiles,
 		dlock:             opts.DLock,
 		eb:                opts.EB,
-		sbTimeout:         sbTimeout,
-		sbTicker:          time.NewTicker(sbTimeout),
+		sbTimeout:         10 * time.Second,
+		sbTickerBalance:   time.NewTicker(5 * time.Second),
+		sbTickerAlive:     time.NewTicker(10 * time.Second),
 		maxLiveStreamTime: opts.MaxLiveStreamTime,
 	}
 
@@ -72,6 +73,7 @@ func (m *Manager) StartBackgroundTasks() error {
 }
 
 func (m *Manager) StopBackgroundTasks() error {
-	m.sbTicker.Stop()
+	m.sbTickerAlive.Stop()
+	m.sbTickerBalance.Stop()
 	return nil
 }

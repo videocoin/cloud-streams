@@ -14,7 +14,7 @@ import (
 func (m *Manager) startCheckStreamBalanceTask() error {
 	for {
 		select {
-		case <-m.sbTicker.C:
+		case <-m.sbTickerBalance.C:
 			lockKey := "streams/tasks/check-stream-balance/lock"
 			lock, err := m.dlock.Obtain(lockKey)
 			if err != nil {
@@ -116,7 +116,7 @@ func (m *Manager) startCheckStreamBalanceTask() error {
 func (m *Manager) startCheckStreamAliveTask() error {
 	for {
 		select {
-		case <-m.sbTicker.C:
+		case <-m.sbTickerAlive.C:
 			lockKey := "streams/tasks/check-stream-alive/lock"
 			lock, err := m.dlock.Obtain(lockKey)
 			if err != nil {
