@@ -26,7 +26,16 @@ build:
 deps:
 	GO111MODULE=on go mod vendor
 
+lint:
+	golangci-lint run -v
+
+docker-lint:
+	docker build -f Dockerfile.lint .
+
 docker-build:
+	@ if [ "${CI}" = "" ]; then \
+        make lint; \
+    fi
 	docker build -t gcr.io/${GCP_PROJECT}/${NAME}:${VERSION} -f Dockerfile .
 
 docker-push:
