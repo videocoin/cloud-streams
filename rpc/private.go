@@ -129,9 +129,9 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
+	go s.logger.Error(s.eb.EmitUpdateStream(
 		opentracing.ContextWithSpan(ctx, span),
-		streamResponse.ID)
+		streamResponse.ID))
 
 	return streamResponse, nil
 }
@@ -141,7 +141,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	_, err := s.manager.GetStreamByID(ctx, req.Id)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -151,7 +151,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	stream, err = s.manager.StopStream(ctx, req.Id, "", v1.StreamStatusCompleted)
+	stream, err := s.manager.StopStream(ctx, req.Id, "", v1.StreamStatusCompleted)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -269,7 +269,7 @@ func toStreamResponsePrivate(stream *ds.Stream) (*privatev1.StreamResponse, erro
 		return nil, err
 	}
 
-	resp.ID = stream.Id
+	resp.ID = stream.ID
 	resp.UserID = stream.UserId
 	resp.InputURL = stream.InputUrl
 	resp.OutputURL = stream.OutputUrl

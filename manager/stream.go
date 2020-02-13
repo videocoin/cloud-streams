@@ -55,7 +55,7 @@ func (m *Manager) CreateStream(
 	rand.Seed(time.Now().UTC().UnixNano())
 	streamContractID := big.NewInt(int64(rand.Intn(math.MaxInt64)))
 	stream, err := m.ds.Stream.Create(ctx, &ds.Stream{
-		Id:               id,
+		ID:               id,
 		UserId:           userID,
 		Name:             name,
 		ProfileId:        profileID,
@@ -201,7 +201,7 @@ func (m *Manager) DeleteUserStream(ctx context.Context, userID string, streamID 
 		return ErrStreamCantBeDeleted
 	}
 
-	if err := m.ds.Stream.Delete(ctx, stream.Id); err != nil {
+	if err := m.ds.Stream.Delete(ctx, stream.ID); err != nil {
 		tracer.SpanLogError(span, err)
 		return err
 	}
@@ -241,7 +241,7 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	}
 
 	if userID == "" && stream.UserId != "" {
-		logger = logger.WithField("user_id", stream.UserId)
+		logger.WithField("user_id", stream.UserId)
 
 		err := m.checkBalance(ctx, userID)
 		if err != nil {
@@ -256,7 +256,7 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	}
 
 	_, err = m.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
-		StreamId:         stream.Id,
+		StreamId:         stream.ID,
 		UserId:           userID,
 		StreamContractId: stream.StreamContractId,
 		ProfilesIds:      []string{stream.ProfileId},
@@ -265,7 +265,7 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 		return nil, fmt.Errorf("failed to init stream: %s", err)
 	}
 
-	go m.eb.EmitUpdateStream(ctx, streamID)
+	go m.logger.Error(m.eb.EmitUpdateStream(ctx, streamID))
 
 	return stream, nil
 }
@@ -325,8 +325,7 @@ func (m *Manager) StopStream(
 	if err != nil {
 		return nil, fmt.Errorf("failed to update stream: %s", err)
 	}
-
-	go m.eb.EmitUpdateStream(ctx, streamID)
+	go m.logger.Error(m.eb.EmitUpdateStream(ctx, streamID))
 
 	return stream, nil
 }

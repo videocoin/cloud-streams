@@ -68,7 +68,7 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	managerOpts := &manager.ManagerOpts{
+	managerOpts := &manager.Opts{
 		Logger:            cfg.Logger.WithField("system", "manager"),
 		Ds:                ds,
 		Emitter:           emitter,
@@ -126,17 +126,15 @@ func NewService(cfg *Config) (*Service, error) {
 }
 
 func (s *Service) Start() error {
-	go s.rpc.Start()
-	go s.privateRPC.Start()
-	go s.eb.Start()
-	s.dm.StartBackgroundTasks()
-
-	return nil
+	go s.rpc.Start()  //nolint
+	go s.privateRPC.Start() //nolint
+	go s.eb.Start() //nolint
+	err := s.dm.StartBackgroundTasks()
+	return err
 }
 
 func (s *Service) Stop() error {
-	s.eb.Stop()
-	s.dm.StopBackgroundTasks()
-
-	return nil
+	s.eb.Stop() //nolint
+	err := s.dm.StopBackgroundTasks()
+	return err
 }

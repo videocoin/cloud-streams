@@ -20,7 +20,7 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 			if s.Code() == codes.NotFound {
 				respErr := &rpc.MultiValidationError{
 					Errors: []*rpc.ValidationError{
-						&rpc.ValidationError{
+						{
 							Field:   "profile_id",
 							Message: "profile id does not exist",
 						},
@@ -73,9 +73,9 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitCreateStream(
+	go s.logger.Error(s.eb.EmitCreateStream(
 		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
+		stream.ID))
 
 	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
@@ -91,7 +91,7 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +113,9 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitDeleteStream(
+	go s.logger.Error(s.eb.EmitDeleteStream(
 		opentracing.ContextWithSpan(ctx, span),
-		req.Id)
+		req.Id))
 
 	return &protoempty.Empty{}, nil
 }
@@ -125,7 +125,7 @@ func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamListResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -183,7 +183,7 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -222,9 +222,9 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
+	go s.logger.Error(s.eb.EmitUpdateStream(
 		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
+		stream.ID))
 
 	return streamResponse, nil
 }
@@ -280,9 +280,9 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(
+	go s.logger.Error(s.eb.EmitUpdateStream(
 		opentracing.ContextWithSpan(ctx, span),
-		stream.Id)
+		stream.ID))
 
 	return &protoempty.Empty{}, nil
 }
@@ -292,7 +292,7 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +327,7 @@ func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	userID, _, err := s.authenticate(ctx)
+	userID, err := s.authenticate(ctx)
 	if err != nil {
 		return nil, err
 	}

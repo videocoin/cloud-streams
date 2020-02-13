@@ -92,17 +92,20 @@ func (e *EventBus) emitCUDStream(ctx context.Context, t privatev1.EventType, id 
 	ext.SpanKindRPCServer.Set(span)
 	ext.Component.Set(span, "streams")
 
-	span.Tracer().Inject(
+	err := span.Tracer().Inject(
 		span.Context(),
 		opentracing.TextMap,
 		mqmux.RMQHeaderCarrier(headers),
 	)
+	if err != nil {
+		return err
+	}
 
 	event := &privatev1.Event{
 		Type:     t,
 		StreamID: id,
 	}
-	err := e.mq.PublishX("streams.events", event, headers)
+	err = e.mq.PublishX("streams.events", event, headers)
 	if err != nil {
 		e.logger.Errorf("failed to publish to streams.events: %s", err)
 		return err
@@ -131,11 +134,14 @@ func (e *EventBus) SendNotification(span opentracing.Span, req *notificationsv1.
 	ext.SpanKindRPCServer.Set(span)
 	ext.Component.Set(span, "streams")
 
-	span.Tracer().Inject(
+	err := span.Tracer().Inject(
 		span.Context(),
 		opentracing.TextMap,
 		mqmux.RMQHeaderCarrier(headers),
 	)
+	if err != nil {
+		return err
+	}
 
 	return e.mq.PublishX("notifications.send", req, headers)
 }

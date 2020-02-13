@@ -67,6 +67,10 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 	if err != nil {
 		return nil, err
 	}
+	validator, err := newRequestValidator()
+	if err != nil {
+		return nil, err
+	}
 
 	rpcServer := &RpcServer{
 		addr:            opts.Addr,
@@ -84,7 +88,7 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		rtmpURL:         opts.RTMPURL,
 
 		logger:    opts.Logger.WithField("system", "rpc"),
-		validator: newRequestValidator(),
+		validator: validator,
 		eb:        opts.EventBus,
 	}
 
@@ -99,7 +103,7 @@ func (s *RpcServer) Start() error {
 	return s.grpc.Serve(s.listen)
 }
 
-func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, error) {
+func (s *RpcServer) authenticate(ctx context.Context) (string, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "authenticate")
 	defer span.Finish()
 
@@ -107,7 +111,7 @@ func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, 
 	ctx, jwtToken, err := auth.AuthFromContext(ctx)
 	if err != nil {
 		s.logger.Warningf("failed to auth from context: %s", err)
-		return "", ctx, rpc.ErrRpcUnauthenticated
+		return "", rpc.ErrRpcUnauthenticated
 	}
 
 	tokenType, ok := auth.TypeFromContext(ctx)
@@ -116,7 +120,7 @@ func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, 
 			_, err := s.users.GetApiToken(context.Background(), &usersv1.ApiTokenRequest{Token: jwtToken})
 			if err != nil {
 				s.logger.Errorf("failed to get api token: %s", err)
-				return "", ctx, rpc.ErrRpcUnauthenticated
+				return "", rpc.ErrRpcUnauthenticated
 			}
 		}
 	}
@@ -124,8 +128,8 @@ func (s *RpcServer) authenticate(ctx context.Context) (string, context.Context, 
 	userID, ok := auth.UserIDFromContext(ctx)
 	if !ok {
 		s.logger.Warningf("failed to get user id from context: %s", err)
-		return "", ctx, rpc.ErrRpcUnauthenticated
+		return "", rpc.ErrRpcUnauthenticated
 	}
 
-	return userID, ctx, nil
+	return userID, nil
 }

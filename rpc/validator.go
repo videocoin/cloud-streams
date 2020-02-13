@@ -16,7 +16,7 @@ type requestValidator struct {
 	translator *ut.Translator
 }
 
-func newRequestValidator() *requestValidator {
+func newRequestValidator() (*requestValidator, error) {
 	lt := enLocale.New()
 	en := &lt
 
@@ -25,18 +25,22 @@ func newRequestValidator() *requestValidator {
 	translator := &uniEn
 
 	validate := validator.New()
-	enTrans.RegisterDefaultTranslations(validate, *translator)
-
-	validate.RegisterTranslation(
+	err := enTrans.RegisterDefaultTranslations(validate, *translator)
+	if err != nil {
+		return nil, err
+	}
+	err = validate.RegisterTranslation(
 		"name",
 		*translator,
 		RegisterNameTranslation,
 		NameTranslation)
-
+	if err != nil {
+		return nil, err
+	}
 	return &requestValidator{
 		validator:  validate,
 		translator: translator,
-	}
+	}, nil
 }
 
 func (rv *requestValidator) validate(r interface{}) *rpc.MultiValidationError {

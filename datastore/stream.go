@@ -18,7 +18,7 @@ var (
 )
 
 type Stream struct {
-	Id                    string          `gorm:"type:varchar(36);PRIMARY_KEY"`
+	ID                    string          `gorm:"type:varchar(36);PRIMARY_KEY"`
 	UserId                string          `gorm:"type:varchar(255)"`
 	Name                  string          `gorm:"type:varchar(255)"`
 	ProfileId             string          `gorm:"type:varchar(255)"`
@@ -78,7 +78,7 @@ func (ds *StreamDatastore) Delete(ctx context.Context, id string) error {
 	span.SetTag("id", id)
 
 	stream := &Stream{
-		Id: id,
+		ID: id,
 	}
 
 	if err := ds.db.Delete(stream).Error; err != nil {

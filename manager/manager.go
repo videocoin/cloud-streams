@@ -16,7 +16,7 @@ import (
 var ErrHitBalanceLimitation = errors.New("account has insufficient funds to start streaming")
 var ErrEndStreamNotAllowed = errors.New("not allowed to end stream")
 
-type ManagerOpts struct {
+type Opts struct {
 	Ds                *datastore.Datastore
 	Logger            *logrus.Entry
 	Emitter           emitterv1.EmitterServiceClient
@@ -40,7 +40,7 @@ type Manager struct {
 	maxLiveStreamTime time.Duration
 }
 
-func NewManager(opts *ManagerOpts) *Manager {
+func NewManager(opts *Opts) *Manager {
 	sbTimeout := 10 * time.Second
 	m := &Manager{
 		logger:            opts.Logger,
