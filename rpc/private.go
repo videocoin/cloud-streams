@@ -270,11 +270,11 @@ func toStreamResponsePrivate(stream *ds.Stream) (*privatev1.StreamResponse, erro
 	}
 
 	resp.ID = stream.ID
-	resp.UserID = stream.UserId
-	resp.InputURL = stream.InputUrl
-	resp.OutputURL = stream.OutputUrl
-	resp.ProfileID = stream.ProfileId
-	resp.StreamContractID = stream.StreamContractId
+	resp.UserID = stream.UserID
+	resp.InputURL = stream.InputURL
+	resp.OutputURL = stream.OutputURL
+	resp.ProfileID = stream.ProfileID
+	resp.StreamContractID = stream.StreamContractID
 	resp.StreamContractAddress = stream.StreamContractAddress
 	resp.InputType = stream.InputType
 

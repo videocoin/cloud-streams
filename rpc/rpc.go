@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
+func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
@@ -86,7 +86,7 @@ func (s *RpcServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	return streamResponse, nil
 }
 
-func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+func (s *RPCServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -120,7 +120,7 @@ func (s *RpcServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
+func (s *RPCServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -152,7 +152,7 @@ func (s *RpcServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	return streamResponse, nil
 }
 
-func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamListResponse, error) {
+func (s *RPCServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamListResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 
 	userID, err := s.authenticate(ctx)
@@ -178,7 +178,7 @@ func (s *RpcServer) List(ctx context.Context, req *protoempty.Empty) (*v1.Stream
 	return streamListResponse, nil
 }
 
-func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamResponse, error) {
+func (s *RPCServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -229,7 +229,7 @@ func (s *RpcServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	return streamResponse, nil
 }
 
-func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
+func (s *RPCServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -260,8 +260,8 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 
 	if req.Status == v1.StreamStatusFailed {
 		_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-			UserId:                stream.UserId,
-			StreamContractId:      stream.StreamContractId,
+			UserId:                stream.UserID,
+			StreamContractId:      stream.StreamContractID,
 			StreamContractAddress: stream.StreamContractAddress,
 		})
 
@@ -287,7 +287,7 @@ func (s *RpcServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
+func (s *RPCServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
@@ -322,7 +322,7 @@ func (s *RpcServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	return resp, nil
 }
 
-func (s *RpcServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
+func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)

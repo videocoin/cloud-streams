@@ -56,13 +56,13 @@ func (m *Manager) CreateStream(
 	streamContractID := big.NewInt(int64(rand.Intn(math.MaxInt64)))
 	stream, err := m.ds.Stream.Create(ctx, &ds.Stream{
 		ID:               id,
-		UserId:           userID,
+		UserID:           userID,
 		Name:             name,
-		ProfileId:        profileID,
-		InputUrl:         fmt.Sprintf("%s/%s/index.m3u8", inputURL, id),
-		OutputUrl:        fmt.Sprintf("%s/%s/index.m3u8", outputURL, id),
-		RtmpUrl:          fmt.Sprintf("%s/%s", rtmpURL, id),
-		StreamContractId: streamContractID.Uint64(),
+		ProfileID:        profileID,
+		InputURL:         fmt.Sprintf("%s/%s/index.m3u8", inputURL, id),
+		OutputURL:        fmt.Sprintf("%s/%s/index.m3u8", outputURL, id),
+		RtmpURL:          fmt.Sprintf("%s/%s", rtmpURL, id),
+		StreamContractID: streamContractID.Uint64(),
 		Status:           v1.StreamStatusNew,
 		InputType:        inputType,
 		OutputType:       outputType,
@@ -240,8 +240,8 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 		return nil, fmt.Errorf("failed to get user stream: %s", err)
 	}
 
-	if userID == "" && stream.UserId != "" {
-		logger.WithField("user_id", stream.UserId)
+	if userID == "" && stream.UserID != "" {
+		logger.WithField("user_id", stream.UserID)
 
 		err := m.checkBalance(ctx, userID)
 		if err != nil {
@@ -258,8 +258,8 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	_, err = m.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
 		StreamId:         stream.ID,
 		UserId:           userID,
-		StreamContractId: stream.StreamContractId,
-		ProfilesIds:      []string{stream.ProfileId},
+		StreamContractId: stream.StreamContractID,
+		ProfilesIds:      []string{stream.ProfileID},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to init stream: %s", err)
@@ -303,14 +303,14 @@ func (m *Manager) StopStream(
 		stream.Status == v1.StreamStatusPending ||
 		stream.Status == v1.StreamStatusReady {
 		_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-			UserId:                stream.UserId,
-			StreamContractId:      stream.StreamContractId,
+			UserId:                stream.UserID,
+			StreamContractId:      stream.StreamContractID,
 			StreamContractAddress: stream.StreamContractAddress,
 		})
 		if err != nil {
 			m.logger.WithFields(logrus.Fields{
-				"user_id":                 stream.UserId,
-				"stream_contract_id":      stream.StreamContractId,
+				"user_id":                 stream.UserID,
+				"stream_contract_id":      stream.StreamContractID,
 				"stream_contract_address": stream.StreamContractAddress,
 			}).WithError(err).Error("failed to end stream")
 		}

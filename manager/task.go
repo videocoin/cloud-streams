@@ -63,7 +63,7 @@ func (m *Manager) startCheckStreamBalanceTask() {
 
 					_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
 						StreamId: stream.ID,
-						UserId:   stream.UserId,
+						UserId:   stream.UserID,
 						To:       addr.Bytes(),
 						Value:    big.NewInt(1000000000000000000).Bytes(),
 					})

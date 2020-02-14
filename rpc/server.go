@@ -23,7 +23,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type RpcServerOpts struct {
+type RPCServerOpts struct {  //nolint
 	Addr            string
 	AuthTokenSecret string
 	BaseInputURL    string
@@ -39,7 +39,7 @@ type RpcServerOpts struct {
 	Logger          *logrus.Entry
 }
 
-type RpcServer struct {
+type RPCServer struct {  //nolint
 	addr            string
 	authTokenSecret string
 	baseInputURL    string
@@ -58,11 +58,11 @@ type RpcServer struct {
 	eb              *eventbus.EventBus
 }
 
-func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
+func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
-	grpcServer := grpc.NewServer(grpcOpts...)
+	gRPCServer := grpc.NewServer(grpcOpts...)
 	healthService := health.NewServer()
-	grpc_health_v1.RegisterHealthServer(grpcServer, healthService)
+	grpc_health_v1.RegisterHealthServer(gRPCServer, healthService)
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
@@ -72,10 +72,10 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		return nil, err
 	}
 
-	rpcServer := &RpcServer{
+	RPCServer := &RPCServer{
 		addr:            opts.Addr,
 		authTokenSecret: opts.AuthTokenSecret,
-		grpc:            grpcServer,
+		grpc:            gRPCServer,
 		listen:          listen,
 		ds:              opts.Ds,
 		users:           opts.Users,
@@ -92,18 +92,18 @@ func NewRpcServer(opts *RpcServerOpts) (*RpcServer, error) {
 		eb:        opts.EventBus,
 	}
 
-	v1.RegisterStreamServiceServer(grpcServer, rpcServer)
-	reflection.Register(grpcServer)
+	v1.RegisterStreamServiceServer(gRPCServer, RPCServer)
+	reflection.Register(gRPCServer)
 
-	return rpcServer, nil
+	return RPCServer, nil
 }
 
-func (s *RpcServer) Start() error {
+func (s *RPCServer) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
 }
 
-func (s *RpcServer) authenticate(ctx context.Context) (string, error) {
+func (s *RPCServer) authenticate(ctx context.Context) (string, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "authenticate")
 	defer span.Finish()
 

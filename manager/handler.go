@@ -35,8 +35,8 @@ func (m *Manager) handleStreamStatus(ctx context.Context, event *privatev1.Event
 
 			if event.Status == v1.StreamStatusFailed {
 				_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-					UserId:                stream.UserId,
-					StreamContractId:      stream.StreamContractId,
+					UserId:                stream.UserID,
+					StreamContractId:      stream.StreamContractID,
 					StreamContractAddress: stream.StreamContractAddress,
 				})
 
@@ -47,13 +47,13 @@ func (m *Manager) handleStreamStatus(ctx context.Context, event *privatev1.Event
 
 			if event.Status == v1.StreamStatusReady {
 				user, err := m.users.GetById(ctx, &usersv1.UserRequest{
-					Id: stream.UserId,
+					Id: stream.UserID,
 				})
 				if err != nil {
 					logger.WithError(err).Error("failed to get user by id")
 					return nil
 				}
-				err = m.eb.EmitStreamPublished(ctx, user.Email, stream.OutputUrl)
+				err = m.eb.EmitStreamPublished(ctx, user.Email, stream.OutputURL)
 				if err != nil {
 					logger.WithError(err).Error("failed to send email notification")
 					return nil

@@ -15,7 +15,7 @@ import (
 
 type Service struct {
 	cfg        *Config
-	rpc        *rpc.RpcServer
+	rpc        *rpc.RPCServer
 	privateRPC *rpc.PrivateRPCServer
 	eb         *eventbus.EventBus
 	dm         *manager.Manager
@@ -80,7 +80,7 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	manager := manager.NewManager(managerOpts)
 
-	rpcConfig := &rpc.RpcServerOpts{
+	rpcConfig := &rpc.RPCServerOpts{
 		Logger:          cfg.Logger,
 		Addr:            cfg.RPCAddr,
 		Ds:              ds,
@@ -96,7 +96,7 @@ func NewService(cfg *Config) (*Service, error) {
 		EventBus:        eb,
 	}
 
-	publicRPC, err := rpc.NewRpcServer(rpcConfig)
+	publicRPC, err := rpc.NewRPCServer(rpcConfig)
 	if err != nil {
 		return nil, err
 	}
