@@ -207,7 +207,25 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	span.SetTag("id", req.Id)
 	logger := s.logger.WithField("id", req.Id)
 
-	stream, err := s.manager.StopStream(ctx, req.Id, "", v1.StreamStatusCancelled)
+	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get stream", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	ss := v1.StreamStatusCancelled
+
+	if stream.InputType == v1.InputTypeRTMP || stream.InputType == v1.InputTypeWebRTC {
+		if stream.Status >= v1.StreamStatusPrepared {
+			ss = v1.StreamStatusCompleted
+		}
+	}
+
+	stream, err = s.manager.StopStream(ctx, req.Id, "", ss)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound

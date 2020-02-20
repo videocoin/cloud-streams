@@ -335,7 +335,25 @@ func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
 
-	stream, err := s.manager.StopStream(ctx, req.Id, userID, v1.StreamStatusCancelled)
+	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get stream by id", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	ss := v1.StreamStatusCancelled
+
+	if stream.InputType == v1.InputTypeRTMP || stream.InputType == v1.InputTypeWebRTC {
+		if stream.Status >= v1.StreamStatusPrepared {
+			ss = v1.StreamStatusCompleted
+		}
+	}
+
+	stream, err = s.manager.StopStream(ctx, req.Id, userID, ss)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
