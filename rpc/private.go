@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"net"
+	"time"
 
 	"github.com/jinzhu/copier"
 	"github.com/opentracing/opentracing-go"
@@ -201,6 +202,15 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 		logger.Errorf("failed to complete stream: %s", err)
 		return nil, rpc.ErrRpcInternal
 	}
+
+	go func() {
+		time.Sleep(time.Second * 10)
+
+		err = s.manager.EndStream(ctx, stream)
+		if err != nil {
+			logger.Errorf("failed to end stream: %s", err)
+		}
+	}()
 
 	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
