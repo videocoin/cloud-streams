@@ -173,6 +173,12 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
+	err = s.manager.EndStream(ctx, stream)
+	if err != nil {
+		logger.Errorf("failed to end stream: %s", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
 	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
@@ -203,14 +209,18 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go func() {
+	go func(stream *ds.Stream) {
+		logger.Info("waiting to end stream")
+
 		time.Sleep(time.Second * 10)
 
-		err = s.manager.EndStream(ctx, stream)
+		logger.Info("end stream")
+
+		err = s.manager.EndStream(context.Background(), stream)
 		if err != nil {
 			logger.Errorf("failed to end stream: %s", err)
 		}
-	}()
+	}(stream)
 
 	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
