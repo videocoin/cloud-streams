@@ -220,7 +220,7 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	ss := v1.StreamStatusCancelled
 
 	if stream.InputType == v1.InputTypeRTMP || stream.InputType == v1.InputTypeWebRTC {
-		if stream.Status >= v1.StreamStatusPrepared {
+		if stream.Status == v1.StreamStatusReady {
 			ss = v1.StreamStatusCompleted
 		}
 	}

@@ -300,8 +300,7 @@ func (m *Manager) StopStream(
 	}
 
 	if stream.Status == v1.StreamStatusPrepared ||
-		stream.Status == v1.StreamStatusPending ||
-		stream.Status == v1.StreamStatusReady {
+		stream.Status == v1.StreamStatusPending {
 		_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 			UserId:                stream.UserID,
 			StreamContractId:      stream.StreamContractID,
