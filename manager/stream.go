@@ -328,3 +328,20 @@ func (m *Manager) StopStream(
 
 	return stream, nil
 }
+
+func (m *Manager) EndStream(ctx context.Context, stream *ds.Stream) error {
+	_, err := m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+		UserId:                stream.UserId,
+		StreamContractId:      stream.StreamContractId,
+		StreamContractAddress: stream.StreamContractAddress,
+	})
+	if err != nil {
+		m.logger.WithFields(logrus.Fields{
+			"user_id":                 stream.UserId,
+			"stream_contract_id":      stream.StreamContractId,
+			"stream_contract_address": stream.StreamContractAddress,
+		}).WithError(err).Error("failed to end stream")
+	}
+
+	return nil
+}

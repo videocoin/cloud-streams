@@ -166,6 +166,12 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
+	err = s.manager.EndStream(ctx, stream)
+	if err != nil {
+		logFailedTo(logger, "end stream", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
 	streamResponse, err := toStreamResponsePrivate(stream)
 	if err != nil {
 		logFailedTo(logger, "", err)
