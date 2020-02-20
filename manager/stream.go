@@ -329,6 +329,20 @@ func (m *Manager) StopStream(
 	return stream, nil
 }
 
+func (m *Manager) CompleteStream(ctx context.Context, stream *ds.Stream) error {
+	stream.Status = v1.StreamStatusCompleted
+
+	updates := map[string]interface{}{"status": stream.Status}
+	err := m.UpdateStream(ctx, stream, updates)
+	if err != nil {
+		return err
+	}
+
+	go m.eb.EmitUpdateStream(ctx, stream.Id)
+
+	return nil
+}
+
 func (m *Manager) EndStream(ctx context.Context, stream *ds.Stream) error {
 	_, err := m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 		UserId:                stream.UserId,

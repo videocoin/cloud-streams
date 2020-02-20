@@ -181,6 +181,36 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	return streamResponse, nil
 }
 
+func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	span.SetTag("id", req.Id)
+	logger := s.logger.WithField("id", req.Id)
+
+	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	if err != nil {
+		if err == datastore.ErrStreamNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get stream", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	err = s.manager.CompleteStream(ctx, stream)
+	if err != nil {
+		logger.Errorf("failed to complete stream: %s", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	streamResponse, err := toStreamResponsePrivate(stream)
+	if err != nil {
+		logFailedTo(logger, "", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return streamResponse, nil
+}
+
 func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("id", req.Id)
