@@ -33,7 +33,7 @@ var _ = time.Kitchen
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type CreateStreamRequest struct {
 	Name                 string     `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty" validate:"required,gt=0,lte=255"`
@@ -59,7 +59,7 @@ func (m *CreateStreamRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return xxx_messageInfo_CreateStreamRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -131,7 +131,7 @@ func (m *StreamRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error
 		return xxx_messageInfo_StreamRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -187,7 +187,7 @@ func (m *UpdateStreamRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return xxx_messageInfo_UpdateStreamRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -286,7 +286,7 @@ func (m *StreamResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return xxx_messageInfo_StreamResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -428,7 +428,7 @@ func (m *StreamListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return xxx_messageInfo_StreamListResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -974,7 +974,7 @@ var _StreamService_serviceDesc = grpc.ServiceDesc{
 func (m *CreateStreamRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -982,42 +982,50 @@ func (m *CreateStreamRequest) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *CreateStreamRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *CreateStreamRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Name) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Name)))
-		i += copy(dAtA[i:], m.Name)
-	}
-	if len(m.ProfileId) > 0 {
-		dAtA[i] = 0x12
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.ProfileId)))
-		i += copy(dAtA[i:], m.ProfileId)
-	}
-	if m.InputType != 0 {
-		dAtA[i] = 0x18
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputType))
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	if m.OutputType != 0 {
-		dAtA[i] = 0x20
-		i++
 		i = encodeVarintStreamsService(dAtA, i, uint64(m.OutputType))
+		i--
+		dAtA[i] = 0x20
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if m.InputType != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputType))
+		i--
+		dAtA[i] = 0x18
 	}
-	return i, nil
+	if len(m.ProfileId) > 0 {
+		i -= len(m.ProfileId)
+		copy(dAtA[i:], m.ProfileId)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.ProfileId)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *StreamRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -1025,26 +1033,33 @@ func (m *StreamRequest) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *StreamRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *StreamRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Id) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Id)))
-		i += copy(dAtA[i:], m.Id)
-	}
 	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	return i, nil
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *UpdateStreamRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -1052,53 +1067,62 @@ func (m *UpdateStreamRequest) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *UpdateStreamRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateStreamRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Id) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Id)))
-		i += copy(dAtA[i:], m.Id)
-	}
-	if len(m.Name) > 0 {
-		dAtA[i] = 0x12
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Name)))
-		i += copy(dAtA[i:], m.Name)
-	}
-	if m.StreamContractId != 0 {
-		dAtA[i] = 0x18
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.StreamContractId))
-	}
-	if len(m.StreamContractAddress) > 0 {
-		dAtA[i] = 0x22
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.StreamContractAddress)))
-		i += copy(dAtA[i:], m.StreamContractAddress)
-	}
-	if m.Status != 0 {
-		dAtA[i] = 0x28
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.Status))
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	if m.InputStatus != 0 {
-		dAtA[i] = 0x30
-		i++
 		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputStatus))
+		i--
+		dAtA[i] = 0x30
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if m.Status != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x28
 	}
-	return i, nil
+	if len(m.StreamContractAddress) > 0 {
+		i -= len(m.StreamContractAddress)
+		copy(dAtA[i:], m.StreamContractAddress)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.StreamContractAddress)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.StreamContractId != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.StreamContractId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *StreamResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -1106,119 +1130,130 @@ func (m *StreamResponse) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *StreamResponse) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *StreamResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Id) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Id)))
-		i += copy(dAtA[i:], m.Id)
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if len(m.Name) > 0 {
-		dAtA[i] = 0x12
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Name)))
-		i += copy(dAtA[i:], m.Name)
-	}
-	if len(m.OutputUrl) > 0 {
-		dAtA[i] = 0x2a
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.OutputUrl)))
-		i += copy(dAtA[i:], m.OutputUrl)
-	}
-	if m.StreamContractId != 0 {
-		dAtA[i] = 0x38
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.StreamContractId))
-	}
-	if len(m.StreamContractAddress) > 0 {
-		dAtA[i] = 0x42
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.StreamContractAddress)))
-		i += copy(dAtA[i:], m.StreamContractAddress)
-	}
-	if m.Status != 0 {
-		dAtA[i] = 0x48
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.Status))
-	}
-	if m.InputStatus != 0 {
-		dAtA[i] = 0x50
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputStatus))
-	}
-	if m.CreatedAt != nil {
-		dAtA[i] = 0x5a
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt)))
-		n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i:])
+	if m.UpdatedAt != nil {
+		n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt):])
 		if err1 != nil {
 			return 0, err1
 		}
-		i += n1
+		i -= n1
+		i = encodeVarintStreamsService(dAtA, i, uint64(n1))
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x8a
 	}
-	if m.ReadyAt != nil {
-		dAtA[i] = 0x62
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(github_com_gogo_protobuf_types.SizeOfStdTime(*m.ReadyAt)))
-		n2, err2 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.ReadyAt, dAtA[i:])
+	if m.OutputType != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.OutputType))
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x80
+	}
+	if m.InputType != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputType))
+		i--
+		dAtA[i] = 0x78
+	}
+	if len(m.RtmpUrl) > 0 {
+		i -= len(m.RtmpUrl)
+		copy(dAtA[i:], m.RtmpUrl)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.RtmpUrl)))
+		i--
+		dAtA[i] = 0x72
+	}
+	if m.CompletedAt != nil {
+		n2, err2 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CompletedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CompletedAt):])
 		if err2 != nil {
 			return 0, err2
 		}
-		i += n2
-	}
-	if m.CompletedAt != nil {
+		i -= n2
+		i = encodeVarintStreamsService(dAtA, i, uint64(n2))
+		i--
 		dAtA[i] = 0x6a
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(github_com_gogo_protobuf_types.SizeOfStdTime(*m.CompletedAt)))
-		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CompletedAt, dAtA[i:])
+	}
+	if m.ReadyAt != nil {
+		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.ReadyAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.ReadyAt):])
 		if err3 != nil {
 			return 0, err3
 		}
-		i += n3
+		i -= n3
+		i = encodeVarintStreamsService(dAtA, i, uint64(n3))
+		i--
+		dAtA[i] = 0x62
 	}
-	if len(m.RtmpUrl) > 0 {
-		dAtA[i] = 0x72
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.RtmpUrl)))
-		i += copy(dAtA[i:], m.RtmpUrl)
-	}
-	if m.InputType != 0 {
-		dAtA[i] = 0x78
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputType))
-	}
-	if m.OutputType != 0 {
-		dAtA[i] = 0x80
-		i++
-		dAtA[i] = 0x1
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(m.OutputType))
-	}
-	if m.UpdatedAt != nil {
-		dAtA[i] = 0x8a
-		i++
-		dAtA[i] = 0x1
-		i++
-		i = encodeVarintStreamsService(dAtA, i, uint64(github_com_gogo_protobuf_types.SizeOfStdTime(*m.UpdatedAt)))
-		n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.UpdatedAt, dAtA[i:])
+	if m.CreatedAt != nil {
+		n4, err4 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.CreatedAt, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.CreatedAt):])
 		if err4 != nil {
 			return 0, err4
 		}
-		i += n4
+		i -= n4
+		i = encodeVarintStreamsService(dAtA, i, uint64(n4))
+		i--
+		dAtA[i] = 0x5a
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if m.InputStatus != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.InputStatus))
+		i--
+		dAtA[i] = 0x50
 	}
-	return i, nil
+	if m.Status != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x48
+	}
+	if len(m.StreamContractAddress) > 0 {
+		i -= len(m.StreamContractAddress)
+		copy(dAtA[i:], m.StreamContractAddress)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.StreamContractAddress)))
+		i--
+		dAtA[i] = 0x42
+	}
+	if m.StreamContractId != 0 {
+		i = encodeVarintStreamsService(dAtA, i, uint64(m.StreamContractId))
+		i--
+		dAtA[i] = 0x38
+	}
+	if len(m.OutputUrl) > 0 {
+		i -= len(m.OutputUrl)
+		copy(dAtA[i:], m.OutputUrl)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.OutputUrl)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Id) > 0 {
+		i -= len(m.Id)
+		copy(dAtA[i:], m.Id)
+		i = encodeVarintStreamsService(dAtA, i, uint64(len(m.Id)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *StreamListResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -1226,36 +1261,46 @@ func (m *StreamListResponse) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *StreamListResponse) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *StreamListResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	if len(m.Items) > 0 {
-		for _, msg := range m.Items {
-			dAtA[i] = 0xa
-			i++
-			i = encodeVarintStreamsService(dAtA, i, uint64(msg.Size()))
-			n, err := msg.MarshalTo(dAtA[i:])
-			if err != nil {
-				return 0, err
+		for iNdEx := len(m.Items) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Items[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintStreamsService(dAtA, i, uint64(size))
 			}
-			i += n
+			i--
+			dAtA[i] = 0xa
 		}
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func encodeVarintStreamsService(dAtA []byte, offset int, v uint64) int {
+	offset -= sovStreamsService(v)
+	base := offset
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
 		v >>= 7
 		offset++
 	}
 	dAtA[offset] = uint8(v)
-	return offset + 1
+	return base
 }
 func (m *CreateStreamRequest) Size() (n int) {
 	if m == nil {
@@ -2412,6 +2457,7 @@ func (m *StreamListResponse) Unmarshal(dAtA []byte) error {
 func skipStreamsService(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
+	depth := 0
 	for iNdEx < l {
 		var wire uint64
 		for shift := uint(0); ; shift += 7 {
@@ -2443,10 +2489,8 @@ func skipStreamsService(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			return iNdEx, nil
 		case 1:
 			iNdEx += 8
-			return iNdEx, nil
 		case 2:
 			var length int
 			for shift := uint(0); ; shift += 7 {
@@ -2467,55 +2511,30 @@ func skipStreamsService(dAtA []byte) (n int, err error) {
 				return 0, ErrInvalidLengthStreamsService
 			}
 			iNdEx += length
-			if iNdEx < 0 {
-				return 0, ErrInvalidLengthStreamsService
-			}
-			return iNdEx, nil
 		case 3:
-			for {
-				var innerWire uint64
-				var start int = iNdEx
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return 0, ErrIntOverflowStreamsService
-					}
-					if iNdEx >= l {
-						return 0, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					innerWire |= (uint64(b) & 0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				innerWireType := int(innerWire & 0x7)
-				if innerWireType == 4 {
-					break
-				}
-				next, err := skipStreamsService(dAtA[start:])
-				if err != nil {
-					return 0, err
-				}
-				iNdEx = start + next
-				if iNdEx < 0 {
-					return 0, ErrInvalidLengthStreamsService
-				}
-			}
-			return iNdEx, nil
+			depth++
 		case 4:
-			return iNdEx, nil
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupStreamsService
+			}
+			depth--
 		case 5:
 			iNdEx += 4
-			return iNdEx, nil
 		default:
 			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
 		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthStreamsService
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
 	}
-	panic("unreachable")
+	return 0, io.ErrUnexpectedEOF
 }
 
 var (
-	ErrInvalidLengthStreamsService = fmt.Errorf("proto: negative length found during unmarshaling")
-	ErrIntOverflowStreamsService   = fmt.Errorf("proto: integer overflow")
+	ErrInvalidLengthStreamsService        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowStreamsService          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupStreamsService = fmt.Errorf("proto: unexpected end of group")
 )
