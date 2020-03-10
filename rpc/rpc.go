@@ -34,7 +34,7 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	}
 
 	_, err = s.profiles.Get(ctx, &profilesv1.ProfileRequest{
-		Id: req.ProfileId,
+		ID: req.ProfileId,
 	})
 	if err != nil {
 		s.logger.Error(err)

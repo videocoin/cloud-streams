@@ -153,10 +153,42 @@ func (ds *StreamDatastore) StatusReadyList(ctx context.Context) ([]*Stream, erro
 	return streams, nil
 }
 
+func (ds *StreamDatastore) ListForDeletion(ctx context.Context) ([]*Stream, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "ListForDeletion")
+	defer span.Finish()
+
+	streams := []*Stream{}
+
+	if err := ds.db.
+		Where(
+			"status = ? AND completed_at <= ?",
+			v1.StreamStatusCompleted,
+			time.Now().Add(time.Hour*24*-1),
+		).
+		Find(&streams).Error; err != nil {
+		return nil, fmt.Errorf("failed to list streams for deletion: %s", err)
+	}
+
+	return streams, nil
+}
+
 func (ds *StreamDatastore) Update(ctx context.Context, stream *Stream, updates map[string]interface{}) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "Update")
 	defer span.Finish()
 
+	if err := ds.db.Model(stream).Updates(updates).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ds *StreamDatastore) MarkAsDeleted(ctx context.Context, stream *Stream) error {
+	span, _ := opentracing.StartSpanFromContext(ctx, "MarkAsDeleted")
+	defer span.Finish()
+
+	stream.Status = v1.StreamStatusDeleted
+	updates := map[string]interface{}{"status": stream.Status}
 	if err := ds.db.Model(stream).Updates(updates).Error; err != nil {
 		return err
 	}

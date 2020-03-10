@@ -338,21 +338,21 @@ func (m *Manager) CompleteStream(ctx context.Context, stream *ds.Stream) error {
 		return err
 	}
 
-	go m.eb.EmitUpdateStream(ctx, stream.Id)
+	go m.eb.EmitUpdateStream(ctx, stream.ID) // nolint
 
 	return nil
 }
 
 func (m *Manager) EndStream(ctx context.Context, stream *ds.Stream) error {
 	_, err := m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-		UserId:                stream.UserId,
-		StreamContractId:      stream.StreamContractId,
+		UserId:                stream.UserID,
+		StreamContractId:      stream.StreamContractID,
 		StreamContractAddress: stream.StreamContractAddress,
 	})
 	if err != nil {
 		m.logger.WithFields(logrus.Fields{
-			"user_id":                 stream.UserId,
-			"stream_contract_id":      stream.StreamContractId,
+			"user_id":                 stream.UserID,
+			"stream_contract_id":      stream.StreamContractID,
 			"stream_contract_address": stream.StreamContractAddress,
 		}).WithError(err).Error("failed to end stream")
 	}

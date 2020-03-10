@@ -120,3 +120,43 @@ func (m *Manager) startCheckStreamAliveTask() {
 		}
 	}
 }
+
+func (m *Manager) startRemoveCompletedTask() {
+	for range m.sbTicker.C {
+		lockKey := "streams/tasks/remove-completed-task/lock"
+		lock, err := m.dlock.Obtain(lockKey)
+		if err != nil {
+			m.logger.Error(err)
+			return
+		}
+		if lock == nil {
+			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			return
+		}
+		defer lock.Unlock() //nolint
+
+		m.logger.Info("getting completed streams")
+
+		emptyCtx := context.Background()
+		streams, err := m.ds.Stream.ListForDeletion(emptyCtx)
+		if err != nil {
+			m.logger.Error(err)
+			continue
+		}
+
+		for _, stream := range streams {
+			m.logger.WithField("stream_id", stream.ID).Info("marking stream as deleted")
+			err := m.ds.Stream.MarkAsDeleted(emptyCtx, stream)
+			if err != nil {
+				m.logger.Errorf("failed to mark as deleted: %s", err)
+				continue
+			}
+
+			err = m.eb.EmitDeleteStreamContent(emptyCtx, stream.ID)
+			if err != nil {
+				m.logger.Errorf("failed to emit delete stream content: %s", err)
+				continue
+			}
+		}
+	}
+}

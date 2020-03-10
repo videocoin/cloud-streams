@@ -74,6 +74,11 @@ func (e *EventBus) registerPublishers() error {
 	if err := e.mq.Publisher("notifications.send"); err != nil {
 		return err
 	}
+
+	if err := e.mq.Publisher("streams.delete"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -83,6 +88,42 @@ func (e *EventBus) registerConsumers() error {
 
 func (e *EventBus) Stop() error {
 	return e.mq.Close()
+}
+
+func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
+	var span opentracing.Span
+	tracer := opentracing.GlobalTracer()
+	spanCtx, err := tracer.Extract(opentracing.TextMap, mqmux.RMQHeaderCarrier(d.Headers))
+
+	e.logger.Debugf("handling body: %+v", string(d.Body))
+
+	if err != nil {
+		span = tracer.StartSpan("eventbus.handleStreamStatus")
+	} else {
+		span = tracer.StartSpan("eventbus.handleStreamStatus", ext.RPCServerOption(spanCtx))
+	}
+
+	defer span.Finish()
+
+	req := new(privatev1.Event)
+	err = json.Unmarshal(d.Body, req)
+	if err != nil {
+		tracerext.SpanLogError(span, err)
+		return err
+	}
+
+	span.SetTag("stream_id", req.StreamID)
+	span.SetTag("event_type", req.Type.String())
+	span.SetTag("status", req.Status.String())
+
+	e.logger.Infof("handling request %+v", req)
+
+	ctx := opentracing.ContextWithSpan(context.Background(), span)
+	if e.StreamStatusHandler != nil {
+		return e.StreamStatusHandler(ctx, req)
+	}
+
+	return nil
 }
 
 func (e *EventBus) emitCUDStream(ctx context.Context, t privatev1.EventType, id string) error {
@@ -146,42 +187,6 @@ func (e *EventBus) SendNotification(span opentracing.Span, req *notificationsv1.
 	return e.mq.PublishX("notifications.send", req, headers)
 }
 
-func (e *EventBus) handleStreamStatus(d amqp.Delivery) error {
-	var span opentracing.Span
-	tracer := opentracing.GlobalTracer()
-	spanCtx, err := tracer.Extract(opentracing.TextMap, mqmux.RMQHeaderCarrier(d.Headers))
-
-	e.logger.Debugf("handling body: %+v", string(d.Body))
-
-	if err != nil {
-		span = tracer.StartSpan("eventbus.handleStreamStatus")
-	} else {
-		span = tracer.StartSpan("eventbus.handleStreamStatus", ext.RPCServerOption(spanCtx))
-	}
-
-	defer span.Finish()
-
-	req := new(privatev1.Event)
-	err = json.Unmarshal(d.Body, req)
-	if err != nil {
-		tracerext.SpanLogError(span, err)
-		return err
-	}
-
-	span.SetTag("stream_id", req.StreamID)
-	span.SetTag("event_type", req.Type.String())
-	span.SetTag("status", req.Status.String())
-
-	e.logger.Infof("handling request %+v", req)
-
-	ctx := opentracing.ContextWithSpan(context.Background(), span)
-	if e.StreamStatusHandler != nil {
-		return e.StreamStatusHandler(ctx, req)
-	}
-
-	return nil
-}
-
 func (e *EventBus) EmitStreamPublished(ctx context.Context, by, url string) error {
 	span, _ := opentracing.StartSpanFromContext(ctx, "SendStreamPublished")
 	defer span.Finish()
@@ -202,6 +207,22 @@ func (e *EventBus) EmitStreamPublished(ctx context.Context, by, url string) erro
 	}
 
 	if err := e.SendNotification(span, notification); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (e *EventBus) EmitDeleteStreamContent(ctx context.Context, id string) error {
+	e.logger.Debugf("emitting delete stream content: %s", id)
+
+	event := &privatev1.Event{
+		Type:     privatev1.EventTypeDelete,
+		StreamID: id,
+	}
+	err := e.mq.Publish("streams.delete", event)
+	if err != nil {
+		e.logger.Errorf("failed to publish to streams.delete: %s", err)
 		return err
 	}
 
