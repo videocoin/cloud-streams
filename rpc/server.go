@@ -23,7 +23,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type RPCServerOpts struct {  //nolint
+type RPCServerOpts struct { //nolint
 	Addr            string
 	AuthTokenSecret string
 	BaseInputURL    string
@@ -39,7 +39,7 @@ type RPCServerOpts struct {  //nolint
 	Logger          *logrus.Entry
 }
 
-type RPCServer struct {  //nolint
+type RPCServer struct { //nolint
 	addr            string
 	authTokenSecret string
 	baseInputURL    string
@@ -98,9 +98,12 @@ func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 	return RPCServer, nil
 }
 
-func (s *RPCServer) Start() error {
+func (s *RPCServer) Start() {
 	s.logger.Infof("starting rpc server on %s", s.addr)
-	return s.grpc.Serve(s.listen)
+	err := s.grpc.Serve(s.listen)
+	if err != nil {
+		s.logger.WithError(err).Errorf("Failed to start rpc server on %s", s.addr)
+	}
 }
 
 func (s *RPCServer) authenticate(ctx context.Context) (string, error) {

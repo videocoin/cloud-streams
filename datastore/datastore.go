@@ -2,7 +2,7 @@ package datastore
 
 import (
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"  //nolint
+	_ "github.com/jinzhu/gorm/dialects/mysql" //nolint
 )
 
 type Datastore struct {

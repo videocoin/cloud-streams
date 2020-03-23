@@ -52,18 +52,23 @@ func New(c *Config) (*EventBus, error) {
 	}, nil
 }
 
-func (e *EventBus) Start() error {
+func (e *EventBus) Start() {
 	err := e.registerPublishers()
 	if err != nil {
-		return err
+		e.logger.WithError(err).Error("failed to start eventbus on registering publishers")
+		return
 	}
 
 	err = e.registerConsumers()
 	if err != nil {
-		return err
+		e.logger.WithError(err).Error("failed to start eventbus on registering consumers")
+		return
 	}
 
-	return e.mq.Run()
+	err = e.mq.Run()
+	if err != nil {
+		e.logger.WithError(err).Error("failed to start eventbus on worker mux start")
+	}
 }
 
 func (e *EventBus) registerPublishers() error {
@@ -155,19 +160,28 @@ func (e *EventBus) emitCUDStream(ctx context.Context, t privatev1.EventType, id 
 	return nil
 }
 
-func (e *EventBus) EmitCreateStream(ctx context.Context, id string) error {
+func (e *EventBus) EmitCreateStream(ctx context.Context, id string) {
 	e.logger.Debugf("emitting create stream: %s", id)
-	return e.emitCUDStream(ctx, privatev1.EventTypeCreate, id)
+	err := e.emitCUDStream(ctx, privatev1.EventTypeCreate, id)
+	if err != nil {
+		e.logger.Errorf("failed to emit create stream: %s", err)
+	}
 }
 
-func (e *EventBus) EmitUpdateStream(ctx context.Context, id string) error {
+func (e *EventBus) EmitUpdateStream(ctx context.Context, id string) {
 	e.logger.Debugf("emitting update stream: %s", id)
-	return e.emitCUDStream(ctx, privatev1.EventTypeUpdate, id)
+	err := e.emitCUDStream(ctx, privatev1.EventTypeUpdate, id)
+	if err != nil {
+		e.logger.Errorf("failed to emit update stream: %s", err)
+	}
 }
 
-func (e *EventBus) EmitDeleteStream(ctx context.Context, id string) error {
+func (e *EventBus) EmitDeleteStream(ctx context.Context, id string) {
 	e.logger.Debugf("emitting delete stream: %s", id)
-	return e.emitCUDStream(ctx, privatev1.EventTypeDelete, id)
+	err := e.emitCUDStream(ctx, privatev1.EventTypeDelete, id)
+	if err != nil {
+		e.logger.Errorf("failed to emit delete stream: %s", err)
+	}
 }
 
 func (e *EventBus) SendNotification(span opentracing.Span, req *notificationsv1.Notification) error {
