@@ -67,9 +67,12 @@ func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) 
 	return rpcServer, nil
 }
 
-func (s *PrivateRPCServer) Start() error {
+func (s *PrivateRPCServer) Start() {
 	s.logger.Infof("starting private rpc server on %s", s.addr)
-	return s.grpc.Serve(s.listen)
+	err := s.grpc.Serve(s.listen)
+	if err != nil {
+		s.logger.WithError(err).Errorf("Failed to start private rpc server on %s", s.addr)
+	}
 }
 
 func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
@@ -130,9 +133,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.logger.Error(s.eb.EmitUpdateStream(
-		opentracing.ContextWithSpan(ctx, span),
-		streamResponse.ID))
+	go s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), streamResponse.ID)
 
 	return streamResponse, nil
 }

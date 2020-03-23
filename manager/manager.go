@@ -60,12 +60,10 @@ func NewManager(opts *Opts) *Manager {
 	return m
 }
 
-func (m *Manager) StartBackgroundTasks() error {
+func (m *Manager) StartBackgroundTasks() {
 	go m.startCheckStreamBalanceTask()
 	go m.startCheckStreamAliveTask()
 	go m.startRemoveCompletedTask()
-
-	return nil
 }
 
 func (m *Manager) StopBackgroundTasks() error {

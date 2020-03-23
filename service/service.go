@@ -125,16 +125,18 @@ func NewService(cfg *Config) (*Service, error) {
 	return svc, nil
 }
 
-func (s *Service) Start() error {
-	go s.rpc.Start()  //nolint
-	go s.privateRPC.Start() //nolint
-	go s.eb.Start() //nolint
-	err := s.dm.StartBackgroundTasks()
-	return err
+func (s *Service) Start() {
+	go s.rpc.Start()
+	go s.privateRPC.Start()
+	go s.eb.Start()
+	s.dm.StartBackgroundTasks()
 }
 
 func (s *Service) Stop() error {
-	s.eb.Stop() //nolint
-	err := s.dm.StopBackgroundTasks()
+	err := s.eb.Stop()
+	if err != nil {
+		return err
+	}
+	err = s.dm.StopBackgroundTasks()
 	return err
 }
