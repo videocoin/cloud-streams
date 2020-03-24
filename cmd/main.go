@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	stdlog "log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,7 +21,7 @@ var (
 func main() {
 	err := logger.Init(ServiceName, Version)
 	if err != nil {
-		fmt.Printf("Failed to init logger: %s", err)
+		stdlog.Fatalf("Failed to init logger: %s", err)
 	}
 
 	log := logrus.NewEntry(logrus.New())

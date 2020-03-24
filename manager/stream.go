@@ -265,7 +265,12 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 		return nil, fmt.Errorf("failed to init stream: %s", err)
 	}
 
-	go m.eb.EmitUpdateStream(ctx, streamID)
+	go func() {
+		err := m.eb.EmitUpdateStream(ctx, streamID)
+		if err != nil {
+			m.logger.Error(err)
+		}
+	}()
 
 	return stream, nil
 }
@@ -324,7 +329,12 @@ func (m *Manager) StopStream(
 	if err != nil {
 		return nil, fmt.Errorf("failed to update stream: %s", err)
 	}
-	go m.eb.EmitUpdateStream(ctx, streamID)
+	go func() {
+		err := m.eb.EmitUpdateStream(ctx, streamID)
+		if err != nil {
+			m.logger.Error(err)
+		}
+	}()
 
 	return stream, nil
 }
@@ -338,8 +348,12 @@ func (m *Manager) CompleteStream(ctx context.Context, stream *ds.Stream) error {
 		return err
 	}
 
-	go m.eb.EmitUpdateStream(ctx, stream.ID)
-
+	go func() {
+		err := m.eb.EmitUpdateStream(ctx, stream.ID)
+		if err != nil {
+			m.logger.Error(err)
+		}
+	}()
 	return nil
 }
 
