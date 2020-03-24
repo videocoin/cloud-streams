@@ -126,9 +126,27 @@ func NewService(cfg *Config) (*Service, error) {
 }
 
 func (s *Service) Start() {
-	go s.rpc.Start()
-	go s.privateRPC.Start()
-	go s.eb.Start()
+	go func() {
+		err := s.rpc.Start()
+		if err != nil {
+			s.cfg.Logger.Error(err)
+		}
+	}()
+
+	go func() {
+		err := s.privateRPC.Start()
+		if err != nil {
+			s.cfg.Logger.Error(err)
+		}
+	}()
+
+	go func() {
+		err := s.eb.Start()
+		if err != nil {
+			s.cfg.Logger.Error(err)
+		}
+	}()
+
 	s.dm.StartBackgroundTasks()
 }
 

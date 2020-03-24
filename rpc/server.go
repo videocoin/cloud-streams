@@ -98,12 +98,9 @@ func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 	return RPCServer, nil
 }
 
-func (s *RPCServer) Start() {
+func (s *RPCServer) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
-	err := s.grpc.Serve(s.listen)
-	if err != nil {
-		s.logger.WithError(err).Errorf("Failed to start rpc server on %s", s.addr)
-	}
+	return s.grpc.Serve(s.listen)
 }
 
 func (s *RPCServer) authenticate(ctx context.Context) (string, error) {

@@ -73,7 +73,12 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitCreateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
+	go func() {
+		err := s.eb.EmitCreateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
+		if err != nil {
+			s.logger.Error(err)
+		}
+	}()
 
 	streamResponse, err := toStreamResponse(stream)
 	if err != nil {
@@ -111,7 +116,12 @@ func (s *RPCServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitDeleteStream(opentracing.ContextWithSpan(ctx, span), req.Id)
+	go func() {
+		err := s.eb.EmitDeleteStream(opentracing.ContextWithSpan(ctx, span), req.Id)
+		if err != nil {
+			s.logger.Error(err)
+		}
+	}()
 
 	return &protoempty.Empty{}, nil
 }
@@ -218,8 +228,12 @@ func (s *RPCServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
-
+	go func() {
+		err := s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
+		if err != nil {
+			s.logger.Error(err)
+		}
+	}()
 	return streamResponse, nil
 }
 
@@ -274,8 +288,12 @@ func (s *RPCServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 		return nil, rpc.ErrRpcInternal
 	}
 
-	go s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
-
+	go func() {
+		err := s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
+		if err != nil {
+			s.logger.Error(err)
+		}
+	}()
 	return &protoempty.Empty{}, nil
 }
 
