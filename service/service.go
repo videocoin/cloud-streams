@@ -125,26 +125,17 @@ func NewService(cfg *Config) (*Service, error) {
 	return svc, nil
 }
 
-func (s *Service) Start() {
+func (s *Service) Start(errCh chan error) {
 	go func() {
-		err := s.rpc.Start()
-		if err != nil {
-			s.cfg.Logger.Error(err)
-		}
+		errCh <- s.rpc.Start()
 	}()
 
 	go func() {
-		err := s.privateRPC.Start()
-		if err != nil {
-			s.cfg.Logger.Error(err)
-		}
+		errCh <- s.privateRPC.Start()
 	}()
 
 	go func() {
-		err := s.eb.Start()
-		if err != nil {
-			s.cfg.Logger.Error(err)
-		}
+		errCh <- s.eb.Start()
 	}()
 
 	s.dm.StartBackgroundTasks()
