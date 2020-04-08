@@ -33,5 +33,6 @@ func isRemovable(stream *ds.Stream) bool {
 	return stream.Status == v1.StreamStatusNew ||
 		stream.Status == v1.StreamStatusCompleted ||
 		stream.Status == v1.StreamStatusCancelled ||
-		stream.Status == v1.StreamStatusFailed
+		stream.Status == v1.StreamStatusFailed ||
+		stream.Status == v1.StreamStatusDeleted
 }
