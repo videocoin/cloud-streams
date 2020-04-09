@@ -268,7 +268,7 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	go func() {
 		err := m.eb.EmitUpdateStream(ctx, streamID)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.Errorf("failed to emit update stream: %s", err)
 		}
 	}()
 

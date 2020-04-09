@@ -9,11 +9,33 @@ import (
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
+	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/manager"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
+
+func (s *RPCServer) getProfile(ctx context.Context, profileID string) (*profilesv1.GetProfileResponse, error) {
+	profileReq := &profilesv1.ProfileRequest{ID: profileID}
+	profile, err := s.profiles.Get(ctx, profileReq)
+	if err != nil {
+		if grpcutil.IsNotFoundError(err) {
+			return nil, rpc.NewRpcValidationError(&rpc.MultiValidationError{
+				Errors: []*rpc.ValidationError{
+					{
+						Field:   "profile_id",
+						Message: "profile id does not exist",
+					},
+				},
+			})
+		}
+
+		logFailedTo(s.logger, "get profile", err)
+
+		return nil, rpc.ErrRpcInternal
+	}
+
+	return profile, nil
+}
 
 func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
@@ -33,34 +55,15 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.NewRpcValidationError(verr)
 	}
 
-	_, err = s.profiles.Get(ctx, &profilesv1.ProfileRequest{
-		ID: req.ProfileId,
-	})
+	profile, err := s.getProfile(ctx, req.ProfileId)
 	if err != nil {
-		s.logger.Error(err)
-
-		if s, ok := status.FromError(err); ok {
-			if s.Code() == codes.NotFound {
-				respErr := &rpc.MultiValidationError{
-					Errors: []*rpc.ValidationError{
-						{
-							Field:   "profile_id",
-							Message: "profile id does not exist",
-						},
-					},
-				}
-
-				return nil, rpc.NewRpcValidationError(respErr)
-			}
-		}
-
-		return nil, rpc.ErrRpcInternal
+		return nil, err
 	}
 
 	stream, err := s.manager.CreateStream(
 		ctx,
 		req.Name,
-		req.ProfileId,
+		profile.ID,
 		userID,
 		s.baseInputURL,
 		s.baseOutputURL,
@@ -76,7 +79,7 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	go func() {
 		err := s.eb.EmitCreateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
 		if err != nil {
-			s.logger.Error(err)
+			logFailedTo(logger, "emit create stream", err)
 		}
 	}()
 
@@ -119,7 +122,7 @@ func (s *RPCServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 	go func() {
 		err := s.eb.EmitDeleteStream(opentracing.ContextWithSpan(ctx, span), req.Id)
 		if err != nil {
-			s.logger.Error(err)
+			logFailedTo(logger, "emit delete stream", err)
 		}
 	}()
 
@@ -231,9 +234,10 @@ func (s *RPCServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	go func() {
 		err := s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
 		if err != nil {
-			s.logger.Error(err)
+			logFailedTo(logger, "emit update stream", err)
 		}
 	}()
+
 	return streamResponse, nil
 }
 
@@ -291,9 +295,10 @@ func (s *RPCServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 	go func() {
 		err := s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), stream.ID)
 		if err != nil {
-			s.logger.Error(err)
+			logFailedTo(logger, "emit update stream", err)
 		}
 	}()
+
 	return &protoempty.Empty{}, nil
 }
 
