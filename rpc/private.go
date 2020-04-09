@@ -9,6 +9,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
+	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -28,17 +29,19 @@ type PrivateRPCServerOpts struct {
 	Logger   *logrus.Entry
 	Manager  *manager.Manager
 	Emitter  emitterv1.EmitterServiceClient
+	Profiles profilesv1.ProfilesServiceClient
 	EventBus *eventbus.EventBus
 }
 
 type PrivateRPCServer struct {
-	addr    string
-	logger  *logrus.Entry
-	grpc    *grpc.Server
-	listen  net.Listener
-	manager *manager.Manager
-	emitter emitterv1.EmitterServiceClient
-	eb      *eventbus.EventBus
+	addr     string
+	logger   *logrus.Entry
+	grpc     *grpc.Server
+	listen   net.Listener
+	manager  *manager.Manager
+	emitter  emitterv1.EmitterServiceClient
+	profiles profilesv1.ProfilesServiceClient
+	eb       *eventbus.EventBus
 }
 
 func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) {
@@ -52,13 +55,14 @@ func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) 
 	}
 
 	rpcServer := &PrivateRPCServer{
-		addr:    opts.Addr,
-		logger:  opts.Logger.WithField("system", "privaterpc"),
-		grpc:    grpcServer,
-		listen:  listen,
-		manager: opts.Manager,
-		emitter: opts.Emitter,
-		eb:      opts.EventBus,
+		addr:     opts.Addr,
+		logger:   opts.Logger.WithField("system", "privaterpc"),
+		grpc:     grpcServer,
+		listen:   listen,
+		manager:  opts.Manager,
+		emitter:  opts.Emitter,
+		profiles: opts.Profiles,
+		eb:       opts.EventBus,
 	}
 
 	privatev1.RegisterStreamsServiceServer(grpcServer, rpcServer)
@@ -87,7 +91,14 @@ func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponsePrivate(stream)
+	profileReq := &profilesv1.ProfileRequest{ID: stream.ProfileID}
+	profile, err := s.profiles.Get(ctx, profileReq)
+	if err != nil {
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	streamResponse, err := toStreamResponsePrivate(stream, profile)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -124,7 +135,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponsePrivate(stream)
+	streamResponse, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -182,7 +193,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	streamResponse, err := toStreamResponsePrivate(stream)
+	streamResponse, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -225,7 +236,7 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 		}
 	}(stream)
 
-	streamResponse, err := toStreamResponsePrivate(stream)
+	streamResponse, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -252,7 +263,7 @@ func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest
 		return nil, rpc.ErrRpcInternal
 	}
 
-	resp, err := toStreamResponsePrivate(stream)
+	resp, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -297,7 +308,7 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 		return nil, rpc.ErrRpcInternal
 	}
 
-	resp, err := toStreamResponsePrivate(stream)
+	resp, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -331,7 +342,7 @@ func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.Upda
 		return nil, rpc.ErrRpcInternal
 	}
 
-	resp, err := toStreamResponsePrivate(stream)
+	resp, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
 		return nil, rpc.ErrRpcInternal
@@ -340,7 +351,7 @@ func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.Upda
 	return resp, nil
 }
 
-func toStreamResponsePrivate(stream *ds.Stream) (*privatev1.StreamResponse, error) {
+func toStreamResponsePrivate(stream *ds.Stream, profile *profilesv1.GetProfileResponse) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
 		return nil, err
@@ -354,6 +365,10 @@ func toStreamResponsePrivate(stream *ds.Stream) (*privatev1.StreamResponse, erro
 	resp.StreamContractID = stream.StreamContractID
 	resp.StreamContractAddress = stream.StreamContractAddress
 	resp.InputType = stream.InputType
+
+	if profile != nil {
+		resp.ProfileCost = profile.Cost
+	}
 
 	return resp, nil
 }

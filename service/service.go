@@ -106,6 +106,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Logger:   cfg.Logger.WithField("system", "privaterpc"),
 		Manager:  manager,
 		Emitter:  emitter,
+		Profiles: profiles,
 		EventBus: eb,
 	}
 
