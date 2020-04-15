@@ -41,6 +41,7 @@ type Manager struct {
 	sbTicker          *time.Ticker
 	sbTimeout         time.Duration
 	stcTicker         *time.Ticker
+	cblsTicker        *time.Ticker
 	maxLiveStreamTime time.Duration
 }
 
@@ -58,6 +59,7 @@ func NewManager(opts *Opts) *Manager {
 		sbTimeout:         sbTimeout,
 		sbTicker:          time.NewTicker(sbTimeout),
 		stcTicker:         time.NewTicker(time.Second * 60),
+		cblsTicker:        time.NewTicker(time.Second * 30),
 		maxLiveStreamTime: opts.MaxLiveStreamTime,
 	}
 
@@ -71,9 +73,12 @@ func (m *Manager) StartBackgroundTasks() {
 	go m.startCheckStreamAliveTask()
 	go m.startRemoveCompletedTask()
 	go m.startStreamTotalCostTask()
+	go m.startCheckBalanceForLiveStreamsTask()
 }
 
 func (m *Manager) StopBackgroundTasks() error {
 	m.sbTicker.Stop()
+	m.stcTicker.Stop()
+	m.cblsTicker.Stop()
 	return nil
 }

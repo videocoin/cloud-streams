@@ -89,6 +89,7 @@ func (m *Manager) startCheckStreamBalanceTask() {
 						continue
 					}
 				}
+
 			}
 		}
 
@@ -261,6 +262,70 @@ func (m *Manager) startStreamTotalCostTask() {
 				}
 
 				continue
+			}
+		}
+
+		unlockErr := lock.Unlock()
+		if unlockErr != nil {
+			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+		}
+	}
+}
+
+func (m *Manager) startCheckBalanceForLiveStreamsTask() {
+	for range m.cblsTicker.C {
+		lockKey := "streams/tasks/check-balance-task/lock"
+		lock, err := m.dlock.Obtain(lockKey)
+		if err != nil {
+			m.logger.Error(err)
+			return
+		}
+		if lock == nil {
+			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			return
+		}
+
+		m.logger.Info("checking balance for live streams")
+
+		emptyCtx := context.Background()
+		streams, err := m.ds.Stream.StatusReadyList(emptyCtx)
+		if err != nil {
+			m.logger.Error(err)
+
+			unlockErr := lock.Unlock()
+			if unlockErr != nil {
+				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			}
+
+			continue
+		}
+
+		lowBalance := map[string]bool{}
+
+		for _, stream := range streams {
+			if isLowBalance, ok := lowBalance[stream.UserID]; ok {
+				if isLowBalance {
+					_, err := m.StopStream(emptyCtx, stream.ID, stream.UserID, streamsv1.StreamStatusCompleted)
+					if err != nil {
+						m.logger.Errorf("failed to stop stream when low balance: %s", err)
+						continue
+					}
+				}
+			}
+
+			profile, err := m.billing.GetProfileByUserID(emptyCtx, &billingv1.ProfileRequest{UserID: stream.UserID})
+			if err != nil {
+				m.logger.Errorf("failed to get profile by user id: %s", err)
+				continue
+			}
+
+			if profile.Balance <= 0 {
+				lowBalance[stream.UserID] = true
+				_, err := m.StopStream(emptyCtx, stream.ID, stream.UserID, streamsv1.StreamStatusCompleted)
+				if err != nil {
+					m.logger.Errorf("failed to stop stream when low balance: %s", err)
+					continue
+				}
 			}
 		}
 
