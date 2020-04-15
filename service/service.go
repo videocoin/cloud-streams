@@ -2,6 +2,7 @@ package service
 
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
+	billingv1 "github.com/videocoin/cloud-api/billing/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
@@ -56,6 +57,12 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 	profiles := profilesv1.NewProfilesServiceClient(conn)
 
+	conn, err = grpcutil.Connect(cfg.BillingRPCAddr, cfg.Logger.WithField("system", "billingcli"))
+	if err != nil {
+		return nil, err
+	}
+	billing := billingv1.NewBillingServiceClient(conn)
+
 	ebConfig := &eventbus.Config{
 		URI:     cfg.MQURI,
 		Name:    cfg.Name,
@@ -74,6 +81,7 @@ func NewService(cfg *Config) (*Service, error) {
 		Emitter:           emitter,
 		Accounts:          accounts,
 		Users:             users,
+		Billing:           billing,
 		EB:                eb,
 		DLock:             dlock,
 		MaxLiveStreamTime: cfg.MaxLiveStreamTime,

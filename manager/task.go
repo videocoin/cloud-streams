@@ -23,14 +23,18 @@ func (m *Manager) startCheckStreamBalanceTask() {
 			return
 		}
 
-		defer lock.Unlock() //nolint
-
 		m.logger.Info("checking stream contract balance")
 
 		ctx := context.Background()
 		streams, err := m.ds.Stream.StatusReadyList(ctx)
 		if err != nil {
 			m.logger.Error(err)
+
+			unlockErr := lock.Unlock()
+			if unlockErr != nil {
+				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			}
+
 			continue
 		}
 
@@ -49,6 +53,12 @@ func (m *Manager) startCheckStreamBalanceTask() {
 				)
 				if err != nil {
 					logger.Error(err)
+
+					unlockErr := lock.Unlock()
+					if unlockErr != nil {
+						logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+					}
+
 					continue
 				}
 
@@ -69,10 +79,21 @@ func (m *Manager) startCheckStreamBalanceTask() {
 					})
 					if err != nil {
 						logger.Error(err)
+
+						unlockErr := lock.Unlock()
+						if unlockErr != nil {
+							logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+						}
+
 						continue
 					}
 				}
 			}
+		}
+
+		unlockErr := lock.Unlock()
+		if unlockErr != nil {
+			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
 		}
 	}
 }
@@ -90,8 +111,6 @@ func (m *Manager) startCheckStreamAliveTask() {
 			return
 		}
 
-		defer lock.Unlock() //nolint
-
 		m.logger.Info("checking stream is alive")
 
 		emptyCtx := context.Background()
@@ -99,6 +118,12 @@ func (m *Manager) startCheckStreamAliveTask() {
 		streams, err := m.ds.Stream.StatusReadyList(emptyCtx)
 		if err != nil {
 			m.logger.Error(err)
+
+			unlockErr := lock.Unlock()
+			if unlockErr != nil {
+				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			}
+
 			continue
 		}
 
@@ -118,6 +143,11 @@ func (m *Manager) startCheckStreamAliveTask() {
 				}
 			}
 		}
+
+		unlockErr := lock.Unlock()
+		if unlockErr != nil {
+			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+		}
 	}
 }
 
@@ -133,7 +163,6 @@ func (m *Manager) startRemoveCompletedTask() {
 			m.logger.Errorf("failed to obtain lock %s", lockKey)
 			return
 		}
-		defer lock.Unlock() //nolint
 
 		m.logger.Info("getting completed streams")
 
@@ -141,6 +170,12 @@ func (m *Manager) startRemoveCompletedTask() {
 		streams, err := m.ds.Stream.ListForDeletion(emptyCtx)
 		if err != nil {
 			m.logger.Error(err)
+
+			unlockErr := lock.Unlock()
+			if unlockErr != nil {
+				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			}
+
 			continue
 		}
 
@@ -149,14 +184,31 @@ func (m *Manager) startRemoveCompletedTask() {
 			err := m.ds.Stream.MarkAsDeleted(emptyCtx, stream)
 			if err != nil {
 				m.logger.Errorf("failed to mark as deleted: %s", err)
+
+				unlockErr := lock.Unlock()
+				if unlockErr != nil {
+					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				}
+
 				continue
 			}
 
 			err = m.eb.EmitDeleteStreamContent(emptyCtx, stream.ID)
 			if err != nil {
 				m.logger.Errorf("failed to emit delete stream content: %s", err)
+
+				unlockErr := lock.Unlock()
+				if unlockErr != nil {
+					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				}
+
 				continue
 			}
+		}
+
+		unlockErr := lock.Unlock()
+		if unlockErr != nil {
+			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
 		}
 	}
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
+	billingv1 "github.com/videocoin/cloud-api/billing/private/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
@@ -22,6 +23,7 @@ type Opts struct {
 	Emitter           emitterv1.EmitterServiceClient
 	Accounts          accountsv1.AccountServiceClient
 	Users             usersv1.UserServiceClient
+	Billing           billingv1.BillingServiceClient
 	DLock             *dlock.Locker
 	EB                *eventbus.EventBus
 	MaxLiveStreamTime time.Duration
@@ -33,6 +35,7 @@ type Manager struct {
 	emitter           emitterv1.EmitterServiceClient
 	accounts          accountsv1.AccountServiceClient
 	users             usersv1.UserServiceClient
+	billing           billingv1.BillingServiceClient
 	dlock             *dlock.Locker
 	eb                *eventbus.EventBus
 	sbTicker          *time.Ticker
@@ -48,6 +51,7 @@ func NewManager(opts *Opts) *Manager {
 		emitter:           opts.Emitter,
 		accounts:          opts.Accounts,
 		users:             opts.Users,
+		billing:           opts.Billing,
 		dlock:             opts.DLock,
 		eb:                opts.EB,
 		sbTimeout:         sbTimeout,

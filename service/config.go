@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Name    string `envconfig:"-"`
-	Version string `envconfig:"-"`
+	Name    string        `envconfig:"-"`
+	Version string        `envconfig:"-"`
+	Logger  *logrus.Entry `envconfig:"-"`
 
 	RPCAddr         string `default:"0.0.0.0:5002" envconfig:"RPC_ADDR"`
 	PrivateRPCAddr  string `default:"0.0.0.0:5102" envconfig:"PRIVATE_RPC_ADDR"`
@@ -16,6 +17,7 @@ type Config struct {
 	AccountsRPCAddr string `default:"0.0.0.0:5001" envconfig:"ACCOUNTS_RPC_ADDR"`
 	EmitterRPCAddr  string `default:"0.0.0.0:5003" envconfig:"EMITTER_RPC_ADDR"`
 	ProfilesRPCAddr string `default:"0.0.0.0:5004" envconfig:"PROFILES_RPC_ADDR"`
+	BillingRPCAddr  string `default:"0.0.0.0:5120" envconfig:"BILLING_RPC_ADDR"`
 
 	DBURI    string `default:"root:root@/videocoin?charset=utf8&parseTime=True&loc=Local" envconfig:"DBURI"`
 	MQURI    string `default:"amqp://guest:guest@127.0.0.1:5672" envconfig:"MQURI"`
@@ -28,6 +30,4 @@ type Config struct {
 	RTMPURL       string `required:"true" envconfig:"RTMP_URL"`
 
 	MaxLiveStreamTime time.Duration `required:"true" envconfig:"MAX_LIVESTREAM_TIME" default:"43200s"`
-
-	Logger *logrus.Entry `envconfig:"-"`
 }
