@@ -57,6 +57,7 @@ function get_vars() {
     readonly ACCOUNTS_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/accountsRpcAddr`
     readonly PROFILES_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/profilesRpcAddr`
     readonly EMITTER_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/emitterRpcAddr`
+    readonly BILLING_RPC_ADDR=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/billingRpcAddr`
     readonly BASE_INPUT_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/baseInputUrl`
     readonly BASE_OUTPUT_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/baseOutputUrl`
     readonly RTMP_URL=`consul kv get -http-addr=${CONSUL_ADDR} config/${ENV}/services/${CHART_NAME}/vars/rtmpUrl`
@@ -77,6 +78,7 @@ function deploy() {
         --set config.accountsRpcAddr="${ACCOUNTS_RPC_ADDR}" \
         --set config.profilesRpcAddr="${PROFILES_RPC_ADDR}" \
         --set config.emitterRpcAddr="${EMITTER_RPC_ADDR}" \
+        --set config.billingRpcAddr="${BILLING_RPC_ADDR}" \
         --set config.baseInputUrl="${BASE_INPUT_URL}" \
         --set config.baseOutputUrl="${BASE_OUTPUT_URL}" \
         --set config.rtmpUrl="${RTMP_URL}" \

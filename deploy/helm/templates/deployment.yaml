@@ -63,6 +63,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
                   key: emitterRpcAddr
+            - name: BILLING_RPC_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: billingRpcAddr
             - name: BASE_INPUT_URL
               valueFrom:
                 configMapKeyRef:

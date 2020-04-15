@@ -19,6 +19,8 @@ service EmitterService {
     rpc AddInputChunk(AddInputChunkRequest) returns (google.protobuf.Empty) {}
     rpc GetBalance(BalanceRequest) returns (BalanceResponse) {}
     rpc Deposit(DepositRequest) returns (DepositResponse) {}
+    rpc ValidateProof(ValidateProofRequest) returns (ValidateProofResponse) {}
+    rpc ScrapProof(ScrapProofRequest) returns (ScrapProofResponse) {}
 }
 
 message Tx {
@@ -62,5 +64,25 @@ message DepositRequest {
 }
 
 message DepositResponse {
+    bytes tx_id = 1;
+}
+
+message ValidateProofRequest {
+    string stream_contract_address = 1;
+    bytes profile_id = 2;
+    bytes chunk_id = 3;
+}
+
+message ValidateProofResponse {
+    bytes tx_id = 1;
+}
+
+message ScrapProofRequest {
+    string stream_contract_address = 1;
+    bytes profile_id = 2;
+    bytes chunk_id = 3;
+}
+
+message ScrapProofResponse {
     bytes tx_id = 1;
 }

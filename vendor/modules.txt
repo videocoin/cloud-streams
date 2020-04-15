@@ -130,6 +130,8 @@ github.com/uber/jaeger-client-go/utils
 github.com/uber/jaeger-lib/metrics
 # github.com/videocoin/cloud-api v0.0.17 => ../cloud-api
 github.com/videocoin/cloud-api/accounts/v1
+github.com/videocoin/cloud-api/billing/private/v1
+github.com/videocoin/cloud-api/billing/v1
 github.com/videocoin/cloud-api/emitter/v1
 github.com/videocoin/cloud-api/miners/v1
 github.com/videocoin/cloud-api/notifications/v1

@@ -2,7 +2,7 @@ package service
 
 import (
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
-	billingv1 "github.com/videocoin/cloud-api/billing/v1"
+	billingv1 "github.com/videocoin/cloud-api/billing/private/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"

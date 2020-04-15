@@ -3,26 +3,19 @@ package manager
 import (
 	"context"
 	"fmt"
-	"math/big"
 
-	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
+	billingv1 "github.com/videocoin/cloud-api/billing/private/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	ds "github.com/videocoin/cloud-streams/datastore"
 )
 
 func (m *Manager) checkBalance(ctx context.Context, userID string) error {
-	account, err := m.accounts.GetByOwner(ctx, &accountsv1.AccountRequest{OwnerId: userID})
+	account, err := m.billing.GetProfileByUserID(ctx, &billingv1.ProfileRequest{UserID: userID})
 	if err != nil {
 		return fmt.Errorf("failed to get account: %s", err)
 	}
 
-	if account.Balance == "" {
-		return ErrHitBalanceLimitation
-	}
-
-	balance, ok := new(big.Int).SetString(account.Balance, 10)
-	balanceVID := new(big.Int).Div(balance, big.NewInt(1000000000000000000))
-	if !ok || balanceVID.Cmp(big.NewInt(20)) == -1 {
+	if account.Balance < 10 {
 		return ErrHitBalanceLimitation
 	}
 
