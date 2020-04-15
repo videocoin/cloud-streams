@@ -37,6 +37,7 @@ type Stream struct {
 	DeletedAt             *time.Time      `gorm:"type:timestamp NULL;DEFAULT:null"`
 	InputType             v1.InputType    `gorm:"type:string"`
 	OutputType            v1.OutputType   `gorm:"type:string"`
+	TotalCost             float64         `gorm:"type:decimal(10,6);default:0"`
 }
 
 type StreamDatastore struct {

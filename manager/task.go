@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	billingv1 "github.com/videocoin/cloud-api/billing/private/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 )
@@ -197,6 +198,63 @@ func (m *Manager) startRemoveCompletedTask() {
 			if err != nil {
 				m.logger.Errorf("failed to emit delete stream content: %s", err)
 
+				unlockErr := lock.Unlock()
+				if unlockErr != nil {
+					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				}
+
+				continue
+			}
+		}
+
+		unlockErr := lock.Unlock()
+		if unlockErr != nil {
+			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+		}
+	}
+}
+
+func (m *Manager) startStreamTotalCostTask() {
+	for range m.stcTicker.C {
+		lockKey := "streams/tasks/stream-total-cost/lock"
+		lock, err := m.dlock.Obtain(lockKey)
+		if err != nil {
+			m.logger.Error(err)
+			return
+		}
+		if lock == nil {
+			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			return
+		}
+
+		m.logger.Info("getting charges")
+
+		ctx := context.Background()
+		charges, err := m.billing.GetCharges(ctx, &billingv1.ChargesRequest{})
+		if err != nil {
+			m.logger.Errorf("failed to get charges: %s", err)
+			unlockErr := lock.Unlock()
+			if unlockErr != nil {
+				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			}
+
+			continue
+		}
+
+		for _, charge := range charges.Items {
+			stream, err := m.ds.Stream.Get(ctx, charge.StreamID)
+			if err != nil {
+				unlockErr := lock.Unlock()
+				if unlockErr != nil {
+					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				}
+
+				continue
+			}
+
+			updates := map[string]interface{}{"total_cost": charge.TotalCost}
+			err = m.ds.Stream.Update(ctx, stream, updates)
+			if err != nil {
 				unlockErr := lock.Unlock()
 				if unlockErr != nil {
 					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
