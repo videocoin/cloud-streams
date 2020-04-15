@@ -215,10 +215,10 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 	if userID != "" {
 		logger = logger.WithField("user_id", userID)
 
-		err := m.checkBalance(ctx, userID)
-		if err != nil {
-			return nil, err
-		}
+		// err := m.checkBalance(ctx, userID)
+		// if err != nil {
+		// 	return nil, err
+		// }
 	}
 
 	var (
