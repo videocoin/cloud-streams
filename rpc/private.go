@@ -122,6 +122,29 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 		return nil, rpc.ErrRpcInternal
 	}
 
+	profileReq := &profilesv1.ProfileRequest{ID: stream.ProfileID}
+	profile, err := s.profiles.Get(ctx, profileReq)
+	if err != nil {
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	cost := profile.Cost / 60 * req.Duration
+
+	logger.Infof("cost %f", cost)
+
+	balance, err := s.manager.GetBalance(ctx, stream.UserID)
+	if err != nil {
+		logFailedTo(logger, "get balance", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	logger.Infof("balance %f", balance)
+
+	if cost > balance {
+		return nil, rpc.ErrRpcBadRequest
+	}
+
 	err = s.manager.UpdateStream(
 		ctx,
 		stream,
