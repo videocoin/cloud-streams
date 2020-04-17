@@ -134,7 +134,7 @@ func (ds *StreamDatastore) List(ctx context.Context, userID string) ([]*Stream, 
 
 	streams := []*Stream{}
 
-	if err := ds.db.Where("user_id = ?", userID).Find(&streams).Error; err != nil {
+	if err := ds.db.Where("user_id = ?", userID).Order("created_at desc").Find(&streams).Error; err != nil {
 		return nil, fmt.Errorf("failed to list streams by user id %s: %s", userID, err)
 	}
 
