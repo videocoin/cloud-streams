@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
+	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 )
@@ -24,6 +25,18 @@ func (m *Manager) handleStreamStatus(ctx context.Context, event *privatev1.Event
 			if err != nil {
 				logger.WithError(err).Error("failed to get stream")
 				return nil
+			}
+
+			if event.Status == streamsv1.StreamStatusFailed ||
+				event.Status == streamsv1.StreamStatusReady ||
+				event.Status == streamsv1.StreamStatusCancelled ||
+				event.Status == streamsv1.StreamStatusDeleted {
+				if stream.Status == streamsv1.StreamStatusFailed ||
+					stream.Status == streamsv1.StreamStatusReady ||
+					stream.Status == streamsv1.StreamStatusCancelled ||
+					stream.Status == streamsv1.StreamStatusDeleted {
+					return nil
+				}
 			}
 
 			updates := map[string]interface{}{"status": event.Status}
