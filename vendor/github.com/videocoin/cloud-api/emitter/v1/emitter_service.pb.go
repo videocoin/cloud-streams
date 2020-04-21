@@ -191,6 +191,121 @@ func (*InitStreamRequest) XXX_MessageName() string {
 	return "cloud.api.emitter.v1.InitStreamRequest"
 }
 
+type InitStreamResponse struct {
+	RequestStreamTx       string        `protobuf:"bytes,1,opt,name=request_stream_tx,json=requestStreamTx,proto3" json:"request_stream_tx,omitempty"`
+	RequestStreamTxStatus ReceiptStatus `protobuf:"varint,2,opt,name=request_stream_tx_status,json=requestStreamTxStatus,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"request_stream_tx_status,omitempty"`
+	ApproveStreamTx       string        `protobuf:"bytes,3,opt,name=approve_stream_tx,json=approveStreamTx,proto3" json:"approve_stream_tx,omitempty"`
+	ApproveStreamTxStatus ReceiptStatus `protobuf:"varint,4,opt,name=approve_stream_tx_status,json=approveStreamTxStatus,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"approve_stream_tx_status,omitempty"`
+	CreateStreamTx        string        `protobuf:"bytes,5,opt,name=create_stream_tx,json=createStreamTx,proto3" json:"create_stream_tx,omitempty"`
+	CreateStreamTxStatus  ReceiptStatus `protobuf:"varint,6,opt,name=create_stream_tx_status,json=createStreamTxStatus,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"create_stream_tx_status,omitempty"`
+	AllowRefundTx         string        `protobuf:"bytes,7,opt,name=allow_refund_tx,json=allowRefundTx,proto3" json:"allow_refund_tx,omitempty"`
+	AllowRefundTxStatus   ReceiptStatus `protobuf:"varint,8,opt,name=allow_refund_tx_status,json=allowRefundTxStatus,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"allow_refund_tx_status,omitempty"`
+	StreamContractAddress string        `protobuf:"bytes,9,opt,name=stream_contract_address,json=streamContractAddress,proto3" json:"stream_contract_address,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}      `json:"-"`
+	XXX_unrecognized      []byte        `json:"-"`
+	XXX_sizecache         int32         `json:"-"`
+}
+
+func (m *InitStreamResponse) Reset()         { *m = InitStreamResponse{} }
+func (m *InitStreamResponse) String() string { return proto.CompactTextString(m) }
+func (*InitStreamResponse) ProtoMessage()    {}
+func (*InitStreamResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_595d714f170d55af, []int{2}
+}
+func (m *InitStreamResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *InitStreamResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_InitStreamResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *InitStreamResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InitStreamResponse.Merge(m, src)
+}
+func (m *InitStreamResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *InitStreamResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_InitStreamResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InitStreamResponse proto.InternalMessageInfo
+
+func (m *InitStreamResponse) GetRequestStreamTx() string {
+	if m != nil {
+		return m.RequestStreamTx
+	}
+	return ""
+}
+
+func (m *InitStreamResponse) GetRequestStreamTxStatus() ReceiptStatus {
+	if m != nil {
+		return m.RequestStreamTxStatus
+	}
+	return ReceiptStatusUnknown
+}
+
+func (m *InitStreamResponse) GetApproveStreamTx() string {
+	if m != nil {
+		return m.ApproveStreamTx
+	}
+	return ""
+}
+
+func (m *InitStreamResponse) GetApproveStreamTxStatus() ReceiptStatus {
+	if m != nil {
+		return m.ApproveStreamTxStatus
+	}
+	return ReceiptStatusUnknown
+}
+
+func (m *InitStreamResponse) GetCreateStreamTx() string {
+	if m != nil {
+		return m.CreateStreamTx
+	}
+	return ""
+}
+
+func (m *InitStreamResponse) GetCreateStreamTxStatus() ReceiptStatus {
+	if m != nil {
+		return m.CreateStreamTxStatus
+	}
+	return ReceiptStatusUnknown
+}
+
+func (m *InitStreamResponse) GetAllowRefundTx() string {
+	if m != nil {
+		return m.AllowRefundTx
+	}
+	return ""
+}
+
+func (m *InitStreamResponse) GetAllowRefundTxStatus() ReceiptStatus {
+	if m != nil {
+		return m.AllowRefundTxStatus
+	}
+	return ReceiptStatusUnknown
+}
+
+func (m *InitStreamResponse) GetStreamContractAddress() string {
+	if m != nil {
+		return m.StreamContractAddress
+	}
+	return ""
+}
+
+func (*InitStreamResponse) XXX_MessageName() string {
+	return "cloud.api.emitter.v1.InitStreamResponse"
+}
+
 type EndStreamRequest struct {
 	StreamId              string   `protobuf:"bytes,1,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
 	UserId                string   `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -205,7 +320,7 @@ func (m *EndStreamRequest) Reset()         { *m = EndStreamRequest{} }
 func (m *EndStreamRequest) String() string { return proto.CompactTextString(m) }
 func (*EndStreamRequest) ProtoMessage()    {}
 func (*EndStreamRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{2}
+	return fileDescriptor_595d714f170d55af, []int{3}
 }
 func (m *EndStreamRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -266,6 +381,81 @@ func (*EndStreamRequest) XXX_MessageName() string {
 	return "cloud.api.emitter.v1.EndStreamRequest"
 }
 
+type EndStreamResponse struct {
+	EndStreamTx          string        `protobuf:"bytes,1,opt,name=end_stream_tx,json=endStreamTx,proto3" json:"end_stream_tx,omitempty"`
+	EndStreamTxStatus    ReceiptStatus `protobuf:"varint,2,opt,name=end_stream_tx_status,json=endStreamTxStatus,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"end_stream_tx_status,omitempty"`
+	EscrowRefundTx       string        `protobuf:"bytes,3,opt,name=escrow_refund_tx,json=escrowRefundTx,proto3" json:"escrow_refund_tx,omitempty"`
+	EscrowRefundTxStatus ReceiptStatus `protobuf:"varint,4,opt,name=escrow_refund_tx_status,json=escrowRefundTxStatus,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"escrow_refund_tx_status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *EndStreamResponse) Reset()         { *m = EndStreamResponse{} }
+func (m *EndStreamResponse) String() string { return proto.CompactTextString(m) }
+func (*EndStreamResponse) ProtoMessage()    {}
+func (*EndStreamResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_595d714f170d55af, []int{4}
+}
+func (m *EndStreamResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *EndStreamResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_EndStreamResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *EndStreamResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EndStreamResponse.Merge(m, src)
+}
+func (m *EndStreamResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *EndStreamResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_EndStreamResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EndStreamResponse proto.InternalMessageInfo
+
+func (m *EndStreamResponse) GetEndStreamTx() string {
+	if m != nil {
+		return m.EndStreamTx
+	}
+	return ""
+}
+
+func (m *EndStreamResponse) GetEndStreamTxStatus() ReceiptStatus {
+	if m != nil {
+		return m.EndStreamTxStatus
+	}
+	return ReceiptStatusUnknown
+}
+
+func (m *EndStreamResponse) GetEscrowRefundTx() string {
+	if m != nil {
+		return m.EscrowRefundTx
+	}
+	return ""
+}
+
+func (m *EndStreamResponse) GetEscrowRefundTxStatus() ReceiptStatus {
+	if m != nil {
+		return m.EscrowRefundTxStatus
+	}
+	return ReceiptStatusUnknown
+}
+
+func (*EndStreamResponse) XXX_MessageName() string {
+	return "cloud.api.emitter.v1.EndStreamResponse"
+}
+
 type AddInputChunkRequest struct {
 	StreamContractId     uint64   `protobuf:"varint,1,opt,name=stream_contract_id,json=streamContractId,proto3" json:"stream_contract_id,omitempty"`
 	ChunkId              uint64   `protobuf:"varint,2,opt,name=chunk_id,json=chunkId,proto3" json:"chunk_id,omitempty"`
@@ -279,7 +469,7 @@ func (m *AddInputChunkRequest) Reset()         { *m = AddInputChunkRequest{} }
 func (m *AddInputChunkRequest) String() string { return proto.CompactTextString(m) }
 func (*AddInputChunkRequest) ProtoMessage()    {}
 func (*AddInputChunkRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{3}
+	return fileDescriptor_595d714f170d55af, []int{5}
 }
 func (m *AddInputChunkRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -333,6 +523,65 @@ func (*AddInputChunkRequest) XXX_MessageName() string {
 	return "cloud.api.emitter.v1.AddInputChunkRequest"
 }
 
+type AddInputChunkResponse struct {
+	Tx                   string        `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	Status               ReceiptStatus `protobuf:"varint,2,opt,name=status,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *AddInputChunkResponse) Reset()         { *m = AddInputChunkResponse{} }
+func (m *AddInputChunkResponse) String() string { return proto.CompactTextString(m) }
+func (*AddInputChunkResponse) ProtoMessage()    {}
+func (*AddInputChunkResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_595d714f170d55af, []int{6}
+}
+func (m *AddInputChunkResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AddInputChunkResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AddInputChunkResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AddInputChunkResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddInputChunkResponse.Merge(m, src)
+}
+func (m *AddInputChunkResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *AddInputChunkResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddInputChunkResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddInputChunkResponse proto.InternalMessageInfo
+
+func (m *AddInputChunkResponse) GetTx() string {
+	if m != nil {
+		return m.Tx
+	}
+	return ""
+}
+
+func (m *AddInputChunkResponse) GetStatus() ReceiptStatus {
+	if m != nil {
+		return m.Status
+	}
+	return ReceiptStatusUnknown
+}
+
+func (*AddInputChunkResponse) XXX_MessageName() string {
+	return "cloud.api.emitter.v1.AddInputChunkResponse"
+}
+
 type BalanceRequest struct {
 	Address              []byte   `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -344,7 +593,7 @@ func (m *BalanceRequest) Reset()         { *m = BalanceRequest{} }
 func (m *BalanceRequest) String() string { return proto.CompactTextString(m) }
 func (*BalanceRequest) ProtoMessage()    {}
 func (*BalanceRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{4}
+	return fileDescriptor_595d714f170d55af, []int{7}
 }
 func (m *BalanceRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -396,7 +645,7 @@ func (m *BalanceResponse) Reset()         { *m = BalanceResponse{} }
 func (m *BalanceResponse) String() string { return proto.CompactTextString(m) }
 func (*BalanceResponse) ProtoMessage()    {}
 func (*BalanceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{5}
+	return fileDescriptor_595d714f170d55af, []int{8}
 }
 func (m *BalanceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -457,7 +706,7 @@ func (m *DepositRequest) Reset()         { *m = DepositRequest{} }
 func (m *DepositRequest) String() string { return proto.CompactTextString(m) }
 func (*DepositRequest) ProtoMessage()    {}
 func (*DepositRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{6}
+	return fileDescriptor_595d714f170d55af, []int{9}
 }
 func (m *DepositRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -519,17 +768,18 @@ func (*DepositRequest) XXX_MessageName() string {
 }
 
 type DepositResponse struct {
-	TxId                 []byte   `protobuf:"bytes,1,opt,name=tx_id,json=txId,proto3" json:"tx_id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Tx                   string        `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	Status               ReceiptStatus `protobuf:"varint,2,opt,name=status,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
 }
 
 func (m *DepositResponse) Reset()         { *m = DepositResponse{} }
 func (m *DepositResponse) String() string { return proto.CompactTextString(m) }
 func (*DepositResponse) ProtoMessage()    {}
 func (*DepositResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{7}
+	return fileDescriptor_595d714f170d55af, []int{10}
 }
 func (m *DepositResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -558,11 +808,18 @@ func (m *DepositResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DepositResponse proto.InternalMessageInfo
 
-func (m *DepositResponse) GetTxId() []byte {
+func (m *DepositResponse) GetTx() string {
 	if m != nil {
-		return m.TxId
+		return m.Tx
 	}
-	return nil
+	return ""
+}
+
+func (m *DepositResponse) GetStatus() ReceiptStatus {
+	if m != nil {
+		return m.Status
+	}
+	return ReceiptStatusUnknown
 }
 
 func (*DepositResponse) XXX_MessageName() string {
@@ -582,7 +839,7 @@ func (m *ValidateProofRequest) Reset()         { *m = ValidateProofRequest{} }
 func (m *ValidateProofRequest) String() string { return proto.CompactTextString(m) }
 func (*ValidateProofRequest) ProtoMessage()    {}
 func (*ValidateProofRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{8}
+	return fileDescriptor_595d714f170d55af, []int{11}
 }
 func (m *ValidateProofRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -637,17 +894,18 @@ func (*ValidateProofRequest) XXX_MessageName() string {
 }
 
 type ValidateProofResponse struct {
-	TxId                 []byte   `protobuf:"bytes,1,opt,name=tx_id,json=txId,proto3" json:"tx_id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Tx                   string        `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	Status               ReceiptStatus `protobuf:"varint,2,opt,name=status,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
 }
 
 func (m *ValidateProofResponse) Reset()         { *m = ValidateProofResponse{} }
 func (m *ValidateProofResponse) String() string { return proto.CompactTextString(m) }
 func (*ValidateProofResponse) ProtoMessage()    {}
 func (*ValidateProofResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{9}
+	return fileDescriptor_595d714f170d55af, []int{12}
 }
 func (m *ValidateProofResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -676,11 +934,18 @@ func (m *ValidateProofResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ValidateProofResponse proto.InternalMessageInfo
 
-func (m *ValidateProofResponse) GetTxId() []byte {
+func (m *ValidateProofResponse) GetTx() string {
 	if m != nil {
-		return m.TxId
+		return m.Tx
 	}
-	return nil
+	return ""
+}
+
+func (m *ValidateProofResponse) GetStatus() ReceiptStatus {
+	if m != nil {
+		return m.Status
+	}
+	return ReceiptStatusUnknown
 }
 
 func (*ValidateProofResponse) XXX_MessageName() string {
@@ -700,7 +965,7 @@ func (m *ScrapProofRequest) Reset()         { *m = ScrapProofRequest{} }
 func (m *ScrapProofRequest) String() string { return proto.CompactTextString(m) }
 func (*ScrapProofRequest) ProtoMessage()    {}
 func (*ScrapProofRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{10}
+	return fileDescriptor_595d714f170d55af, []int{13}
 }
 func (m *ScrapProofRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -755,17 +1020,18 @@ func (*ScrapProofRequest) XXX_MessageName() string {
 }
 
 type ScrapProofResponse struct {
-	TxId                 []byte   `protobuf:"bytes,1,opt,name=tx_id,json=txId,proto3" json:"tx_id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	Tx                   string        `protobuf:"bytes,1,opt,name=tx,proto3" json:"tx,omitempty"`
+	Status               ReceiptStatus `protobuf:"varint,2,opt,name=status,proto3,enum=cloud.api.emitter.v1.ReceiptStatus" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
 }
 
 func (m *ScrapProofResponse) Reset()         { *m = ScrapProofResponse{} }
 func (m *ScrapProofResponse) String() string { return proto.CompactTextString(m) }
 func (*ScrapProofResponse) ProtoMessage()    {}
 func (*ScrapProofResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{11}
+	return fileDescriptor_595d714f170d55af, []int{14}
 }
 func (m *ScrapProofResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -794,11 +1060,18 @@ func (m *ScrapProofResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ScrapProofResponse proto.InternalMessageInfo
 
-func (m *ScrapProofResponse) GetTxId() []byte {
+func (m *ScrapProofResponse) GetTx() string {
 	if m != nil {
-		return m.TxId
+		return m.Tx
 	}
-	return nil
+	return ""
+}
+
+func (m *ScrapProofResponse) GetStatus() ReceiptStatus {
+	if m != nil {
+		return m.Status
+	}
+	return ReceiptStatusUnknown
 }
 
 func (*ScrapProofResponse) XXX_MessageName() string {
@@ -808,10 +1081,10 @@ func (*ScrapProofResponse) XXX_MessageName() string {
 type WorkerResponse struct {
 	Address              string      `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
 	State                WorkerState `protobuf:"varint,2,opt,name=state,proto3,enum=cloud.api.emitter.v1.WorkerState" json:"state,omitempty"`
-	TotalStake           []byte      `protobuf:"bytes,3,opt,name=totalStake,proto3" json:"totalStake,omitempty"`
-	SelfStake            []byte      `protobuf:"bytes,4,opt,name=selfStake,proto3" json:"selfStake,omitempty"`
-	DelegatedStake       []byte      `protobuf:"bytes,5,opt,name=delegatedStake,proto3" json:"delegatedStake,omitempty"`
-	RegisteredAt         *time.Time  `protobuf:"bytes,6,opt,name=registeredAt,proto3,stdtime" json:"registeredAt,omitempty"`
+	TotalStake           string      `protobuf:"bytes,3,opt,name=total_stake,json=totalStake,proto3" json:"total_stake,omitempty"`
+	SelfStake            string      `protobuf:"bytes,4,opt,name=self_stake,json=selfStake,proto3" json:"self_stake,omitempty"`
+	DelegatedStake       string      `protobuf:"bytes,5,opt,name=delegated_stake,json=delegatedStake,proto3" json:"delegated_stake,omitempty"`
+	RegisteredAt         *time.Time  `protobuf:"bytes,6,opt,name=registered_at,json=registeredAt,proto3,stdtime" json:"registered_at,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -821,7 +1094,7 @@ func (m *WorkerResponse) Reset()         { *m = WorkerResponse{} }
 func (m *WorkerResponse) String() string { return proto.CompactTextString(m) }
 func (*WorkerResponse) ProtoMessage()    {}
 func (*WorkerResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{12}
+	return fileDescriptor_595d714f170d55af, []int{15}
 }
 func (m *WorkerResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -864,25 +1137,25 @@ func (m *WorkerResponse) GetState() WorkerState {
 	return WorkerStateBonding
 }
 
-func (m *WorkerResponse) GetTotalStake() []byte {
+func (m *WorkerResponse) GetTotalStake() string {
 	if m != nil {
 		return m.TotalStake
 	}
-	return nil
+	return ""
 }
 
-func (m *WorkerResponse) GetSelfStake() []byte {
+func (m *WorkerResponse) GetSelfStake() string {
 	if m != nil {
 		return m.SelfStake
 	}
-	return nil
+	return ""
 }
 
-func (m *WorkerResponse) GetDelegatedStake() []byte {
+func (m *WorkerResponse) GetDelegatedStake() string {
 	if m != nil {
 		return m.DelegatedStake
 	}
-	return nil
+	return ""
 }
 
 func (m *WorkerResponse) GetRegisteredAt() *time.Time {
@@ -907,7 +1180,7 @@ func (m *ListWorkersResponse) Reset()         { *m = ListWorkersResponse{} }
 func (m *ListWorkersResponse) String() string { return proto.CompactTextString(m) }
 func (*ListWorkersResponse) ProtoMessage()    {}
 func (*ListWorkersResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_595d714f170d55af, []int{13}
+	return fileDescriptor_595d714f170d55af, []int{16}
 }
 func (m *ListWorkersResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -953,10 +1226,16 @@ func init() {
 	golang_proto.RegisterType((*Tx)(nil), "cloud.api.emitter.v1.Tx")
 	proto.RegisterType((*InitStreamRequest)(nil), "cloud.api.emitter.v1.InitStreamRequest")
 	golang_proto.RegisterType((*InitStreamRequest)(nil), "cloud.api.emitter.v1.InitStreamRequest")
+	proto.RegisterType((*InitStreamResponse)(nil), "cloud.api.emitter.v1.InitStreamResponse")
+	golang_proto.RegisterType((*InitStreamResponse)(nil), "cloud.api.emitter.v1.InitStreamResponse")
 	proto.RegisterType((*EndStreamRequest)(nil), "cloud.api.emitter.v1.EndStreamRequest")
 	golang_proto.RegisterType((*EndStreamRequest)(nil), "cloud.api.emitter.v1.EndStreamRequest")
+	proto.RegisterType((*EndStreamResponse)(nil), "cloud.api.emitter.v1.EndStreamResponse")
+	golang_proto.RegisterType((*EndStreamResponse)(nil), "cloud.api.emitter.v1.EndStreamResponse")
 	proto.RegisterType((*AddInputChunkRequest)(nil), "cloud.api.emitter.v1.AddInputChunkRequest")
 	golang_proto.RegisterType((*AddInputChunkRequest)(nil), "cloud.api.emitter.v1.AddInputChunkRequest")
+	proto.RegisterType((*AddInputChunkResponse)(nil), "cloud.api.emitter.v1.AddInputChunkResponse")
+	golang_proto.RegisterType((*AddInputChunkResponse)(nil), "cloud.api.emitter.v1.AddInputChunkResponse")
 	proto.RegisterType((*BalanceRequest)(nil), "cloud.api.emitter.v1.BalanceRequest")
 	golang_proto.RegisterType((*BalanceRequest)(nil), "cloud.api.emitter.v1.BalanceRequest")
 	proto.RegisterType((*BalanceResponse)(nil), "cloud.api.emitter.v1.BalanceResponse")
@@ -985,67 +1264,83 @@ func init() {
 }
 
 var fileDescriptor_595d714f170d55af = []byte{
-	// 957 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x55, 0x41, 0x73, 0xdb, 0x44,
-	0x14, 0xf6, 0x3a, 0x76, 0x1c, 0x3f, 0xbb, 0x6e, 0xb2, 0x71, 0x12, 0xa3, 0x82, 0xeb, 0x08, 0x9a,
-	0xba, 0xa1, 0xc8, 0x93, 0x30, 0x03, 0x33, 0xdc, 0xe2, 0x26, 0xd3, 0xf1, 0x0c, 0xa4, 0x20, 0x37,
-	0xc0, 0xc0, 0x21, 0xb3, 0xf1, 0x6e, 0x1c, 0x11, 0x59, 0x6b, 0xb4, 0x6b, 0x37, 0xfc, 0x00, 0x66,
-	0x3a, 0xb9, 0xc0, 0x99, 0x99, 0x9c, 0xe0, 0xcc, 0x0f, 0xe8, 0x89, 0x63, 0x8f, 0xfc, 0x03, 0x20,
-	0xfd, 0x23, 0x8c, 0xb4, 0x92, 0x2d, 0x2b, 0x92, 0xcb, 0x89, 0xde, 0xb4, 0xef, 0x7d, 0xef, 0xbd,
-	0x6f, 0xdf, 0x7b, 0xfa, 0x16, 0x1a, 0x6c, 0x60, 0x49, 0xc9, 0xdc, 0xd6, 0x78, 0xa7, 0x15, 0x7c,
-	0x1e, 0x0b, 0xe6, 0x8e, 0xad, 0x1e, 0x33, 0x86, 0x2e, 0x97, 0x1c, 0x57, 0x7b, 0x36, 0x1f, 0x51,
-	0x83, 0x0c, 0x2d, 0x23, 0x00, 0x18, 0xe3, 0x1d, 0xed, 0x4e, 0x9f, 0xf3, 0xbe, 0xcd, 0x5a, 0x3e,
-	0xe6, 0x64, 0x74, 0xda, 0x62, 0x83, 0xa1, 0xfc, 0x41, 0x85, 0x68, 0x1f, 0xf4, 0x2d, 0x79, 0x36,
-	0x3a, 0x31, 0x7a, 0x7c, 0xd0, 0xea, 0xf3, 0x3e, 0x9f, 0xa2, 0xbc, 0x93, 0x7f, 0xf0, 0xbf, 0x02,
-	0xf8, 0xdd, 0x78, 0x2e, 0x69, 0x0d, 0x98, 0x90, 0x64, 0x30, 0x54, 0x00, 0xbd, 0x06, 0xd9, 0xa7,
-	0x17, 0x18, 0x43, 0xee, 0x8c, 0x88, 0xb3, 0x1a, 0x6a, 0xa0, 0x66, 0xd9, 0xf4, 0xbf, 0xf5, 0x5f,
-	0x10, 0xac, 0x74, 0x1c, 0x4b, 0x76, 0xa5, 0xcb, 0xc8, 0xc0, 0x64, 0xdf, 0x8f, 0x98, 0x90, 0xf8,
-	0x0e, 0x14, 0x85, 0x6f, 0x38, 0xb6, 0xa8, 0x0f, 0x2f, 0x9a, 0x4b, 0xca, 0xd0, 0xa1, 0x78, 0x03,
-	0x0a, 0x23, 0xc1, 0x5c, 0xcf, 0x95, 0xf5, 0x5d, 0x8b, 0xde, 0xb1, 0x43, 0xf1, 0x43, 0xc0, 0x41,
-	0x54, 0x8f, 0x3b, 0xd2, 0x25, 0x3d, 0xe9, 0x61, 0x16, 0x1a, 0xa8, 0x99, 0x33, 0x97, 0x95, 0xe7,
-	0x51, 0xe0, 0xe8, 0x50, 0xbc, 0x09, 0xe5, 0xa1, 0xcb, 0x4f, 0x2d, 0x9b, 0x89, 0x63, 0x8b, 0x8a,
-	0x5a, 0xae, 0xb1, 0xd0, 0x2c, 0x9a, 0xa5, 0xd0, 0xd6, 0xa1, 0x42, 0xff, 0x1d, 0xc1, 0xf2, 0x81,
-	0x43, 0xff, 0x7f, 0x6e, 0x1f, 0xc1, 0x46, 0x1c, 0x4d, 0x28, 0x75, 0x99, 0xf0, 0x68, 0x7a, 0x69,
-	0xd7, 0x66, 0x43, 0xf6, 0x94, 0x53, 0x7f, 0x06, 0xd5, 0x3d, 0x4a, 0x3b, 0xce, 0x70, 0x24, 0x1f,
-	0x9d, 0x8d, 0x9c, 0xf3, 0x90, 0x73, 0x72, 0x75, 0x94, 0x52, 0xfd, 0x2d, 0x58, 0xea, 0x79, 0xd1,
-	0xe1, 0x2d, 0x72, 0x66, 0xc1, 0x3f, 0x77, 0x28, 0x5e, 0x87, 0x45, 0x97, 0x3d, 0x23, 0x2e, 0xf5,
-	0x79, 0x20, 0x33, 0x38, 0xe9, 0xdb, 0x50, 0x69, 0x13, 0x9b, 0x38, 0x3d, 0x16, 0x96, 0xac, 0x41,
-	0x21, 0xa4, 0xac, 0xe6, 0x1d, 0x1e, 0xf5, 0x3d, 0xb8, 0x3d, 0xc1, 0x8a, 0x21, 0x77, 0x04, 0x4b,
-	0x07, 0xe3, 0x2a, 0xe4, 0xc7, 0xc4, 0x1e, 0x31, 0x9f, 0x48, 0xd9, 0x54, 0x07, 0xdd, 0x86, 0xca,
-	0x3e, 0x1b, 0x72, 0x61, 0xc9, 0xb0, 0x5c, 0xa4, 0xf1, 0x68, 0xa6, 0xf1, 0x33, 0xe3, 0xca, 0xc6,
-	0xc6, 0x55, 0x81, 0xac, 0xe4, 0xfe, 0x14, 0xca, 0x66, 0xd6, 0xfb, 0x55, 0xc2, 0x6a, 0xb9, 0x68,
-	0xb5, 0x2d, 0xb8, 0x3d, 0xa9, 0x16, 0x10, 0x5e, 0x85, 0xbc, 0xbc, 0x08, 0x8b, 0x95, 0xcd, 0x9c,
-	0xbc, 0xe8, 0x50, 0xfd, 0x39, 0x82, 0xea, 0x97, 0xc4, 0xb6, 0x28, 0x91, 0xec, 0x73, 0x97, 0xf3,
-	0xd3, 0x90, 0xdc, 0x9c, 0x71, 0xa2, 0x39, 0xe3, 0xc4, 0xef, 0x00, 0x04, 0xeb, 0x18, 0x92, 0x2f,
-	0x9b, 0xc5, 0xc0, 0x12, 0x9b, 0x93, 0xba, 0x43, 0x38, 0x27, 0xfd, 0x21, 0xac, 0xc5, 0x98, 0xcc,
-	0x23, 0xfe, 0x23, 0x82, 0x95, 0x6e, 0xcf, 0x25, 0xc3, 0x37, 0xcc, 0xfa, 0x01, 0xe0, 0x28, 0x8d,
-	0x79, 0x94, 0x7f, 0xca, 0x42, 0xe5, 0x2b, 0xee, 0x9e, 0x33, 0x37, 0x6d, 0x89, 0x8a, 0xd3, 0x25,
-	0xfa, 0x18, 0xf2, 0x42, 0x12, 0xa9, 0x96, 0xa8, 0xb2, 0xbb, 0x69, 0x24, 0x29, 0xa2, 0xa1, 0xd2,
-	0x75, 0x3d, 0xa0, 0xa9, 0xf0, 0xb8, 0x0e, 0x20, 0xb9, 0x24, 0x76, 0x57, 0x92, 0x73, 0x16, 0xb0,
-	0x8d, 0x58, 0xf0, 0xdb, 0x50, 0x14, 0xcc, 0x3e, 0x55, 0x6e, 0xb5, 0x33, 0x53, 0x03, 0xde, 0x82,
-	0x0a, 0x65, 0x36, 0xeb, 0x13, 0xc9, 0xa8, 0x82, 0xe4, 0x7d, 0x48, 0xcc, 0x8a, 0xf7, 0xa1, 0xec,
-	0xb2, 0xbe, 0x25, 0x24, 0x73, 0x19, 0xdd, 0x93, 0xb5, 0xc5, 0x06, 0x6a, 0x96, 0x76, 0x35, 0x43,
-	0xa9, 0xaa, 0x11, 0xaa, 0xaa, 0xf1, 0x34, 0x54, 0xd5, 0x76, 0xee, 0xe7, 0xbf, 0xee, 0x22, 0x73,
-	0x26, 0x4a, 0xff, 0x02, 0x56, 0x3f, 0xb5, 0x84, 0x54, 0xb7, 0x10, 0x93, 0xae, 0x7c, 0x02, 0x79,
-	0x4b, 0xb2, 0x81, 0xd7, 0x93, 0x85, 0x66, 0x69, 0xf7, 0xbd, 0x79, 0x77, 0x0f, 0x83, 0x4c, 0x15,
-	0xb2, 0xfd, 0x02, 0x41, 0x29, 0xd2, 0x15, 0xfc, 0x2e, 0x14, 0xda, 0x4f, 0x0e, 0xf7, 0x3b, 0x87,
-	0x8f, 0x97, 0x33, 0xda, 0xfa, 0xe5, 0x55, 0x03, 0x47, 0xbc, 0x6d, 0xee, 0x50, 0xcb, 0xe9, 0xe3,
-	0x4d, 0x58, 0xf4, 0x40, 0x07, 0xfb, 0xcb, 0x48, 0x5b, 0xbb, 0xbc, 0x6a, 0xac, 0xc4, 0x30, 0x8c,
-	0xe2, 0x7b, 0xb0, 0x74, 0x74, 0x18, 0x80, 0xb2, 0xda, 0xc6, 0xe5, 0x55, 0x63, 0x35, 0x02, 0x3a,
-	0x72, 0x4e, 0x14, 0xec, 0x3e, 0x14, 0x15, 0xcc, 0x2b, 0xb8, 0xa0, 0xd5, 0x2e, 0xaf, 0x1a, 0xd5,
-	0x1b, 0x38, 0xcb, 0xe9, 0x6b, 0xab, 0xcf, 0x7f, 0xad, 0x67, 0x5e, 0xfc, 0x56, 0x8f, 0x92, 0xdd,
-	0xfd, 0x27, 0x0f, 0x95, 0x03, 0x75, 0xc3, 0xae, 0x7a, 0x0f, 0xf1, 0x13, 0x80, 0xe9, 0x5b, 0x83,
-	0xef, 0x27, 0xb7, 0xe2, 0xc6, 0x6b, 0xa4, 0xad, 0xdf, 0x98, 0xc4, 0x81, 0xf7, 0x56, 0xea, 0x19,
-	0xfc, 0x19, 0x14, 0x27, 0xef, 0x03, 0xde, 0x4a, 0xce, 0x17, 0x7f, 0x40, 0xe6, 0xa4, 0x3b, 0x82,
-	0x5b, 0x33, 0xf2, 0x8d, 0xb7, 0x93, 0x53, 0x26, 0x69, 0xfc, 0x9c, 0xb4, 0xdf, 0x02, 0x3c, 0x66,
-	0x32, 0xd0, 0x5c, 0x9c, 0xb2, 0x01, 0xb3, 0xf2, 0xad, 0xdd, 0x7b, 0x0d, 0x4a, 0x2d, 0x8a, 0x9e,
-	0xc1, 0x5f, 0x43, 0x21, 0x10, 0xc7, 0xb4, 0xcc, 0xb3, 0x4a, 0x9d, 0x96, 0x39, 0xa6, 0xb0, 0x7a,
-	0x06, 0x7f, 0x07, 0xb7, 0x66, 0x34, 0x2c, 0xad, 0x1b, 0x49, 0x92, 0xab, 0xbd, 0xff, 0x9f, 0xb0,
-	0x93, 0x5a, 0x04, 0x60, 0xaa, 0x3c, 0x69, 0x9b, 0x71, 0x43, 0x22, 0xb5, 0xe6, 0xeb, 0x81, 0x93,
-	0x12, 0x26, 0x94, 0x22, 0xff, 0x27, 0x4e, 0x19, 0x97, 0xf6, 0x20, 0x39, 0x65, 0xc2, 0xaf, 0xad,
-	0x67, 0xda, 0xb5, 0x97, 0xd7, 0x75, 0xf4, 0xe7, 0x75, 0x1d, 0xfd, 0x7d, 0x5d, 0x47, 0x7f, 0xbc,
-	0xaa, 0xa3, 0x97, 0xaf, 0xea, 0xe8, 0x9b, 0xec, 0x78, 0xe7, 0x64, 0xd1, 0x4f, 0xfb, 0xe1, 0xbf,
-	0x01, 0x00, 0x00, 0xff, 0xff, 0x81, 0x6a, 0x5e, 0x1e, 0x1f, 0x0a, 0x00, 0x00,
+	// 1214 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x57, 0x4f, 0x6f, 0x1b, 0x45,
+	0x14, 0xf7, 0x3a, 0x8e, 0x1d, 0x3f, 0x3b, 0x4e, 0x3c, 0x71, 0x12, 0xb3, 0x15, 0xae, 0xbb, 0xa5,
+	0x8d, 0x09, 0xe0, 0xa8, 0x41, 0x02, 0x09, 0x4e, 0x49, 0x13, 0x55, 0x96, 0x50, 0x80, 0x8d, 0x0b,
+	0x55, 0x40, 0xb5, 0x26, 0x9e, 0x89, 0xb3, 0x64, 0xbd, 0xbb, 0xcc, 0x8e, 0x1d, 0xf3, 0x01, 0x90,
+	0xaa, 0x9c, 0x90, 0x7a, 0x02, 0x29, 0x27, 0x38, 0xf3, 0x01, 0x7a, 0xe2, 0xd8, 0x23, 0xdf, 0x00,
+	0x94, 0x5e, 0xf8, 0x18, 0x68, 0x77, 0x66, 0xed, 0xdd, 0xb5, 0x9d, 0xa4, 0x95, 0x02, 0x37, 0xef,
+	0x7b, 0xbf, 0xf7, 0xde, 0x6f, 0xde, 0xbc, 0x3f, 0x63, 0xa8, 0xd2, 0xae, 0xc1, 0x39, 0x65, 0x1b,
+	0xfd, 0x07, 0x1b, 0xf2, 0x67, 0xcb, 0xa5, 0xac, 0x6f, 0xb4, 0x69, 0xdd, 0x61, 0x36, 0xb7, 0x51,
+	0xa9, 0x6d, 0xda, 0x3d, 0x52, 0xc7, 0x8e, 0x51, 0x97, 0x80, 0x7a, 0xff, 0x81, 0x7a, 0xab, 0x63,
+	0xdb, 0x1d, 0x93, 0x6e, 0xf8, 0x98, 0xc3, 0xde, 0xd1, 0x06, 0xed, 0x3a, 0xfc, 0x07, 0x61, 0xa2,
+	0x7e, 0xd0, 0x31, 0xf8, 0x71, 0xef, 0xb0, 0xde, 0xb6, 0xbb, 0x1b, 0x1d, 0xbb, 0x63, 0x8f, 0x50,
+	0xde, 0x97, 0xff, 0xe1, 0xff, 0x92, 0xf0, 0xdb, 0x71, 0x5f, 0xdc, 0xe8, 0x52, 0x97, 0xe3, 0xae,
+	0x23, 0x01, 0xe5, 0x10, 0x49, 0x46, 0xdb, 0xd4, 0x70, 0xb8, 0xd0, 0x68, 0x65, 0x48, 0x36, 0x07,
+	0x08, 0x41, 0xea, 0x18, 0xbb, 0xc7, 0x65, 0xa5, 0xaa, 0xd4, 0xf2, 0xba, 0xff, 0x5b, 0xfb, 0x45,
+	0x81, 0x62, 0xc3, 0x32, 0xf8, 0x3e, 0x67, 0x14, 0x77, 0x75, 0xfa, 0x7d, 0x8f, 0xba, 0x1c, 0xdd,
+	0x82, 0xac, 0xeb, 0x0b, 0x5a, 0x06, 0xf1, 0xe1, 0x59, 0x7d, 0x4e, 0x08, 0x1a, 0x04, 0xad, 0x42,
+	0xa6, 0xe7, 0x52, 0xe6, 0xa9, 0x92, 0xbe, 0x2a, 0xed, 0x7d, 0x36, 0x08, 0x7a, 0x1f, 0x90, 0xb4,
+	0x6a, 0xdb, 0x16, 0x67, 0xb8, 0xcd, 0x3d, 0xcc, 0x4c, 0x55, 0xa9, 0xa5, 0xf4, 0x45, 0xa1, 0x79,
+	0x28, 0x15, 0x0d, 0x82, 0xee, 0x40, 0xde, 0x61, 0xf6, 0x91, 0x61, 0x52, 0xb7, 0x65, 0x10, 0xb7,
+	0x9c, 0xaa, 0xce, 0xd4, 0xb2, 0x7a, 0x2e, 0x90, 0x35, 0x88, 0xab, 0xfd, 0x93, 0x02, 0x14, 0x26,
+	0xe7, 0x3a, 0xb6, 0xe5, 0x52, 0xb4, 0x0e, 0x45, 0x26, 0x88, 0xb6, 0x64, 0x3c, 0x3e, 0x90, 0x2c,
+	0x17, 0xa4, 0x42, 0x58, 0x34, 0x07, 0xe8, 0x5b, 0x28, 0x8f, 0x61, 0x5b, 0x2e, 0xc7, 0xbc, 0xe7,
+	0xfa, 0xec, 0x0b, 0x9b, 0x77, 0xeb, 0x93, 0x6e, 0xae, 0xae, 0x8b, 0x04, 0xee, 0xfb, 0x50, 0x7d,
+	0x39, 0xe6, 0x57, 0x88, 0x3d, 0x26, 0xd8, 0x71, 0x98, 0xdd, 0xa7, 0x21, 0x26, 0x33, 0x82, 0x89,
+	0x54, 0x84, 0x99, 0x8c, 0x61, 0x03, 0x26, 0xa9, 0xd7, 0x60, 0x12, 0xf3, 0x2b, 0x99, 0xd4, 0x60,
+	0xb1, 0xcd, 0x28, 0xe6, 0x61, 0x22, 0xb3, 0x3e, 0x91, 0x82, 0x90, 0x0f, 0x79, 0x1c, 0xc0, 0x6a,
+	0x1c, 0x19, 0xd0, 0x48, 0x5f, 0x9f, 0x46, 0x29, 0xea, 0x55, 0xb2, 0xb8, 0x0f, 0x0b, 0xd8, 0x34,
+	0xed, 0xd3, 0x16, 0xa3, 0x47, 0x3d, 0x8b, 0x78, 0x24, 0x32, 0x3e, 0x89, 0x79, 0x5f, 0xac, 0xfb,
+	0xd2, 0xe6, 0x00, 0x3d, 0x81, 0x95, 0x18, 0x2e, 0xa0, 0x30, 0x77, 0x7d, 0x0a, 0x4b, 0x11, 0x9f,
+	0x92, 0xc1, 0x47, 0xb0, 0x1a, 0xaf, 0x41, 0x4c, 0x08, 0xa3, 0xae, 0x5b, 0xce, 0xfa, 0x4c, 0x96,
+	0xa3, 0x85, 0xb8, 0x25, 0x94, 0xda, 0xef, 0x0a, 0x2c, 0xee, 0x5a, 0xe4, 0xbf, 0x6f, 0x83, 0x4b,
+	0x08, 0xa7, 0x2e, 0x23, 0xfc, 0x3c, 0x09, 0xc5, 0x10, 0x61, 0xd9, 0x1a, 0x1a, 0xcc, 0x53, 0x8b,
+	0x8c, 0xb5, 0x45, 0x8e, 0x06, 0xc8, 0xe6, 0x00, 0x35, 0xa1, 0x14, 0xc1, 0xbc, 0x41, 0x3b, 0x14,
+	0x43, 0xfe, 0x46, 0x05, 0x48, 0xdd, 0x36, 0x8b, 0xdc, 0xbd, 0xe8, 0x84, 0x82, 0x90, 0x0f, 0x2f,
+	0xff, 0x00, 0x56, 0xe3, 0xc8, 0x37, 0xe8, 0x83, 0x52, 0xd4, 0xab, 0x90, 0x6a, 0xa7, 0x50, 0xda,
+	0x22, 0xa4, 0x61, 0x39, 0x3d, 0xfe, 0xf0, 0xb8, 0x67, 0x9d, 0x04, 0x37, 0x39, 0xf9, 0x4e, 0x94,
+	0x29, 0x77, 0xf2, 0x16, 0xcc, 0xb5, 0x3d, 0xeb, 0xe0, 0x6e, 0x53, 0x7a, 0xc6, 0xff, 0x6e, 0x10,
+	0xb4, 0x02, 0x69, 0x46, 0x4f, 0x31, 0x23, 0x3e, 0x57, 0x45, 0x97, 0x5f, 0x1a, 0x81, 0xe5, 0x58,
+	0x60, 0x79, 0x23, 0x05, 0x48, 0x0e, 0xaf, 0x21, 0xc9, 0x07, 0xe8, 0x53, 0x48, 0xbf, 0x7e, 0xbe,
+	0xa5, 0x89, 0xb6, 0x0e, 0x85, 0x6d, 0x6c, 0x62, 0xab, 0x4d, 0x83, 0x83, 0x95, 0x21, 0x13, 0x94,
+	0x8b, 0x18, 0xeb, 0xc1, 0xa7, 0xb6, 0x05, 0x0b, 0x43, 0xac, 0xe4, 0x32, 0x15, 0x8c, 0x4a, 0x30,
+	0xdb, 0xc7, 0x66, 0x8f, 0xfa, 0xa4, 0xf2, 0xba, 0xf8, 0xd0, 0x4c, 0x28, 0xec, 0x50, 0xc7, 0x76,
+	0x0d, 0x1e, 0x84, 0x0b, 0x15, 0xbd, 0x12, 0x29, 0xfa, 0x48, 0xab, 0x24, 0x63, 0xad, 0xe2, 0xe5,
+	0xc0, 0xf6, 0xab, 0x21, 0xaf, 0x27, 0xbd, 0x5d, 0x19, 0x44, 0x4b, 0x85, 0xa3, 0x3d, 0x85, 0x85,
+	0x61, 0xb4, 0x9b, 0x48, 0xde, 0x33, 0x05, 0x4a, 0x5f, 0x61, 0xd3, 0x20, 0x98, 0xd3, 0x2f, 0x98,
+	0x6d, 0x1f, 0x05, 0x87, 0xba, 0xa4, 0x05, 0x95, 0x4b, 0x5a, 0x10, 0xbd, 0x0d, 0x20, 0xb7, 0x55,
+	0x70, 0xe8, 0xbc, 0x9e, 0x95, 0x92, 0x58, 0x15, 0x89, 0xb3, 0x07, 0x55, 0xe4, 0x55, 0x4b, 0x8c,
+	0xc9, 0x4d, 0x1c, 0xf8, 0x47, 0x05, 0x8a, 0xfb, 0x6d, 0x86, 0x9d, 0xff, 0xf9, 0xb4, 0x18, 0x50,
+	0x98, 0xc6, 0x4d, 0x1c, 0xf5, 0x79, 0x12, 0x0a, 0x5f, 0xdb, 0xec, 0x84, 0xb2, 0x69, 0xc5, 0x9e,
+	0x1d, 0x15, 0xfb, 0xc7, 0x30, 0xeb, 0x99, 0x51, 0x19, 0xe8, 0xce, 0xe4, 0x40, 0xc2, 0x9d, 0x17,
+	0x87, 0xea, 0x02, 0x8f, 0x6e, 0x43, 0x8e, 0xdb, 0x1c, 0x9b, 0xde, 0xb8, 0x3a, 0xa1, 0x72, 0xbc,
+	0x81, 0x2f, 0xda, 0xf7, 0x24, 0x5e, 0x8e, 0x5c, 0x6a, 0x1e, 0x49, 0xbd, 0x98, 0xdf, 0x59, 0x4f,
+	0x22, 0xd4, 0x6b, 0xb0, 0x40, 0xa8, 0x49, 0x3b, 0x98, 0x53, 0x22, 0x31, 0x72, 0x47, 0x0f, 0xc5,
+	0x02, 0xb8, 0x0b, 0xf3, 0x8c, 0x76, 0x0c, 0x97, 0x53, 0x46, 0x49, 0x0b, 0x73, 0x7f, 0x33, 0xe7,
+	0x36, 0xd5, 0xba, 0x78, 0x02, 0xd6, 0x83, 0x27, 0x60, 0xbd, 0x19, 0x3c, 0x01, 0xb7, 0x53, 0x3f,
+	0xfd, 0x75, 0x5b, 0xd1, 0xf3, 0x23, 0xb3, 0x2d, 0xae, 0x7d, 0x09, 0x4b, 0x9f, 0x19, 0x2e, 0x17,
+	0x27, 0x71, 0x87, 0x99, 0xf9, 0x04, 0x66, 0x0d, 0x4e, 0xbb, 0x5e, 0x5e, 0x66, 0x6a, 0xb9, 0xcd,
+	0x77, 0x2e, 0x3b, 0x7f, 0x60, 0xa4, 0x0b, 0x93, 0xf5, 0x17, 0x0a, 0xe4, 0x42, 0x99, 0x41, 0x77,
+	0x21, 0xb3, 0xfd, 0xf9, 0xde, 0x4e, 0x63, 0xef, 0xd1, 0x62, 0x42, 0x5d, 0x39, 0x3b, 0xaf, 0xa2,
+	0x90, 0x76, 0xdb, 0xb6, 0x88, 0x61, 0x75, 0xd0, 0x1d, 0x48, 0x7b, 0xa0, 0xdd, 0x9d, 0x45, 0x45,
+	0x5d, 0x3e, 0x3b, 0xaf, 0x16, 0x63, 0x18, 0x4a, 0xd0, 0x3d, 0x98, 0x7b, 0xbc, 0x27, 0x41, 0x49,
+	0x75, 0xf5, 0xec, 0xbc, 0xba, 0x14, 0x02, 0x3d, 0xb6, 0x0e, 0x05, 0x6c, 0x0d, 0xb2, 0x02, 0xe6,
+	0x05, 0x9c, 0x51, 0xcb, 0x67, 0xe7, 0xd5, 0xd2, 0x18, 0xce, 0xb0, 0x3a, 0xea, 0xd2, 0xb3, 0x5f,
+	0x2b, 0x89, 0x17, 0xbf, 0x55, 0xc2, 0x64, 0x37, 0x7f, 0x4e, 0x43, 0x61, 0x57, 0x9c, 0x70, 0x5f,
+	0x3c, 0xde, 0x11, 0x06, 0x18, 0xbd, 0x30, 0xd1, 0xda, 0xe4, 0x54, 0x8c, 0x3d, 0x90, 0xd5, 0xda,
+	0xd5, 0x40, 0x91, 0x37, 0x2d, 0x81, 0x9e, 0x42, 0x76, 0xb8, 0xa8, 0xd1, 0xfd, 0xc9, 0x86, 0xf1,
+	0xa7, 0x87, 0xba, 0x76, 0x25, 0x6e, 0xe8, 0xff, 0x3b, 0x98, 0x8f, 0xac, 0x1e, 0xb4, 0x3e, 0xd9,
+	0x76, 0xd2, 0x62, 0x54, 0xdf, 0xbb, 0x16, 0x76, 0x18, 0xeb, 0x1b, 0x80, 0x47, 0x94, 0xcb, 0xbd,
+	0x82, 0xa6, 0x54, 0x4e, 0x74, 0x45, 0xa9, 0xf7, 0xae, 0x40, 0x0d, 0x9d, 0x3f, 0x81, 0x8c, 0x5c,
+	0x00, 0xd3, 0x3c, 0x47, 0xb7, 0xd1, 0x34, 0xcf, 0xb1, 0x2d, 0x22, 0x52, 0x14, 0x99, 0xb7, 0xd3,
+	0x52, 0x34, 0x69, 0x3d, 0x4c, 0x4b, 0xd1, 0xc4, 0x01, 0xae, 0x25, 0xbc, 0x8a, 0x1a, 0x4d, 0xbb,
+	0x69, 0x15, 0x35, 0x36, 0x96, 0xa7, 0x55, 0xd4, 0xf8, 0xe0, 0xd4, 0x12, 0x48, 0x87, 0x5c, 0xa8,
+	0xaf, 0xd1, 0xca, 0xd8, 0x58, 0xd8, 0xf5, 0xfe, 0x65, 0xaa, 0xef, 0x4e, 0x76, 0x39, 0x61, 0x24,
+	0x68, 0x89, 0xed, 0xf2, 0xcb, 0x8b, 0x8a, 0xf2, 0xe7, 0x45, 0x45, 0xf9, 0xfb, 0xa2, 0xa2, 0xfc,
+	0xf1, 0xaa, 0xa2, 0xbc, 0x7c, 0x55, 0x51, 0x0e, 0x92, 0xfd, 0x07, 0x87, 0x69, 0xdf, 0xed, 0x87,
+	0xff, 0x06, 0x00, 0x00, 0xff, 0xff, 0x3c, 0x81, 0xa3, 0x0a, 0x04, 0x0f, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1060,9 +1355,9 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type EmitterServiceClient interface {
-	InitStream(ctx context.Context, in *InitStreamRequest, opts ...grpc.CallOption) (*types.Empty, error)
-	EndStream(ctx context.Context, in *EndStreamRequest, opts ...grpc.CallOption) (*types.Empty, error)
-	AddInputChunk(ctx context.Context, in *AddInputChunkRequest, opts ...grpc.CallOption) (*types.Empty, error)
+	InitStream(ctx context.Context, in *InitStreamRequest, opts ...grpc.CallOption) (*InitStreamResponse, error)
+	EndStream(ctx context.Context, in *EndStreamRequest, opts ...grpc.CallOption) (*EndStreamResponse, error)
+	AddInputChunk(ctx context.Context, in *AddInputChunkRequest, opts ...grpc.CallOption) (*AddInputChunkResponse, error)
 	GetBalance(ctx context.Context, in *BalanceRequest, opts ...grpc.CallOption) (*BalanceResponse, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositResponse, error)
 	ValidateProof(ctx context.Context, in *ValidateProofRequest, opts ...grpc.CallOption) (*ValidateProofResponse, error)
@@ -1078,8 +1373,8 @@ func NewEmitterServiceClient(cc *grpc.ClientConn) EmitterServiceClient {
 	return &emitterServiceClient{cc}
 }
 
-func (c *emitterServiceClient) InitStream(ctx context.Context, in *InitStreamRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) InitStream(ctx context.Context, in *InitStreamRequest, opts ...grpc.CallOption) (*InitStreamResponse, error) {
+	out := new(InitStreamResponse)
 	err := c.cc.Invoke(ctx, "/cloud.api.emitter.v1.EmitterService/InitStream", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1087,8 +1382,8 @@ func (c *emitterServiceClient) InitStream(ctx context.Context, in *InitStreamReq
 	return out, nil
 }
 
-func (c *emitterServiceClient) EndStream(ctx context.Context, in *EndStreamRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) EndStream(ctx context.Context, in *EndStreamRequest, opts ...grpc.CallOption) (*EndStreamResponse, error) {
+	out := new(EndStreamResponse)
 	err := c.cc.Invoke(ctx, "/cloud.api.emitter.v1.EmitterService/EndStream", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1096,8 +1391,8 @@ func (c *emitterServiceClient) EndStream(ctx context.Context, in *EndStreamReque
 	return out, nil
 }
 
-func (c *emitterServiceClient) AddInputChunk(ctx context.Context, in *AddInputChunkRequest, opts ...grpc.CallOption) (*types.Empty, error) {
-	out := new(types.Empty)
+func (c *emitterServiceClient) AddInputChunk(ctx context.Context, in *AddInputChunkRequest, opts ...grpc.CallOption) (*AddInputChunkResponse, error) {
+	out := new(AddInputChunkResponse)
 	err := c.cc.Invoke(ctx, "/cloud.api.emitter.v1.EmitterService/AddInputChunk", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1152,9 +1447,9 @@ func (c *emitterServiceClient) ListWorkers(ctx context.Context, in *types.Empty,
 
 // EmitterServiceServer is the server API for EmitterService service.
 type EmitterServiceServer interface {
-	InitStream(context.Context, *InitStreamRequest) (*types.Empty, error)
-	EndStream(context.Context, *EndStreamRequest) (*types.Empty, error)
-	AddInputChunk(context.Context, *AddInputChunkRequest) (*types.Empty, error)
+	InitStream(context.Context, *InitStreamRequest) (*InitStreamResponse, error)
+	EndStream(context.Context, *EndStreamRequest) (*EndStreamResponse, error)
+	AddInputChunk(context.Context, *AddInputChunkRequest) (*AddInputChunkResponse, error)
 	GetBalance(context.Context, *BalanceRequest) (*BalanceResponse, error)
 	Deposit(context.Context, *DepositRequest) (*DepositResponse, error)
 	ValidateProof(context.Context, *ValidateProofRequest) (*ValidateProofResponse, error)
@@ -1166,13 +1461,13 @@ type EmitterServiceServer interface {
 type UnimplementedEmitterServiceServer struct {
 }
 
-func (*UnimplementedEmitterServiceServer) InitStream(ctx context.Context, req *InitStreamRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) InitStream(ctx context.Context, req *InitStreamRequest) (*InitStreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitStream not implemented")
 }
-func (*UnimplementedEmitterServiceServer) EndStream(ctx context.Context, req *EndStreamRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) EndStream(ctx context.Context, req *EndStreamRequest) (*EndStreamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EndStream not implemented")
 }
-func (*UnimplementedEmitterServiceServer) AddInputChunk(ctx context.Context, req *AddInputChunkRequest) (*types.Empty, error) {
+func (*UnimplementedEmitterServiceServer) AddInputChunk(ctx context.Context, req *AddInputChunkRequest) (*AddInputChunkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddInputChunk not implemented")
 }
 func (*UnimplementedEmitterServiceServer) GetBalance(ctx context.Context, req *BalanceRequest) (*BalanceResponse, error) {
@@ -1469,6 +1764,88 @@ func (m *InitStreamRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *InitStreamResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *InitStreamResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *InitStreamResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if len(m.StreamContractAddress) > 0 {
+		i -= len(m.StreamContractAddress)
+		copy(dAtA[i:], m.StreamContractAddress)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.StreamContractAddress)))
+		i--
+		dAtA[i] = 0x4a
+	}
+	if m.AllowRefundTxStatus != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.AllowRefundTxStatus))
+		i--
+		dAtA[i] = 0x40
+	}
+	if len(m.AllowRefundTx) > 0 {
+		i -= len(m.AllowRefundTx)
+		copy(dAtA[i:], m.AllowRefundTx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.AllowRefundTx)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if m.CreateStreamTxStatus != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.CreateStreamTxStatus))
+		i--
+		dAtA[i] = 0x30
+	}
+	if len(m.CreateStreamTx) > 0 {
+		i -= len(m.CreateStreamTx)
+		copy(dAtA[i:], m.CreateStreamTx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.CreateStreamTx)))
+		i--
+		dAtA[i] = 0x2a
+	}
+	if m.ApproveStreamTxStatus != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.ApproveStreamTxStatus))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.ApproveStreamTx) > 0 {
+		i -= len(m.ApproveStreamTx)
+		copy(dAtA[i:], m.ApproveStreamTx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.ApproveStreamTx)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.RequestStreamTxStatus != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.RequestStreamTxStatus))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.RequestStreamTx) > 0 {
+		i -= len(m.RequestStreamTx)
+		copy(dAtA[i:], m.RequestStreamTx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.RequestStreamTx)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *EndStreamRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1522,6 +1899,57 @@ func (m *EndStreamRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *EndStreamResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *EndStreamResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *EndStreamResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.EscrowRefundTxStatus != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.EscrowRefundTxStatus))
+		i--
+		dAtA[i] = 0x20
+	}
+	if len(m.EscrowRefundTx) > 0 {
+		i -= len(m.EscrowRefundTx)
+		copy(dAtA[i:], m.EscrowRefundTx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.EscrowRefundTx)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.EndStreamTxStatus != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.EndStreamTxStatus))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.EndStreamTx) > 0 {
+		i -= len(m.EndStreamTx)
+		copy(dAtA[i:], m.EndStreamTx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.EndStreamTx)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func (m *AddInputChunkRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1561,6 +1989,45 @@ func (m *AddInputChunkRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintEmitterService(dAtA, i, uint64(m.StreamContractId))
 		i--
 		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AddInputChunkResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AddInputChunkResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AddInputChunkResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
+	if m.Status != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Tx) > 0 {
+		i -= len(m.Tx)
+		copy(dAtA[i:], m.Tx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.Tx)))
+		i--
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -1719,10 +2186,15 @@ func (m *DepositResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if len(m.TxId) > 0 {
-		i -= len(m.TxId)
-		copy(dAtA[i:], m.TxId)
-		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.TxId)))
+	if m.Status != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Tx) > 0 {
+		i -= len(m.Tx)
+		copy(dAtA[i:], m.Tx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.Tx)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1801,10 +2273,15 @@ func (m *ValidateProofResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if len(m.TxId) > 0 {
-		i -= len(m.TxId)
-		copy(dAtA[i:], m.TxId)
-		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.TxId)))
+	if m.Status != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Tx) > 0 {
+		i -= len(m.Tx)
+		copy(dAtA[i:], m.Tx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.Tx)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1883,10 +2360,15 @@ func (m *ScrapProofResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.XXX_unrecognized)
 		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	if len(m.TxId) > 0 {
-		i -= len(m.TxId)
-		copy(dAtA[i:], m.TxId)
-		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.TxId)))
+	if m.Status != 0 {
+		i = encodeVarintEmitterService(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Tx) > 0 {
+		i -= len(m.Tx)
+		copy(dAtA[i:], m.Tx)
+		i = encodeVarintEmitterService(dAtA, i, uint64(len(m.Tx)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2060,6 +2542,50 @@ func (m *InitStreamRequest) Size() (n int) {
 	return n
 }
 
+func (m *InitStreamResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.RequestStreamTx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.RequestStreamTxStatus != 0 {
+		n += 1 + sovEmitterService(uint64(m.RequestStreamTxStatus))
+	}
+	l = len(m.ApproveStreamTx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.ApproveStreamTxStatus != 0 {
+		n += 1 + sovEmitterService(uint64(m.ApproveStreamTxStatus))
+	}
+	l = len(m.CreateStreamTx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.CreateStreamTxStatus != 0 {
+		n += 1 + sovEmitterService(uint64(m.CreateStreamTxStatus))
+	}
+	l = len(m.AllowRefundTx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.AllowRefundTxStatus != 0 {
+		n += 1 + sovEmitterService(uint64(m.AllowRefundTxStatus))
+	}
+	l = len(m.StreamContractAddress)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *EndStreamRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2087,6 +2613,32 @@ func (m *EndStreamRequest) Size() (n int) {
 	return n
 }
 
+func (m *EndStreamResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.EndStreamTx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.EndStreamTxStatus != 0 {
+		n += 1 + sovEmitterService(uint64(m.EndStreamTxStatus))
+	}
+	l = len(m.EscrowRefundTx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.EscrowRefundTxStatus != 0 {
+		n += 1 + sovEmitterService(uint64(m.EscrowRefundTxStatus))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
 func (m *AddInputChunkRequest) Size() (n int) {
 	if m == nil {
 		return 0
@@ -2101,6 +2653,25 @@ func (m *AddInputChunkRequest) Size() (n int) {
 	}
 	if m.Reward != 0 {
 		n += 9
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
+	return n
+}
+
+func (m *AddInputChunkResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Tx)
+	if l > 0 {
+		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovEmitterService(uint64(m.Status))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -2178,9 +2749,12 @@ func (m *DepositResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.TxId)
+	l = len(m.Tx)
 	if l > 0 {
 		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovEmitterService(uint64(m.Status))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -2218,9 +2792,12 @@ func (m *ValidateProofResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.TxId)
+	l = len(m.Tx)
 	if l > 0 {
 		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovEmitterService(uint64(m.Status))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -2258,9 +2835,12 @@ func (m *ScrapProofResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.TxId)
+	l = len(m.Tx)
 	if l > 0 {
 		n += 1 + l + sovEmitterService(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovEmitterService(uint64(m.Status))
 	}
 	if m.XXX_unrecognized != nil {
 		n += len(m.XXX_unrecognized)
@@ -2584,6 +3164,296 @@ func (m *InitStreamRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *InitStreamResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEmitterService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: InitStreamResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: InitStreamResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStreamTx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.RequestStreamTx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RequestStreamTxStatus", wireType)
+			}
+			m.RequestStreamTxStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RequestStreamTxStatus |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApproveStreamTx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ApproveStreamTx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ApproveStreamTxStatus", wireType)
+			}
+			m.ApproveStreamTxStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ApproveStreamTxStatus |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreateStreamTx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CreateStreamTx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CreateStreamTxStatus", wireType)
+			}
+			m.CreateStreamTxStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.CreateStreamTxStatus |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowRefundTx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AllowRefundTx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AllowRefundTxStatus", wireType)
+			}
+			m.AllowRefundTxStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.AllowRefundTxStatus |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 9:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StreamContractAddress", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.StreamContractAddress = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEmitterService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *EndStreamRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2753,6 +3623,162 @@ func (m *EndStreamRequest) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *EndStreamResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEmitterService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: EndStreamResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: EndStreamResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndStreamTx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EndStreamTx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndStreamTxStatus", wireType)
+			}
+			m.EndStreamTxStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EndStreamTxStatus |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EscrowRefundTx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EscrowRefundTx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EscrowRefundTxStatus", wireType)
+			}
+			m.EscrowRefundTxStatus = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EscrowRefundTxStatus |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEmitterService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *AddInputChunkRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -2831,6 +3857,111 @@ func (m *AddInputChunkRequest) Unmarshal(dAtA []byte) error {
 			v = uint64(encoding_binary.LittleEndian.Uint64(dAtA[iNdEx:]))
 			iNdEx += 8
 			m.Reward = float64(math.Float64frombits(v))
+		default:
+			iNdEx = preIndex
+			skippy, err := skipEmitterService(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AddInputChunkResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowEmitterService
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AddInputChunkResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AddInputChunkResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tx", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthEmitterService
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Tx = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipEmitterService(dAtA[iNdEx:])
@@ -3283,9 +4414,9 @@ func (m *DepositResponse) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TxId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Tx", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEmitterService
@@ -3295,26 +4426,43 @@ func (m *DepositResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEmitterService
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEmitterService
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TxId = append(m.TxId[:0], dAtA[iNdEx:postIndex]...)
-			if m.TxId == nil {
-				m.TxId = []byte{}
-			}
+			m.Tx = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipEmitterService(dAtA[iNdEx:])
@@ -3525,9 +4673,9 @@ func (m *ValidateProofResponse) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TxId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Tx", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEmitterService
@@ -3537,26 +4685,43 @@ func (m *ValidateProofResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEmitterService
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEmitterService
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TxId = append(m.TxId[:0], dAtA[iNdEx:postIndex]...)
-			if m.TxId == nil {
-				m.TxId = []byte{}
-			}
+			m.Tx = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipEmitterService(dAtA[iNdEx:])
@@ -3767,9 +4932,9 @@ func (m *ScrapProofResponse) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TxId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Tx", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEmitterService
@@ -3779,26 +4944,43 @@ func (m *ScrapProofResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEmitterService
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEmitterService
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TxId = append(m.TxId[:0], dAtA[iNdEx:postIndex]...)
-			if m.TxId == nil {
-				m.TxId = []byte{}
-			}
+			m.Tx = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowEmitterService
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= ReceiptStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipEmitterService(dAtA[iNdEx:])
@@ -3908,7 +5090,7 @@ func (m *WorkerResponse) Unmarshal(dAtA []byte) error {
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field TotalStake", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEmitterService
@@ -3918,31 +5100,29 @@ func (m *WorkerResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEmitterService
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEmitterService
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.TotalStake = append(m.TotalStake[:0], dAtA[iNdEx:postIndex]...)
-			if m.TotalStake == nil {
-				m.TotalStake = []byte{}
-			}
+			m.TotalStake = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SelfStake", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEmitterService
@@ -3952,31 +5132,29 @@ func (m *WorkerResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEmitterService
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEmitterService
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SelfStake = append(m.SelfStake[:0], dAtA[iNdEx:postIndex]...)
-			if m.SelfStake == nil {
-				m.SelfStake = []byte{}
-			}
+			m.SelfStake = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field DelegatedStake", wireType)
 			}
-			var byteLen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowEmitterService
@@ -3986,25 +5164,23 @@ func (m *WorkerResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthEmitterService
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthEmitterService
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DelegatedStake = append(m.DelegatedStake[:0], dAtA[iNdEx:postIndex]...)
-			if m.DelegatedStake == nil {
-				m.DelegatedStake = []byte{}
-			}
+			m.DelegatedStake = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {

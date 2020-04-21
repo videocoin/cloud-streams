@@ -1,17 +1,26 @@
 package service
 
 import (
+	"time"
+
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpcretry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	grpctracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	opentracing "github.com/opentracing/opentracing-go"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	billingv1 "github.com/videocoin/cloud-api/billing/private/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
-	"github.com/videocoin/cloud-pkg/grpcutil"
 	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"github.com/videocoin/cloud-streams/rpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 type Service struct {
@@ -33,31 +42,53 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	conn, err := grpcutil.Connect(cfg.UsersRPCAddr, cfg.Logger.WithField("system", "userscli"))
+	grpcDialOpts := []grpc.DialOption{
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(
+			grpc.UnaryClientInterceptor(grpcmiddleware.ChainUnaryClient(
+				grpctracing.UnaryClientInterceptor(
+					grpctracing.WithTracer(opentracing.GlobalTracer()),
+				),
+				grpcprometheus.UnaryClientInterceptor,
+				grpclogrus.UnaryClientInterceptor(cfg.Logger),
+				grpcretry.UnaryClientInterceptor(
+					grpcretry.WithMax(3),
+					grpcretry.WithBackoff(grpcretry.BackoffLinear(500*time.Millisecond)),
+				),
+			)),
+		),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                time.Second * 10,
+			Timeout:             time.Second * 10,
+			PermitWithoutStream: true,
+		}),
+	}
+
+	conn, err := grpc.Dial(cfg.UsersRPCAddr, grpcDialOpts...)
 	if err != nil {
 		return nil, err
 	}
 	users := usersv1.NewUserServiceClient(conn)
 
-	conn, err = grpcutil.Connect(cfg.AccountsRPCAddr, cfg.Logger.WithField("system", "accountcli"))
+	conn, err = grpc.Dial(cfg.AccountsRPCAddr, grpcDialOpts...)
 	if err != nil {
 		return nil, err
 	}
 	accounts := accountsv1.NewAccountServiceClient(conn)
 
-	conn, err = grpcutil.Connect(cfg.EmitterRPCAddr, cfg.Logger.WithField("system", "emittercli"))
+	conn, err = grpc.Dial(cfg.EmitterRPCAddr, grpcDialOpts...)
 	if err != nil {
 		return nil, err
 	}
 	emitter := emitterv1.NewEmitterServiceClient(conn)
 
-	conn, err = grpcutil.Connect(cfg.ProfilesRPCAddr, cfg.Logger.WithField("system", "profilescli"))
+	conn, err = grpc.Dial(cfg.ProfilesRPCAddr, grpcDialOpts...)
 	if err != nil {
 		return nil, err
 	}
 	profiles := profilesv1.NewProfilesServiceClient(conn)
 
-	conn, err = grpcutil.Connect(cfg.BillingRPCAddr, cfg.Logger.WithField("system", "billingcli"))
+	conn, err = grpc.Dial(cfg.BillingRPCAddr, grpcDialOpts...)
 	if err != nil {
 		return nil, err
 	}

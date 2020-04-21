@@ -1,5 +1,7 @@
 # github.com/AlekSi/pointer v1.1.0
 github.com/AlekSi/pointer
+# github.com/TheZeroSlave/zapsentry v1.3.0
+github.com/TheZeroSlave/zapsentry
 # github.com/beorn7/perks v1.0.0
 github.com/beorn7/perks/quantile
 # github.com/bsm/redis-lock v8.0.0+incompatible
@@ -15,6 +17,8 @@ github.com/ethereum/go-ethereum/common/hexutil
 github.com/evalphobia/logrus_sentry
 # github.com/getsentry/raven-go v0.2.0
 github.com/getsentry/raven-go
+# github.com/getsentry/sentry-go v0.3.0
+github.com/getsentry/sentry-go
 # github.com/go-playground/locales v0.13.0
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
@@ -148,13 +152,19 @@ github.com/videocoin/cloud-pkg/logger
 github.com/videocoin/cloud-pkg/mqmux
 github.com/videocoin/cloud-pkg/tracer
 github.com/videocoin/cloud-pkg/uuid4
-# go.uber.org/atomic v1.5.1
+# go.uber.org/atomic v1.6.0
 go.uber.org/atomic
+# go.uber.org/multierr v1.5.0
+go.uber.org/multierr
+# go.uber.org/zap v1.14.1
+go.uber.org/zap
+go.uber.org/zap/buffer
+go.uber.org/zap/internal/bufferpool
+go.uber.org/zap/internal/color
+go.uber.org/zap/internal/exit
+go.uber.org/zap/zapcore
 # golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 golang.org/x/crypto/sha3
-# golang.org/x/lint v0.0.0-20191125180803-fdd1cda4f05f
-golang.org/x/lint
-golang.org/x/lint/golint
 # golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 golang.org/x/net/context
 golang.org/x/net/http/httpguts
@@ -163,7 +173,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7
+# golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.2
@@ -171,10 +181,6 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20200128002243-345141a36859
-golang.org/x/tools/go/ast/astutil
-golang.org/x/tools/go/gcexportdata
-golang.org/x/tools/go/internal/gcimporter
 # google.golang.org/appengine v1.4.0
 google.golang.org/appengine/cloudsql
 # google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
