@@ -330,8 +330,9 @@ func (s *RPCServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 
 func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+
+	logger := s.logger.WithField("stream_id", req.Id)
 
 	userID, err := s.authenticate(ctx)
 	if err != nil {
@@ -340,6 +341,8 @@ func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 
 	span.SetTag("user_id", userID)
 	logger = logger.WithField("user_id", userID)
+
+	logger.Info("getting stream by id")
 
 	stream, err := s.manager.GetStreamByID(ctx, req.Id)
 	if err != nil {
@@ -359,8 +362,12 @@ func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 		}
 	}
 
+	logger.WithField("status", ss).Info("stopping stream")
+
 	stream, err = s.manager.StopStream(ctx, req.Id, userID, ss)
 	if err != nil {
+		logger.WithError(err).Errorf("failed to stop stream")
+
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}

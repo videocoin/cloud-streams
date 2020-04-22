@@ -319,8 +319,9 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 
 func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.UpdateStatusRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.ID)
-	logger := s.logger.WithField("id", req.ID)
+	span.SetTag("stream_id", req.ID)
+
+	logger := s.logger.WithField("stream_id", req.ID)
 
 	stream, err := s.manager.GetStreamByID(ctx, req.ID)
 	if err != nil {
@@ -331,6 +332,8 @@ func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.Upda
 		logFailedTo(logger, "get stream", err)
 		return nil, rpc.ErrRpcInternal
 	}
+
+	logger.WithField("status", req.Status).Info("upating status")
 
 	updates := map[string]interface{}{"status": req.Status}
 	err = s.manager.UpdateStream(ctx, stream, updates)
