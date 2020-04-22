@@ -320,18 +320,7 @@ func (m *Manager) StopStream(
 
 	if stream.Status == v1.StreamStatusPrepared ||
 		stream.Status == v1.StreamStatusPending {
-		_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-			UserId:                stream.UserID,
-			StreamContractId:      stream.StreamContractID,
-			StreamContractAddress: stream.StreamContractAddress,
-		})
-		if err != nil {
-			m.logger.WithFields(logrus.Fields{
-				"user_id":                 stream.UserID,
-				"stream_contract_id":      stream.StreamContractID,
-				"stream_contract_address": stream.StreamContractAddress,
-			}).WithError(err).Error("failed to end stream")
-		}
+		m.EndStream(ctx, stream)
 	}
 
 	if stream.Status == v1.StreamStatusCompleted {
@@ -371,19 +360,26 @@ func (m *Manager) CompleteStream(ctx context.Context, stream *ds.Stream) error {
 	return nil
 }
 
-func (m *Manager) EndStream(ctx context.Context, stream *ds.Stream) error {
-	_, err := m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
+func (m *Manager) EndStream(ctx context.Context, stream *ds.Stream) {
+	resp, err := m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
 		UserId:                stream.UserID,
 		StreamContractId:      stream.StreamContractID,
 		StreamContractAddress: stream.StreamContractAddress,
 	})
+
 	if err != nil {
-		m.logger.WithFields(logrus.Fields{
+		logger := m.logger.WithFields(logrus.Fields{
 			"user_id":                 stream.UserID,
 			"stream_contract_id":      stream.StreamContractID,
 			"stream_contract_address": stream.StreamContractAddress,
-		}).WithError(err).Error("failed to end stream")
-	}
+		})
 
-	return nil
+		if resp != nil {
+			logger = logger.
+				WithField("endstream_tx", resp.EndStreamTx).
+				WithField("escrow_tx", resp.EscrowRefundTx)
+		}
+
+		logger.WithError(err).Error("failed to end stream")
+	}
 }

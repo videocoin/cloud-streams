@@ -5,7 +5,6 @@ import (
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
-	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -271,15 +270,7 @@ func (s *RPCServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 	}
 
 	if req.Status == v1.StreamStatusFailed {
-		_, err = s.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-			UserId:                stream.UserID,
-			StreamContractId:      stream.StreamContractID,
-			StreamContractAddress: stream.StreamContractAddress,
-		})
-
-		if err != nil {
-			logFailedTo(logger, "end stream", err)
-		}
+		s.manager.EndStream(ctx, stream)
 	}
 
 	err = s.manager.UpdateStream(

@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"net"
-	"time"
 
 	"github.com/jinzhu/copier"
 	"github.com/opentracing/opentracing-go"
@@ -204,12 +203,6 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	err = s.manager.EndStream(ctx, stream)
-	if err != nil {
-		logFailedTo(logger, "end stream", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
 	streamResponse, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
 		logFailedTo(logger, "", err)
@@ -239,19 +232,6 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 		logger.Errorf("failed to complete stream: %s", err)
 		return nil, rpc.ErrRpcInternal
 	}
-
-	go func(stream *ds.Stream) {
-		logger.Info("waiting to end stream")
-
-		time.Sleep(time.Second * 10)
-
-		logger.Info("end stream")
-
-		err = s.manager.EndStream(context.Background(), stream)
-		if err != nil {
-			logger.Errorf("failed to end stream: %s", err)
-		}
-	}(stream)
 
 	streamResponse, err := toStreamResponsePrivate(stream, nil)
 	if err != nil {
@@ -296,11 +276,12 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 
 	stream, err := s.manager.GetStreamByID(ctx, req.Id)
 	if err != nil {
+		logFailedTo(logger, "get stream", err)
+
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}
 
-		logFailedTo(logger, "get stream", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
@@ -314,6 +295,8 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 
 	stream, err = s.manager.StopStream(ctx, req.Id, "", ss)
 	if err != nil {
+		logFailedTo(logger, "stop stream", err)
+
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
 		}
@@ -349,10 +332,7 @@ func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.Upda
 		return nil, rpc.ErrRpcInternal
 	}
 
-	updates := map[string]interface{}{
-		"status": req.Status,
-	}
-
+	updates := map[string]interface{}{"status": req.Status}
 	err = s.manager.UpdateStream(ctx, stream, updates)
 	if err != nil {
 		logFailedTo(logger, "update stream", err)

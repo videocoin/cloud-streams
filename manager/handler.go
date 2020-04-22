@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	streamsv1 "github.com/videocoin/cloud-api/streams/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -47,15 +46,7 @@ func (m *Manager) handleStreamStatus(ctx context.Context, event *privatev1.Event
 			}
 
 			if event.Status == v1.StreamStatusFailed {
-				_, err = m.emitter.EndStream(ctx, &emitterv1.EndStreamRequest{
-					UserId:                stream.UserID,
-					StreamContractId:      stream.StreamContractID,
-					StreamContractAddress: stream.StreamContractAddress,
-				})
-
-				if err != nil {
-					logger.WithError(err).Error("failed to end stream")
-				}
+				m.EndStream(ctx, stream)
 			}
 
 			if event.Status == v1.StreamStatusReady {
