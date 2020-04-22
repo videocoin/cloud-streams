@@ -45,7 +45,7 @@ func NewService(cfg *Config) (*Service, error) {
 	grpcDialOpts := []grpc.DialOption{
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(
-			grpc.UnaryClientInterceptor(grpcmiddleware.ChainUnaryClient(
+			grpcmiddleware.ChainUnaryClient(
 				grpctracing.UnaryClientInterceptor(
 					grpctracing.WithTracer(opentracing.GlobalTracer()),
 				),
@@ -55,7 +55,7 @@ func NewService(cfg *Config) (*Service, error) {
 					grpcretry.WithMax(3),
 					grpcretry.WithBackoff(grpcretry.BackoffLinear(500*time.Millisecond)),
 				),
-			)),
+			),
 		),
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
 			Time:                time.Second * 10,
