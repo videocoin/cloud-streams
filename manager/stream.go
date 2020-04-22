@@ -351,6 +351,8 @@ func (m *Manager) CompleteStream(ctx context.Context, stream *ds.Stream) error {
 		return err
 	}
 
+	m.EndStream(ctx, stream)
+
 	go func() {
 		err := m.eb.EmitUpdateStream(ctx, stream.ID)
 		if err != nil {
