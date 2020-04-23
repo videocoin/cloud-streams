@@ -2,14 +2,11 @@ package service
 
 import (
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
-	Name    string        `envconfig:"-"`
-	Version string        `envconfig:"-"`
-	Logger  *logrus.Entry `envconfig:"-"`
+	Name    string `envconfig:"-"`
+	Version string `envconfig:"-"`
 
 	RPCAddr         string `default:"0.0.0.0:5002" envconfig:"RPC_ADDR"`
 	PrivateRPCAddr  string `default:"0.0.0.0:5102" envconfig:"PRIVATE_RPC_ADDR"`

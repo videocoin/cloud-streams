@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/sirupsen/logrus"
-	"github.com/videocoin/cloud-pkg/logger"
+	pkglogger "github.com/videocoin/cloud-pkg/logger"
 	"github.com/videocoin/cloud-pkg/tracer"
 	"github.com/videocoin/cloud-streams/service"
 )
@@ -18,17 +19,11 @@ var (
 )
 
 func main() {
-	logger.Init(ServiceName, Version)
-
-	log := logrus.NewEntry(logrus.New())
-	log = logrus.WithFields(logrus.Fields{
-		"service": ServiceName,
-		"version": Version,
-	})
+	logger := pkglogger.NewLogrusLogger(ServiceName, Version)
 
 	closer, err := tracer.NewTracer(ServiceName)
 	if err != nil {
-		log.Info(err.Error())
+		logger.Info(err.Error())
 	} else {
 		defer closer.Close()
 	}
@@ -40,14 +35,13 @@ func main() {
 
 	err = envconfig.Process(ServiceName, cfg)
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 
-	cfg.Logger = log
-
-	svc, err := service.NewService(cfg)
+	ctx := ctxlogrus.ToContext(context.Background(), logger)
+	svc, err := service.NewService(ctx, cfg)
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 
 	signals := make(chan os.Signal, 1)
@@ -59,11 +53,11 @@ func main() {
 	go func() {
 		sig := <-signals
 
-		log.Infof("recieved signal %s", sig)
+		logger.Infof("recieved signal %s", sig)
 		exit <- true
 	}()
 
-	log.Info("starting")
+	logger.Info("starting")
 	go svc.Start(errCh)
 
 	select {
@@ -71,17 +65,17 @@ func main() {
 		break
 	case err := <-errCh:
 		if err != nil {
-			log.Error(err)
+			logger.Error(err)
 		}
 		break
 	}
 
-	log.Info("stopping")
+	logger.Info("stopping")
 	err = svc.Stop()
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 		return
 	}
 
-	log.Info("stopped")
+	logger.Info("stopped")
 }

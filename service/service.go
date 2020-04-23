@@ -1,26 +1,15 @@
 package service
 
 import (
-	"time"
+	"context"
 
-	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
-	grpcretry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	grpctracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
-	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	opentracing "github.com/opentracing/opentracing-go"
-	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
-	billingv1 "github.com/videocoin/cloud-api/billing/private/v1"
-	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
-	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
-	usersv1 "github.com/videocoin/cloud-api/users/v1"
+	clientv1 "github.com/videocoin/cloud-api/client/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
 	"github.com/videocoin/cloud-streams/manager"
 	"github.com/videocoin/cloud-streams/rpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 )
 
 type Service struct {
@@ -31,7 +20,7 @@ type Service struct {
 	dm         *manager.Manager
 }
 
-func NewService(cfg *Config) (*Service, error) {
+func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 	ds, err := ds.NewDatastore(cfg.DBURI)
 	if err != nil {
 		return nil, err
@@ -42,64 +31,17 @@ func NewService(cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	grpcDialOpts := []grpc.DialOption{
-		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(
-			grpcmiddleware.ChainUnaryClient(
-				grpctracing.UnaryClientInterceptor(
-					grpctracing.WithTracer(opentracing.GlobalTracer()),
-				),
-				grpcprometheus.UnaryClientInterceptor,
-				grpclogrus.UnaryClientInterceptor(cfg.Logger),
-				grpcretry.UnaryClientInterceptor(
-					grpcretry.WithMax(3),
-					grpcretry.WithBackoff(grpcretry.BackoffLinear(500*time.Millisecond)),
-				),
-			),
-		),
-		grpc.WithKeepaliveParams(keepalive.ClientParameters{
-			Time:                time.Second * 10,
-			Timeout:             time.Second * 10,
-			PermitWithoutStream: true,
-		}),
-	}
-
-	conn, err := grpc.Dial(cfg.UsersRPCAddr, grpcDialOpts...)
+	sc, err := clientv1.NewServiceClientFromEnvconfig(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	users := usersv1.NewUserServiceClient(conn)
-
-	conn, err = grpc.Dial(cfg.AccountsRPCAddr, grpcDialOpts...)
-	if err != nil {
-		return nil, err
-	}
-	accounts := accountsv1.NewAccountServiceClient(conn)
-
-	conn, err = grpc.Dial(cfg.EmitterRPCAddr, grpcDialOpts...)
-	if err != nil {
-		return nil, err
-	}
-	emitter := emitterv1.NewEmitterServiceClient(conn)
-
-	conn, err = grpc.Dial(cfg.ProfilesRPCAddr, grpcDialOpts...)
-	if err != nil {
-		return nil, err
-	}
-	profiles := profilesv1.NewProfilesServiceClient(conn)
-
-	conn, err = grpc.Dial(cfg.BillingRPCAddr, grpcDialOpts...)
-	if err != nil {
-		return nil, err
-	}
-	billing := billingv1.NewBillingServiceClient(conn)
 
 	ebConfig := &eventbus.Config{
 		URI:     cfg.MQURI,
 		Name:    cfg.Name,
-		Logger:  cfg.Logger.WithField("system", "eventbus"),
-		Emitter: emitter,
-		Users:   users,
+		Logger:  grpclogrus.Extract(ctx).WithField("system", "eventbus"),
+		Emitter: sc.Emitter,
+		Users:   sc.Users,
 	}
 	eb, err := eventbus.New(ebConfig)
 	if err != nil {
@@ -107,12 +49,12 @@ func NewService(cfg *Config) (*Service, error) {
 	}
 
 	managerOpts := &manager.Opts{
-		Logger:            cfg.Logger.WithField("system", "manager"),
+		Logger:            grpclogrus.Extract(ctx).WithField("system", "manager"),
 		Ds:                ds,
-		Emitter:           emitter,
-		Accounts:          accounts,
-		Users:             users,
-		Billing:           billing,
+		Emitter:           sc.Emitter,
+		Accounts:          sc.Accounts,
+		Users:             sc.Users,
+		Billing:           sc.Billing,
 		EB:                eb,
 		DLock:             dlock,
 		MaxLiveStreamTime: cfg.MaxLiveStreamTime,
@@ -120,17 +62,17 @@ func NewService(cfg *Config) (*Service, error) {
 	manager := manager.NewManager(managerOpts)
 
 	rpcConfig := &rpc.RPCServerOpts{
-		Logger:          cfg.Logger,
+		Logger:          grpclogrus.Extract(ctx).WithField("system", "rpc"),
 		Addr:            cfg.RPCAddr,
 		Ds:              ds,
 		Manager:         manager,
-		Users:           users,
-		Accounts:        accounts,
-		Profiles:        profiles,
+		Users:           sc.Users,
+		Accounts:        sc.Accounts,
+		Profiles:        sc.Profiles,
 		BaseInputURL:    cfg.BaseInputURL,
 		BaseOutputURL:   cfg.BaseOutputURL,
 		RTMPURL:         cfg.RTMPURL,
-		Emitter:         emitter,
+		Emitter:         sc.Emitter,
 		AuthTokenSecret: cfg.AuthTokenSecret,
 		EventBus:        eb,
 	}
@@ -142,10 +84,10 @@ func NewService(cfg *Config) (*Service, error) {
 
 	privateRPCConfig := &rpc.PrivateRPCServerOpts{
 		Addr:     cfg.PrivateRPCAddr,
-		Logger:   cfg.Logger.WithField("system", "privaterpc"),
+		Logger:   grpclogrus.Extract(ctx).WithField("system", "privaterpc"),
 		Manager:  manager,
-		Emitter:  emitter,
-		Profiles: profiles,
+		Emitter:  sc.Emitter,
+		Profiles: sc.Profiles,
 		EventBus: eb,
 	}
 
