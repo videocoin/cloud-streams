@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	ctxlogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 	ds "github.com/videocoin/cloud-streams/datastore"
@@ -39,7 +39,7 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 	ebConfig := &eventbus.Config{
 		URI:     cfg.MQURI,
 		Name:    cfg.Name,
-		Logger:  grpclogrus.Extract(ctx).WithField("system", "eventbus"),
+		Logger:  ctxlogrus.Extract(ctx).WithField("system", "eventbus"),
 		Emitter: sc.Emitter,
 		Users:   sc.Users,
 	}
@@ -49,7 +49,7 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 	}
 
 	managerOpts := &manager.Opts{
-		Logger:            grpclogrus.Extract(ctx).WithField("system", "manager"),
+		Logger:            ctxlogrus.Extract(ctx).WithField("system", "manager"),
 		Ds:                ds,
 		Emitter:           sc.Emitter,
 		Accounts:          sc.Accounts,
@@ -62,7 +62,7 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 	manager := manager.NewManager(managerOpts)
 
 	rpcConfig := &rpc.RPCServerOpts{
-		Logger:          grpclogrus.Extract(ctx).WithField("system", "rpc"),
+		Logger:          ctxlogrus.Extract(ctx).WithField("system", "rpc"),
 		Addr:            cfg.RPCAddr,
 		Ds:              ds,
 		Manager:         manager,
@@ -84,7 +84,7 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 
 	privateRPCConfig := &rpc.PrivateRPCServerOpts{
 		Addr:     cfg.PrivateRPCAddr,
-		Logger:   grpclogrus.Extract(ctx).WithField("system", "privaterpc"),
+		Logger:   ctxlogrus.Extract(ctx).WithField("system", "privaterpc"),
 		Manager:  manager,
 		Emitter:  sc.Emitter,
 		Profiles: sc.Profiles,

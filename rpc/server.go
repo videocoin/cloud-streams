@@ -19,7 +19,7 @@ import (
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
+	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -61,8 +61,7 @@ type RPCServer struct { //nolint
 func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
 	gRPCServer := grpc.NewServer(grpcOpts...)
-	healthService := health.NewServer()
-	grpc_health_v1.RegisterHealthServer(gRPCServer, healthService)
+
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
@@ -73,6 +72,7 @@ func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 	}
 
 	RPCServer := &RPCServer{
+		logger:          opts.Logger,
 		addr:            opts.Addr,
 		authTokenSecret: opts.AuthTokenSecret,
 		grpc:            gRPCServer,
@@ -86,11 +86,12 @@ func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 		baseInputURL:    opts.BaseInputURL,
 		baseOutputURL:   opts.BaseOutputURL,
 		rtmpURL:         opts.RTMPURL,
-
-		logger:    opts.Logger.WithField("system", "rpc"),
-		validator: validator,
-		eb:        opts.EventBus,
+		validator:       validator,
+		eb:              opts.EventBus,
 	}
+
+	healthService := health.NewServer()
+	healthv1.RegisterHealthServer(gRPCServer, healthService)
 
 	v1.RegisterStreamServiceServer(gRPCServer, RPCServer)
 	reflection.Register(gRPCServer)
