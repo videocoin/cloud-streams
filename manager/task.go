@@ -245,22 +245,12 @@ func (m *Manager) startStreamTotalCostTask() {
 		for _, charge := range charges.Items {
 			stream, err := m.ds.Stream.Get(ctx, charge.StreamID)
 			if err != nil {
-				unlockErr := lock.Unlock()
-				if unlockErr != nil {
-					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
-				}
-
 				continue
 			}
 
 			updates := map[string]interface{}{"total_cost": charge.TotalCost}
 			err = m.ds.Stream.Update(ctx, stream, updates)
 			if err != nil {
-				unlockErr := lock.Unlock()
-				if unlockErr != nil {
-					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
-				}
-
 				continue
 			}
 		}
