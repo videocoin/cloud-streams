@@ -4,6 +4,12 @@ import (
 	"context"
 	"net"
 
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpcctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	grpctracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	grpcvalidator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/jinzhu/copier"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
@@ -12,7 +18,6 @@ import (
 	"github.com/videocoin/cloud-api/rpc"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
-	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-streams/datastore"
 	ds "github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/eventbus"
@@ -44,7 +49,18 @@ type PrivateRPCServer struct {
 }
 
 func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) {
-	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
+	grpcOpts := []grpc.ServerOption{
+		grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
+			grpcctxtags.UnaryServerInterceptor(),
+			grpctracing.UnaryServerInterceptor(
+				grpctracing.WithTracer(opentracing.GlobalTracer()),
+				grpctracing.WithFilterFunc(tracingFilter),
+			),
+			grpcprometheus.UnaryServerInterceptor,
+			grpclogrus.UnaryServerInterceptor(opts.Logger, grpclogrus.WithDecider(logrusFilter)),
+			grpcvalidator.UnaryServerInterceptor(),
+		)),
+	}
 	grpcServer := grpc.NewServer(grpcOpts...)
 
 	listen, err := net.Listen("tcp", opts.Addr)
