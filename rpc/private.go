@@ -19,7 +19,7 @@ import (
 	"github.com/videocoin/cloud-streams/manager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
-	"google.golang.org/grpc/health/grpc_health_v1"
+	healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -46,8 +46,7 @@ type PrivateRPCServer struct {
 func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) {
 	grpcOpts := grpcutil.DefaultServerOpts(opts.Logger)
 	grpcServer := grpc.NewServer(grpcOpts...)
-	healthService := health.NewServer()
-	grpc_health_v1.RegisterHealthServer(grpcServer, healthService)
+
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
@@ -64,6 +63,9 @@ func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) 
 		eb:       opts.EventBus,
 	}
 
+	healthService := health.NewServer()
+	healthv1.RegisterHealthServer(grpcServer, healthService)
+
 	privatev1.RegisterStreamsServiceServer(grpcServer, rpcServer)
 	reflection.Register(grpcServer)
 
@@ -77,10 +79,11 @@ func (s *PrivateRPCServer) Start() error {
 
 func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+	logger := s.logger.WithField("stream_id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+	stream, err := s.manager.GetStreamByID(otCtx, req.Id)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -91,7 +94,7 @@ func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest
 	}
 
 	profileReq := &profilesv1.ProfileRequest{ID: stream.ProfileID}
-	profile, err := s.profiles.Get(ctx, profileReq)
+	profile, err := s.profiles.Get(otCtx, profileReq)
 	if err != nil {
 		logFailedTo(logger, "get profile", err)
 		return nil, rpc.ErrRpcInternal
@@ -108,10 +111,11 @@ func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest
 
 func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+	logger := s.logger.WithField("stream_id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+	stream, err := s.manager.GetStreamByID(otCtx, req.Id)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -122,7 +126,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 	}
 
 	profileReq := &profilesv1.ProfileRequest{ID: stream.ProfileID}
-	profile, err := s.profiles.Get(ctx, profileReq)
+	profile, err := s.profiles.Get(otCtx, profileReq)
 	if err != nil {
 		logFailedTo(logger, "get profile", err)
 		return nil, rpc.ErrRpcInternal
@@ -132,7 +136,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 
 	logger.Infof("cost %f", cost)
 
-	balance, err := s.manager.GetBalance(ctx, stream.UserID)
+	balance, err := s.manager.GetBalance(otCtx, stream.UserID)
 	if err != nil {
 		logFailedTo(logger, "get balance", err)
 		return nil, rpc.ErrRpcInternal
@@ -164,7 +168,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 	}
 
 	go func() {
-		err := s.eb.EmitUpdateStream(opentracing.ContextWithSpan(ctx, span), streamResponse.ID)
+		err := s.eb.EmitUpdateStream(otCtx, streamResponse.ID)
 		if err != nil {
 			s.logger.Error(err)
 		}
@@ -175,10 +179,11 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 
 func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+	logger := s.logger.WithField("stream_id", req.Id)
 
-	_, err := s.manager.GetStreamByID(ctx, req.Id)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+	_, err := s.manager.GetStreamByID(otCtx, req.Id)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -188,7 +193,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 		return nil, rpc.ErrRpcInternal
 	}
 
-	stream, err := s.manager.StopStream(ctx, req.Id, "", v1.StreamStatusCompleted)
+	stream, err := s.manager.StopStream(otCtx, req.Id, "", v1.StreamStatusCompleted)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -214,10 +219,11 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 
 func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+	logger := s.logger.WithField("stream_id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+	stream, err := s.manager.GetStreamByID(otCtx, req.Id)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -227,7 +233,7 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 		return nil, rpc.ErrRpcInternal
 	}
 
-	err = s.manager.CompleteStream(ctx, stream)
+	err = s.manager.CompleteStream(otCtx, stream)
 	if err != nil {
 		logger.Errorf("failed to complete stream: %s", err)
 		return nil, rpc.ErrRpcInternal
@@ -244,10 +250,12 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 
 func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+	logger := s.logger.WithField("stream_id", req.Id)
 
-	stream, err := s.manager.RunStream(ctx, req.Id, "")
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+
+	stream, err := s.manager.RunStream(otCtx, req.Id, "")
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -271,10 +279,11 @@ func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest
 
 func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("id", req.Id)
-	logger := s.logger.WithField("id", req.Id)
+	span.SetTag("stream_id", req.Id)
+	logger := s.logger.WithField("stream_id", req.Id)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.Id)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+	stream, err := s.manager.GetStreamByID(otCtx, req.Id)
 	if err != nil {
 		logFailedTo(logger, "get stream", err)
 
@@ -293,7 +302,7 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 		}
 	}
 
-	stream, err = s.manager.StopStream(ctx, req.Id, "", ss)
+	stream, err = s.manager.StopStream(otCtx, req.Id, "", ss)
 	if err != nil {
 		logFailedTo(logger, "stop stream", err)
 
@@ -320,10 +329,10 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.UpdateStatusRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.ID)
-
 	logger := s.logger.WithField("stream_id", req.ID)
 
-	stream, err := s.manager.GetStreamByID(ctx, req.ID)
+	otCtx := opentracing.ContextWithSpan(context.Background(), span)
+	stream, err := s.manager.GetStreamByID(otCtx, req.ID)
 	if err != nil {
 		if err == datastore.ErrStreamNotFound {
 			return nil, rpc.ErrRpcNotFound
@@ -336,7 +345,7 @@ func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.Upda
 	logger.WithField("status", req.Status).Info("upating status")
 
 	updates := map[string]interface{}{"status": req.Status}
-	err = s.manager.UpdateStream(ctx, stream, updates)
+	err = s.manager.UpdateStream(otCtx, stream, updates)
 	if err != nil {
 		logFailedTo(logger, "update stream", err)
 		return nil, rpc.ErrRpcInternal
