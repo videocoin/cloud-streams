@@ -16,11 +16,11 @@ func (m *Manager) startCheckStreamBalanceTask() {
 		lockKey := "streams/tasks/check-stream-balance/lock"
 		lock, err := m.dlock.Obtain(lockKey)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 		if lock == nil {
-			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			m.logger.WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 
@@ -33,7 +33,7 @@ func (m *Manager) startCheckStreamBalanceTask() {
 
 			unlockErr := lock.Unlock()
 			if unlockErr != nil {
-				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 			}
 
 			continue
@@ -53,11 +53,11 @@ func (m *Manager) startCheckStreamBalanceTask() {
 					&emitterv1.BalanceRequest{Address: addr.Bytes()},
 				)
 				if err != nil {
-					logger.Error(err)
+					logger.WithError(err).Error("failed to get balance")
 
 					unlockErr := lock.Unlock()
 					if unlockErr != nil {
-						logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+						m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 					}
 
 					continue
@@ -69,7 +69,7 @@ func (m *Manager) startCheckStreamBalanceTask() {
 				logger.Infof("balance is %d VID", toVID.Int64())
 				logger = logger.WithField("to_balance", toVID.Int64())
 
-				if toVID.Int64() <= int64(1) {
+				if toVID.Int64() <= int64(4) {
 					logger.Info("deposit")
 
 					_, err := m.emitter.Deposit(emptyCtx, &emitterv1.DepositRequest{
@@ -79,23 +79,22 @@ func (m *Manager) startCheckStreamBalanceTask() {
 						Value:    big.NewInt(1000000000000000000).Bytes(),
 					})
 					if err != nil {
-						logger.Error(err)
+						logger.WithError(err).Error("failed to deposit")
 
 						unlockErr := lock.Unlock()
 						if unlockErr != nil {
-							logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+							m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 						}
 
 						continue
 					}
 				}
-
 			}
 		}
 
 		unlockErr := lock.Unlock()
 		if unlockErr != nil {
-			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 		}
 	}
 }
@@ -105,11 +104,11 @@ func (m *Manager) startCheckStreamAliveTask() {
 		lockKey := "streams/tasks/check-stream-alive/lock"
 		lock, err := m.dlock.Obtain(lockKey)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 		if lock == nil {
-			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			m.logger.WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 
@@ -119,11 +118,11 @@ func (m *Manager) startCheckStreamAliveTask() {
 
 		streams, err := m.ds.Stream.StatusReadyList(emptyCtx)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).Error("failed to get ready streams")
 
 			unlockErr := lock.Unlock()
 			if unlockErr != nil {
-				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 			}
 
 			continue
@@ -138,17 +137,17 @@ func (m *Manager) startCheckStreamAliveTask() {
 
 					_, err := m.StopStream(emptyCtx, stream.ID, "", streamsv1.StreamStatusCompleted)
 					if err != nil {
-						logger.Errorf("failed to complete stream: %s", err)
+						logger.WithError(err).Errorf("failed to stop stream")
+					} else {
+						logger.Info("stream has been completed")
 					}
-
-					logger.Info("stream has been completed")
 				}
 			}
 		}
 
 		unlockErr := lock.Unlock()
 		if unlockErr != nil {
-			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 		}
 	}
 }
@@ -158,11 +157,11 @@ func (m *Manager) startRemoveCompletedTask() {
 		lockKey := "streams/tasks/remove-completed-task/lock"
 		lock, err := m.dlock.Obtain(lockKey)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 		if lock == nil {
-			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			m.logger.WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 
@@ -171,11 +170,11 @@ func (m *Manager) startRemoveCompletedTask() {
 		emptyCtx := context.Background()
 		streams, err := m.ds.Stream.ListForDeletion(emptyCtx)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).Error("failed to list streams for deletion")
 
 			unlockErr := lock.Unlock()
 			if unlockErr != nil {
-				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 			}
 
 			continue
@@ -185,11 +184,11 @@ func (m *Manager) startRemoveCompletedTask() {
 			m.logger.WithField("stream_id", stream.ID).Info("marking stream as deleted")
 			err := m.ds.Stream.MarkAsDeleted(emptyCtx, stream)
 			if err != nil {
-				m.logger.Errorf("failed to mark as deleted: %s", err)
+				m.logger.WithError(err).Errorf("failed to mark streams as deleted")
 
 				unlockErr := lock.Unlock()
 				if unlockErr != nil {
-					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+					m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 				}
 
 				continue
@@ -197,11 +196,11 @@ func (m *Manager) startRemoveCompletedTask() {
 
 			err = m.eb.EmitDeleteStreamContent(emptyCtx, stream.ID)
 			if err != nil {
-				m.logger.Errorf("failed to emit delete stream content: %s", err)
+				m.logger.WithError(err).Errorf("failed to emit delete stream content")
 
 				unlockErr := lock.Unlock()
 				if unlockErr != nil {
-					m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+					m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 				}
 
 				continue
@@ -210,7 +209,7 @@ func (m *Manager) startRemoveCompletedTask() {
 
 		unlockErr := lock.Unlock()
 		if unlockErr != nil {
-			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 		}
 	}
 }
@@ -220,11 +219,11 @@ func (m *Manager) startStreamTotalCostTask() {
 		lockKey := "streams/tasks/stream-total-cost/lock"
 		lock, err := m.dlock.Obtain(lockKey)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 		if lock == nil {
-			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			m.logger.WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 
@@ -233,10 +232,10 @@ func (m *Manager) startStreamTotalCostTask() {
 		ctx := context.Background()
 		charges, err := m.billing.GetCharges(ctx, &billingv1.ChargesRequest{})
 		if err != nil {
-			m.logger.Errorf("failed to get charges: %s", err)
+			m.logger.WithError(err).Errorf("failed to get charges")
 			unlockErr := lock.Unlock()
 			if unlockErr != nil {
-				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 			}
 
 			continue
@@ -257,7 +256,7 @@ func (m *Manager) startStreamTotalCostTask() {
 
 		unlockErr := lock.Unlock()
 		if unlockErr != nil {
-			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 		}
 	}
 }
@@ -267,11 +266,11 @@ func (m *Manager) startCheckBalanceForLiveStreamsTask() {
 		lockKey := "streams/tasks/check-balance-task/lock"
 		lock, err := m.dlock.Obtain(lockKey)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 		if lock == nil {
-			m.logger.Errorf("failed to obtain lock %s", lockKey)
+			m.logger.WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 
@@ -280,11 +279,11 @@ func (m *Manager) startCheckBalanceForLiveStreamsTask() {
 		emptyCtx := context.Background()
 		streams, err := m.ds.Stream.StatusReadyList(emptyCtx)
 		if err != nil {
-			m.logger.Error(err)
+			m.logger.WithError(err).Error("failed to get ready streams")
 
 			unlockErr := lock.Unlock()
 			if unlockErr != nil {
-				m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+				m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 			}
 
 			continue
@@ -297,7 +296,7 @@ func (m *Manager) startCheckBalanceForLiveStreamsTask() {
 				if isLowBalance {
 					_, err := m.StopStream(emptyCtx, stream.ID, stream.UserID, streamsv1.StreamStatusCompleted)
 					if err != nil {
-						m.logger.Errorf("failed to stop stream when low balance: %s", err)
+						m.logger.WithError(err).Errorf("failed to stop stream when low balance")
 						continue
 					}
 				}
@@ -305,7 +304,7 @@ func (m *Manager) startCheckBalanceForLiveStreamsTask() {
 
 			profile, err := m.billing.GetProfileByUserID(emptyCtx, &billingv1.ProfileRequest{UserID: stream.UserID})
 			if err != nil {
-				m.logger.Errorf("failed to get profile by user id: %s", err)
+				m.logger.WithError(err).Errorf("failed to get billing profile by user id")
 				continue
 			}
 
@@ -313,7 +312,7 @@ func (m *Manager) startCheckBalanceForLiveStreamsTask() {
 				lowBalance[stream.UserID] = true
 				_, err := m.StopStream(emptyCtx, stream.ID, stream.UserID, streamsv1.StreamStatusCompleted)
 				if err != nil {
-					m.logger.Errorf("failed to stop stream when low balance: %s", err)
+					m.logger.WithError(err).Error("failed to stop stream when low balance")
 					continue
 				}
 			}
@@ -321,7 +320,7 @@ func (m *Manager) startCheckBalanceForLiveStreamsTask() {
 
 		unlockErr := lock.Unlock()
 		if unlockErr != nil {
-			m.logger.Infof("failed to unlock %s: %s", lockKey, unlockErr)
+			m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 		}
 	}
 }
