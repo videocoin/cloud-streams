@@ -13,40 +13,48 @@ import (
 
 func (m *Manager) startCheckStreamBalanceTask() {
 	for range m.sbTicker.C {
+		logger := m.logger.WithField("bg_task", "CheckStreamBalance")
+
 		lockKey := "streams/tasks/check-stream-balance/lock"
 		lock, err := m.dlock.Obtain(lockKey)
 		if err != nil {
-			m.logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
+			logger.WithError(err).WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 		if lock == nil {
-			m.logger.WithField("key", lockKey).Error("failed to obtain lock")
+			logger.WithField("key", lockKey).Error("failed to obtain lock")
 			return
 		}
 
-		m.logger.Info("checking stream contract balance")
+		logger.Info("checking stream contract balance")
 
 		ctx := context.Background()
 		streams, err := m.ds.Stream.StatusReadyList(ctx)
 		if err != nil {
-			m.logger.Error(err)
+			logger.WithError(err).Error("failed to get ready streams list")
 
 			unlockErr := lock.Unlock()
 			if unlockErr != nil {
-				m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
+				logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 			}
 
 			continue
 		}
 
+		logger.Infof("ready streams count - %d", len(streams))
+
 		emptyCtx := context.Background()
 		for _, stream := range streams {
+			logger := logger.WithField("stream_id", stream.ID)
+
 			if stream.StreamContractAddress != "" && common.IsHexAddress(stream.StreamContractAddress) {
 				addr := common.HexToAddress(stream.StreamContractAddress)
 
-				logger := m.logger.
+				logger := logger.
 					WithField("user_id", stream.ID).
 					WithField("to", stream.StreamContractAddress)
+
+				logger.Info("get stream balance")
 
 				toBalance, err := m.emitter.GetBalance(
 					emptyCtx,
@@ -57,7 +65,7 @@ func (m *Manager) startCheckStreamBalanceTask() {
 
 					unlockErr := lock.Unlock()
 					if unlockErr != nil {
-						m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
+						logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 					}
 
 					continue
@@ -83,18 +91,20 @@ func (m *Manager) startCheckStreamBalanceTask() {
 
 						unlockErr := lock.Unlock()
 						if unlockErr != nil {
-							m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
+							logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 						}
 
 						continue
 					}
 				}
+			} else {
+				logger.Warning("no stream contract address")
 			}
 		}
 
 		unlockErr := lock.Unlock()
 		if unlockErr != nil {
-			m.logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
+			logger.WithError(unlockErr).WithField("key", lockKey).Warning("failed to unlock")
 		}
 	}
 }
