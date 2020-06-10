@@ -40,6 +40,8 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
+	span.SetTag("input_type", req.InputType.String())
+	span.SetTag("output_type", req.OutputType.String())
 
 	userID, err := s.authenticate(ctx)
 	if err != nil {
@@ -52,6 +54,20 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	if verr := s.validator.validate(req); verr != nil {
 		s.logger.Warning(verr)
 		return nil, rpc.NewRpcValidationError(verr)
+	}
+
+	if req.OutputType == v1.OutputTypeFile {
+		if req.InputType != v1.InputTypeFile {
+			verrs := &rpc.MultiValidationError{
+				Errors: []*rpc.ValidationError{
+					{
+						Field:   "input_type",
+						Message: "Input type must be file",
+					},
+				},
+			}
+			return nil, rpc.NewRpcValidationError(verrs)
+		}
 	}
 
 	profile, err := s.getProfile(ctx, req.ProfileId)
