@@ -39,4 +39,4 @@ docker-push:
 	docker push ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/${NAME}:${VERSION}
 
 deploy:
-	cd deploy && helm upgrade -i --wait --set image.tag="${VERSION}" -n console profiles ./helm
+	cd deploy && helm upgrade -i --wait --set image.tag="${VERSION}" -n console streams ./helm
