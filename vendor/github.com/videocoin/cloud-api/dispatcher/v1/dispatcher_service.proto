@@ -42,6 +42,7 @@ message TaskPendingRequest {
   double capacity_cpu = 3;
   string worker_state = 4;
   string version = 5;
+  TaskType type = 6;
 }
 
 message TaskRequest {
@@ -62,6 +63,7 @@ message ConfigResponse {
     string rpc_node_url = 1 [(gogoproto.customname) = "RPCNodeURL"];
     string syncer_url = 2 [(gogoproto.customname) = "SyncerURL"];
     string access_key = 3;
+    string staking_manager_address = 4;
 }
 
 message TaskSegmentRequest {

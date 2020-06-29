@@ -54,13 +54,19 @@ func (m *Manager) CreateStream(
 
 	rand.Seed(time.Now().UTC().UnixNano())
 	streamContractID := big.NewInt(int64(rand.Intn(math.MaxInt64)))
+
+	outputMediaURL := fmt.Sprintf("%s/%s/index.m3u8", outputURL, id)
+	if outputType == v1.OutputTypeFile {
+		outputMediaURL = fmt.Sprintf("%s/%s/index.mp4", outputURL, id)
+	}
+
 	stream, err := m.ds.Stream.Create(ctx, &ds.Stream{
 		ID:               id,
 		UserID:           userID,
 		Name:             name,
 		ProfileID:        profileID,
 		InputURL:         fmt.Sprintf("%s/%s/index.m3u8", inputURL, id),
-		OutputURL:        fmt.Sprintf("%s/%s/index.m3u8", outputURL, id),
+		OutputURL:        outputMediaURL,
 		RtmpURL:          fmt.Sprintf("%s/%s", rtmpURL, id),
 		StreamContractID: streamContractID.Uint64(),
 		Status:           v1.StreamStatusNew,

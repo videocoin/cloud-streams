@@ -40,6 +40,8 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
+	span.SetTag("input_type", req.InputType.String())
+	span.SetTag("output_type", req.OutputType.String())
 
 	userID, err := s.authenticate(ctx)
 	if err != nil {
