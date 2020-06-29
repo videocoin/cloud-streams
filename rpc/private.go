@@ -390,6 +390,7 @@ func toStreamResponsePrivate(stream *ds.Stream, profile *profilesv1.GetProfileRe
 	resp.StreamContractID = stream.StreamContractID
 	resp.StreamContractAddress = stream.StreamContractAddress
 	resp.InputType = stream.InputType
+	resp.OutputType = stream.OutputType
 
 	if profile != nil {
 		resp.ProfileCost = profile.Cost
