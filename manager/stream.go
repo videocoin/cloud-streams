@@ -255,36 +255,42 @@ func (m *Manager) RunStream(ctx context.Context, streamID string, userID string)
 		return nil, fmt.Errorf("failed to update stream: %s", err)
 	}
 
-	initStream, err := m.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
-		StreamId:         stream.ID,
-		UserId:           userID,
-		StreamContractId: stream.StreamContractID,
-		ProfilesIds:      []string{stream.ProfileID},
-	})
-	if err != nil {
-		updates := map[string]interface{}{"status": v1.StreamStatusFailed}
-		updateErr := m.UpdateStream(ctx, stream, updates)
-		if updateErr != nil {
-			logger.Errorf("failed to update stream: %s", updateErr)
+	go func() {
+		initStream, err := m.emitter.InitStream(ctx, &emitterv1.InitStreamRequest{
+			StreamId:         stream.ID,
+			UserId:           userID,
+			StreamContractId: stream.StreamContractID,
+			ProfilesIds:      []string{stream.ProfileID},
+		})
+		if err != nil {
+			logger.WithError(err).Error("failed to init stream")
+
+			updates := map[string]interface{}{"status": v1.StreamStatusFailed}
+			updateErr := m.UpdateStream(ctx, stream, updates)
+			if updateErr != nil {
+				logger.Errorf("failed to update stream: %s", updateErr)
+			}
+
+			return
 		}
 
-		return nil, fmt.Errorf("failed to init stream: %s", err)
-	}
+		updates = map[string]interface{}{
+			"stream_contract_address": initStream.StreamContractAddress,
+			"status":                  v1.StreamStatusPrepared,
+			"input_status":            v1.InputStatusPending,
+		}
+		err = m.UpdateStream(ctx, stream, updates)
+		if err != nil {
+			logger.WithError(err).Error("failed to update stream")
+			return
+		}
 
-	updates = map[string]interface{}{
-		"stream_contract_address": initStream.StreamContractAddress,
-		"status":                  v1.StreamStatusPrepared,
-		"input_status":            v1.InputStatusPending,
-	}
-	err = m.UpdateStream(ctx, stream, updates)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update stream: %s", err)
-	}
-
-	err = m.eb.EmitUpdateStream(ctx, streamID)
-	if err != nil {
-		m.logger.Errorf("failed to emit update stream: %s", err)
-	}
+		err = m.eb.EmitUpdateStream(ctx, streamID)
+		if err != nil {
+			logger.WithError(err).Error("failed to emit update stream")
+			return
+		}
+	}()
 
 	return stream, nil
 }
