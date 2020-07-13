@@ -15,7 +15,7 @@ func (m *Manager) checkBalance(ctx context.Context, userID string) error {
 		return fmt.Errorf("failed to get account: %s", err)
 	}
 
-	if account.Balance < 10 {
+	if account.Balance < 1 {
 		return ErrHitBalanceLimitation
 	}
 
