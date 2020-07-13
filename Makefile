@@ -1,7 +1,7 @@
 GOOS?=linux
 GOARCH?=amd64
 
-GCP_PROJECT=videocoin-network
+GCP_PROJECT?=videocoin-network
 
 NAME=streams
 VERSION=$$(git describe --abbrev=0)-$$(git rev-parse --abbrev-ref HEAD)-$$(git rev-parse --short HEAD)
