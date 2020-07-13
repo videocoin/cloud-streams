@@ -1,13 +1,12 @@
 GOOS?=linux
 GOARCH?=amd64
-
-GCP_PROJECT?=videocoin-network
+ENV?=dev
 
 NAME=streams
-VERSION=$$(git describe --abbrev=0)-$$(git rev-parse --abbrev-ref HEAD)-$$(git rev-parse --short HEAD)
+VERSION?=$$(git describe --abbrev=0)-$$(git rev-parse --abbrev-ref HEAD)-$$(git rev-parse --short HEAD)
 
-DBM_MSQLURI=root:@tcp(127.0.0.1:3306)/videocoin?charset=utf8&parseTime=True&loc=Local
-ENV?=dev
+REGISTRY_SERVER?=registry.videocoin.net
+REGISTRY_PROJECT?=cloud
 
 .PHONY: deploy
 
@@ -28,25 +27,16 @@ deps:
 
 lint: docker-lint
 
+release: docker-build docker-push
+
 docker-lint:
 	docker build -f Dockerfile.lint .
 
 docker-build:
-	docker build -t gcr.io/${GCP_PROJECT}/${NAME}:${VERSION} -f Dockerfile .
+	docker build -t ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/${NAME}:${VERSION} -f Dockerfile .
 
 docker-push:
-	docker push gcr.io/${GCP_PROJECT}/${NAME}:${VERSION}
-
-dbm-status:
-	./tools/${GOOS}/goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" status
-
-dbm-up:
-	./tools/${GOOS}/goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" up
-
-dbm-down:
-	./tools/${GOOS}/goose -dir migrations -table ${NAME} mysql "${DBM_MSQLURI}" down
-
-release: docker-build docker-push
+	docker push ${REGISTRY_SERVER}/${REGISTRY_PROJECT}/${NAME}:${VERSION}
 
 deploy:
-	ENV=${ENV} GCP_PROJECT=${GCP_PROJECT} deploy/deploy.sh
+	cd deploy && helm upgrade -i --wait --set image.tag="${VERSION}" -n console streams ./helm
