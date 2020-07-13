@@ -7,14 +7,18 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     heritage: {{ .Release.Service }}
 spec:
+  type: {{ .Values.service.type }}
+{{ if eq .Values.service.type "ClusterIP" }}
+  clusterIP: {{ .Values.service.clusterIP | default "None" | quote }}
+{{ end }}
   ports:
-    - port: {{ .Values.service.ports.grpc }}
-      targetPort: {{ .Values.service.ports.grpc }}
+    - port: {{ .Values.service.externalRpcPort }}
+      targetPort: {{ .Values.service.internalRpcPort }}
       protocol: TCP
       name: grpc
-    - port: {{ .Values.service.ports.pgrpc }}
-      targetPort: {{ .Values.service.ports.pgrpc }}
+    - port: {{ .Values.service.externalPrivateRpcPort }}
+      targetPort: {{ .Values.service.internalPrivateRpcPort }}
       protocol: TCP
-      name: pgrpc
+      name: privategrpc
   selector:
     app: {{ .Chart.Name }}

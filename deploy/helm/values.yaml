@@ -1,52 +1,28 @@
-replicasCount: 1
+replicasCount: 3
 maxUnavailableCount: 0
 
 image:
-  repository: registry.videocoin.net/cloud/streams
+  repository: gcr.io/videocoin-network/streams
   tag: latest
   pullPolicy: Always
-  pullSecrets: 
-  - name: regcred
 
-serviceAccount:
-  name: default
+config: {}
 
 service:
-  ports:
-    grpc: 5002
-    pgrpc: 5102
-
-resources:
-  limits:
-   cpu: 1000m
-   memory: 512Mi
-  requests:
-   cpu: 1000m
-   memory: 512Mi
+  type: ClusterIP
+  externalRpcPort: 5002
+  internalRpcPort: 5002
+  externalPrivateRpcPort: 5102
+  internalPrivateRpcPort: 5102
 
 autoscaler:
   minCount: 1
-  maxCount: 3
+  maxCount: 10
   targets:
     targetCPUUtilizationPercentage: 70
 
-config:
-  USERS_RPC_ADDR: "users.console.svc.cluster.local:5000"
-  ACCOUNTS_RPC_ADDR: "accounts.console.svc.cluster.local:5001"
-  EMITTER_RPC_ADDR: "emitter.console.svc.cluster.local:5003"
-  PROFILES_RPC_ADDR: "profiles.console.svc.cluster.local:5004"
-  BILLING_RPC_ADDR: "billing.console.svc.cluster.local:5120"
-
-annotations:
-  vault.hashicorp.com/agent-inject: "true"
-  vault.hashicorp.com/role: "console-streams"
-  vault.hashicorp.com/agent-inject-secret-common: "videocoin/v1/networks/everest-dev/console/common"
-  vault.hashicorp.com/agent-inject-secret-config: "videocoin/v1/networks/everest-dev/console/streams"
-  vault.hashicorp.com/agent-inject-template-common: |
-    {{ with secret "videocoin/v1/networks/everest-dev/console/common" }}{{ range $k, $v := .Data }}
-    export {{ $k }}="{{ $v }}"
-    {{ end }}{{ end }}
-  vault.hashicorp.com/agent-inject-template-config: |
-    {{ with secret "videocoin/v1/networks/everest-dev/console/streams" }}{{ range $k, $v := .Data }}
-    export {{ $k }}="{{ $v }}"
-    {{ end }}{{ end }}
+secrets:
+  dbUri: ""
+  mqUri: ""
+  secret: ""
+  sentryDsn: ""
