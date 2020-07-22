@@ -1,4 +1,5 @@
 # github.com/AlekSi/pointer v1.1.0
+## explicit
 github.com/AlekSi/pointer
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
@@ -11,6 +12,7 @@ github.com/cespare/xxhash/v2
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
 # github.com/ethereum/go-ethereum v1.9.11
+## explicit
 github.com/ethereum/go-ethereum/common
 github.com/ethereum/go-ethereum/common/hexutil
 # github.com/evalphobia/logrus_sentry v0.8.2
@@ -18,10 +20,12 @@ github.com/evalphobia/logrus_sentry
 # github.com/getsentry/raven-go v0.2.0
 github.com/getsentry/raven-go
 # github.com/go-playground/locales v0.13.0
+## explicit
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
 github.com/go-playground/locales/en
 # github.com/go-playground/universal-translator v0.17.0
+## explicit
 github.com/go-playground/universal-translator
 # github.com/go-redis/redis v6.15.6+incompatible
 github.com/go-redis/redis
@@ -36,12 +40,14 @@ github.com/go-sql-driver/mysql
 # github.com/gogo/googleapis v1.3.0
 github.com/gogo/googleapis/google/api
 # github.com/gogo/protobuf v1.3.1
+## explicit
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
 github.com/gogo/protobuf/sortkeys
 github.com/gogo/protobuf/types
 # github.com/golang/protobuf v1.3.3
+## explicit
 github.com/golang/protobuf/descriptor
 github.com/golang/protobuf/jsonpb
 github.com/golang/protobuf/proto
@@ -55,19 +61,19 @@ github.com/golang/protobuf/ptypes/wrappers
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
 # github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
+## explicit
 github.com/grpc-ecosystem/go-grpc-middleware
 github.com/grpc-ecosystem/go-grpc-middleware/auth
 github.com/grpc-ecosystem/go-grpc-middleware/logging
 github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus
 github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus
-github.com/grpc-ecosystem/go-grpc-middleware/retry
 github.com/grpc-ecosystem/go-grpc-middleware/tags
 github.com/grpc-ecosystem/go-grpc-middleware/tags/logrus
 github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing
-github.com/grpc-ecosystem/go-grpc-middleware/util/backoffutils
 github.com/grpc-ecosystem/go-grpc-middleware/util/metautils
 github.com/grpc-ecosystem/go-grpc-middleware/validator
 # github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+## explicit
 github.com/grpc-ecosystem/go-grpc-prometheus
 # github.com/grpc-ecosystem/grpc-gateway v1.11.3
 github.com/grpc-ecosystem/grpc-gateway/internal
@@ -75,21 +81,28 @@ github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options
 github.com/grpc-ecosystem/grpc-gateway/runtime
 github.com/grpc-ecosystem/grpc-gateway/utilities
 # github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
+## explicit
 github.com/jinzhu/copier
 # github.com/jinzhu/gorm v1.9.12
+## explicit
 github.com/jinzhu/gorm
 github.com/jinzhu/gorm/dialects/mysql
 # github.com/jinzhu/inflection v1.0.0
 github.com/jinzhu/inflection
 # github.com/kelseyhightower/envconfig v1.4.0
+## explicit
 github.com/kelseyhightower/envconfig
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/labstack/gommon v0.3.0
+## explicit
 # github.com/leodido/go-urn v1.2.0
+## explicit
 github.com/leodido/go-urn
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/opentracing/opentracing-go v1.1.0
+## explicit
 github.com/opentracing/opentracing-go
 github.com/opentracing/opentracing-go/ext
 github.com/opentracing/opentracing-go/log
@@ -108,11 +121,15 @@ github.com/prometheus/common/model
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
+# github.com/robertkrimen/otto v0.0.0-20170205013659-6a77b7cbc37d
+## explicit
 # github.com/schoentoon/logrus-loki v0.0.0-20191021224953-4928b3c6b192
 github.com/schoentoon/logrus-loki
 # github.com/sirupsen/logrus v1.4.2
+## explicit
 github.com/sirupsen/logrus
 # github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
+## explicit
 github.com/streadway/amqp
 # github.com/uber/jaeger-client-go v2.22.1+incompatible
 github.com/uber/jaeger-client-go
@@ -135,7 +152,8 @@ github.com/uber/jaeger-client-go/transport
 github.com/uber/jaeger-client-go/utils
 # github.com/uber/jaeger-lib v2.2.0+incompatible
 github.com/uber/jaeger-lib/metrics
-# github.com/videocoin/cloud-api v0.0.17 => ../cloud-api
+# github.com/videocoin/cloud-api v1.1.0 => ../cloud-api
+## explicit
 github.com/videocoin/cloud-api/accounts/v1
 github.com/videocoin/cloud-api/billing/private/v1
 github.com/videocoin/cloud-api/billing/v1
@@ -145,16 +163,15 @@ github.com/videocoin/cloud-api/emitter/v1
 github.com/videocoin/cloud-api/mediaserver/v1
 github.com/videocoin/cloud-api/miners/v1
 github.com/videocoin/cloud-api/notifications/v1
-github.com/videocoin/cloud-api/profiles/v1
 github.com/videocoin/cloud-api/rpc
 github.com/videocoin/cloud-api/streams/private/v1
 github.com/videocoin/cloud-api/streams/v1
 github.com/videocoin/cloud-api/users/v1
 github.com/videocoin/cloud-api/validator/v1
 # github.com/videocoin/cloud-pkg v0.0.5 => ../cloud-pkg
+## explicit
 github.com/videocoin/cloud-pkg/auth
 github.com/videocoin/cloud-pkg/dlock
-github.com/videocoin/cloud-pkg/grpcutil
 github.com/videocoin/cloud-pkg/logger
 github.com/videocoin/cloud-pkg/mqmux
 github.com/videocoin/cloud-pkg/tracer
@@ -187,6 +204,7 @@ google.golang.org/genproto/googleapis/api/httpbody
 google.golang.org/genproto/googleapis/rpc/status
 google.golang.org/genproto/protobuf/field_mask
 # google.golang.org/grpc v1.27.1
+## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -228,5 +246,8 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 # gopkg.in/go-playground/validator.v9 v9.31.0
+## explicit
 gopkg.in/go-playground/validator.v9
 gopkg.in/go-playground/validator.v9/translations/en
+# github.com/videocoin/cloud-api => ../cloud-api
+# github.com/videocoin/cloud-pkg => ../cloud-pkg

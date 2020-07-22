@@ -22,6 +22,12 @@ service DispatcherService {
   rpc GetConfig(ConfigRequest) returns (ConfigResponse) {}
   rpc GetDelegatorConfig(ConfigRequest) returns (ConfigResponse) {}
 
+  rpc GetDelegatorConfigV2(ConfigRequest) returns (DelegatorConfigResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/delegator/config"
+    };
+  }
+
   rpc Register(cloud.api.miners.v1.RegistrationRequest) returns (google.protobuf.Empty) {}
   rpc Ping(cloud.api.miners.v1.PingRequest) returns (cloud.api.miners.v1.PingResponse) {}
 
@@ -64,6 +70,11 @@ message ConfigResponse {
     string syncer_url = 2 [(gogoproto.customname) = "SyncerURL"];
     string access_key = 3;
     string staking_manager_address = 4;
+}
+
+message DelegatorConfigResponse {
+  string rpc_node_url = 1 [(gogoproto.customname) = "RPCNodeURL"];
+  string access_key = 2;
 }
 
 message TaskSegmentRequest {

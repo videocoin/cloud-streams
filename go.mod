@@ -1,10 +1,6 @@
 module github.com/videocoin/cloud-streams
 
-go 1.13
-
-replace github.com/videocoin/cloud-pkg => ../cloud-pkg
-
-replace github.com/videocoin/cloud-api => ../cloud-api
+go 1.14
 
 require (
 	github.com/AlekSi/pointer v1.1.0
@@ -24,8 +20,11 @@ require (
 	github.com/robertkrimen/otto v0.0.0-20170205013659-6a77b7cbc37d // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
-	github.com/videocoin/cloud-api v0.0.17
+	github.com/videocoin/cloud-api v1.1.0
 	github.com/videocoin/cloud-pkg v0.0.5
 	google.golang.org/grpc v1.27.1
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )
+
+replace github.com/videocoin/cloud-api => ../cloud-api
+replace github.com/videocoin/cloud-pkg => ../cloud-pkg
