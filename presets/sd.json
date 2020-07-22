@@ -1,0 +1,80 @@
+{
+    "id": "190b9d72-208d-4fa2-90b7-5b203c0025d2",
+    "name": "SD",
+    "description": "SD",
+    "is_enabled": true,
+    "spec": {
+        "machine_type": "n1-standard-4",
+        "cost": 0.025,
+        "components": [
+            {
+                "type": "DEMUXER",
+                "params": [
+                    {
+                        "key": "-live_start_index",
+                        "value": "0"
+                    }
+                ]
+            },
+            {
+                "type": "FILTER",
+                "params": [
+                    {
+                        "key": "-vf",
+                        "value": "scale=640:-1"
+                    }
+                ]
+            },
+            {
+                "type": "ENCODER",
+                "params": [
+                    {
+                        "key": "-copyts",
+                        "value": ""
+                    },
+                    {
+                        "key": "-r",
+                        "value": "30"
+                    },
+                    {
+                        "key": "-g",
+                        "value": "60"
+                    },
+                    {
+                        "key": "-c:v",
+                        "value": "libx264"
+                    },
+                    {
+                        "key": "-b:v",
+                        "value": "2000K"
+                    },
+                    {
+                        "key": "-c:a",
+                        "value": "copy"
+                    }
+                ]
+            },
+            {
+                "type": "MUXER",
+                "params": [
+                    {
+                        "key": "-hls_list_size",
+                        "value": "0"
+                    },
+                    {
+                        "key": "-hls_time",
+                        "value": "10"
+                    },
+                    {
+                        "key": "-f",
+                        "value": "hls"
+                    }
+                ]
+            }
+        ]
+    },
+    "capacity": {
+        "encode": 40500,
+        "cpu": 80
+    }
+}

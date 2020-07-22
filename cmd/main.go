@@ -44,6 +44,15 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 
+	logger.Info("loading fixtures")
+
+	err = svc.LoadFixtures("./presets")
+	if err != nil {
+		logger.Fatalf("failed to load fixtures: %s", err)
+	}
+
+	logger.Info("fixtures has been loaded")
+
 	signals := make(chan os.Signal, 1)
 	exit := make(chan bool, 1)
 	errCh := make(chan error, 1)

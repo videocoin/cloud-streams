@@ -6,7 +6,8 @@ import (
 )
 
 type Datastore struct {
-	Stream *StreamDatastore
+	Stream  *StreamDatastore
+	Profile *ProfileDatastore
 }
 
 func NewDatastore(uri string) (*Datastore, error) {
@@ -25,6 +26,13 @@ func NewDatastore(uri string) (*Datastore, error) {
 	}
 
 	ds.Stream = streamDs
+
+	profileDs, err := NewProfileDatastore(db)
+	if err != nil {
+		return nil, err
+	}
+
+	ds.Profile = profileDs
 
 	return ds, nil
 }

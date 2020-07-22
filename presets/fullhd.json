@@ -1,0 +1,80 @@
+{
+    "id": "45d5ef05-efef-4606-6fa3-48f42d3f0b96",
+    "name": "FullHD",
+    "description": "FullHD",
+    "is_enabled": true,
+    "spec": {
+        "machine_type": "n1-standard-8",
+        "cost": 0.025,
+        "components": [
+            {
+                "type": "DEMUXER",
+                "params": [
+                    {
+                        "key": "-live_start_index",
+                        "value": "0"
+                    }
+                ]
+            },
+            {
+                "type": "FILTER",
+                "params": [
+                    {
+                        "key": "-vf",
+                        "value": "scale=1920:-1"
+                    }
+                ]
+            },
+            {
+                "type": "ENCODER",
+                "params": [
+                    {
+                        "key": "-copyts",
+                        "value": ""
+                    },
+                    {
+                        "key": "-r",
+                        "value": "30"
+                    },
+                    {
+                        "key": "-g",
+                        "value": "60"
+                    },
+                    {
+                        "key": "-c:v",
+                        "value": "libx264"
+                    },
+                    {
+                        "key": "-b:v",
+                        "value": "4800K"
+                    },
+                    {
+                        "key": "-c:a",
+                        "value": "copy"
+                    }
+                ]
+            },
+            {
+                "type": "MUXER",
+                "params": [
+                    {
+                        "key": "-hls_list_size",
+                        "value": "0"
+                    },
+                    {
+                        "key": "-hls_time",
+                        "value": "10"
+                    },
+                    {
+                        "key": "-f",
+                        "value": "hls"
+                    }
+                ]
+            }
+        ]
+    },
+    "capacity": {
+        "encode": 108000,
+        "cpu": 90
+    }
+}

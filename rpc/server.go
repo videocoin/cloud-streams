@@ -14,7 +14,6 @@ import (
 	"github.com/sirupsen/logrus"
 	accountsv1 "github.com/videocoin/cloud-api/accounts/v1"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
-	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	usersv1 "github.com/videocoin/cloud-api/users/v1"
@@ -28,7 +27,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type RPCServerOpts struct { //nolint
+type ServerOpts struct { //nolint
 	Addr            string
 	AuthTokenSecret string
 	BaseInputURL    string
@@ -38,13 +37,12 @@ type RPCServerOpts struct { //nolint
 	Ds              *ds.Datastore
 	Users           usersv1.UserServiceClient
 	Accounts        accountsv1.AccountServiceClient
-	Profiles        profilesv1.ProfilesServiceClient
 	Emitter         emitterv1.EmitterServiceClient
 	EventBus        *eventbus.EventBus
 	Logger          *logrus.Entry
 }
 
-type RPCServer struct { //nolint
+type Server struct { //nolint
 	addr            string
 	authTokenSecret string
 	baseInputURL    string
@@ -55,7 +53,6 @@ type RPCServer struct { //nolint
 	ds              *ds.Datastore
 	users           usersv1.UserServiceClient
 	accounts        accountsv1.AccountServiceClient
-	profiles        profilesv1.ProfilesServiceClient
 	emitter         emitterv1.EmitterServiceClient
 	manager         *manager.Manager
 	logger          *logrus.Entry
@@ -63,7 +60,7 @@ type RPCServer struct { //nolint
 	eb              *eventbus.EventBus
 }
 
-func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
+func NewServer(opts *ServerOpts) (*Server, error) {
 	grpcOpts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
 			grpcctxtags.UnaryServerInterceptor(),
@@ -76,27 +73,27 @@ func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 			grpcvalidator.UnaryServerInterceptor(),
 		)),
 	}
-	gRPCServer := grpc.NewServer(grpcOpts...)
+	grpcSrv := grpc.NewServer(grpcOpts...)
 
 	listen, err := net.Listen("tcp", opts.Addr)
 	if err != nil {
 		return nil, err
 	}
+
 	validator, err := newRequestValidator()
 	if err != nil {
 		return nil, err
 	}
 
-	RPCServer := &RPCServer{
+	srv := &Server{
 		logger:          opts.Logger,
 		addr:            opts.Addr,
 		authTokenSecret: opts.AuthTokenSecret,
-		grpc:            gRPCServer,
+		grpc:            grpcSrv,
 		listen:          listen,
 		ds:              opts.Ds,
 		users:           opts.Users,
 		accounts:        opts.Accounts,
-		profiles:        opts.Profiles,
 		emitter:         opts.Emitter,
 		manager:         opts.Manager,
 		baseInputURL:    opts.BaseInputURL,
@@ -107,20 +104,20 @@ func NewRPCServer(opts *RPCServerOpts) (*RPCServer, error) {
 	}
 
 	healthService := health.NewServer()
-	healthv1.RegisterHealthServer(gRPCServer, healthService)
+	healthv1.RegisterHealthServer(grpcSrv, healthService)
 
-	v1.RegisterStreamServiceServer(gRPCServer, RPCServer)
-	reflection.Register(gRPCServer)
+	v1.RegisterStreamsServiceServer(grpcSrv, srv)
+	reflection.Register(grpcSrv)
 
-	return RPCServer, nil
+	return srv, nil
 }
 
-func (s *RPCServer) Start() error {
+func (s *Server) Start() error {
 	s.logger.Infof("starting rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
 }
 
-func (s *RPCServer) authenticate(ctx context.Context) (string, error) {
+func (s *Server) authenticate(ctx context.Context) (string, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "authenticate")
 	defer span.Finish()
 

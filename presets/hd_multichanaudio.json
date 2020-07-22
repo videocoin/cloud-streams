@@ -1,0 +1,88 @@
+{
+    "id": "hd-multichan-audio",
+    "name": "HD MultiChan Audio",
+    "description": "HD",
+    "is_enabled": true,
+    "spec": {
+        "machine_type": "n1-standard-8",
+        "cost": 0.025,
+        "components": [
+            {
+                "type": "DEMUXER",
+                "params": [
+                    {
+                        "key": "-live_start_index",
+                        "value": "0"
+                    }
+                ]
+            },
+            {
+                "type": "FILTER",
+                "params": [
+                    {
+                        "key": "-vf",
+                        "value": "scale=1280:-1"
+                    }
+                ]
+            },
+            {
+                "type": "ENCODER",
+                "params": [
+                    {
+                        "key": "-copyts",
+                        "value": ""
+                    },
+                    {
+                        "key": "-r",
+                        "value": "30"
+                    },
+                    {
+                        "key": "-c:v",
+                        "value": "libx264"
+                    },
+                    {
+                        "key": "-g",
+                        "value": "60"
+                    },
+                    {
+                        "key": "-b:v",
+                        "value": "5000K"
+                    },
+                    {
+                        "key": "-c:a",
+                        "value": "libfdk_aac"
+                    },
+                    {
+                        "key": "-map",
+                        "value": "0:v"
+                    },
+                    {
+                        "key": "-map",
+                        "value": "0:a"
+                    }
+                ]
+            },
+            {
+                "type": "MUXER",
+                "params": [
+                    {
+                        "key": "-hls_list_size",
+                        "value": "0"
+                    },
+                    {
+                        "key": "-hls_time",
+                        "value": "10"
+                    },
+                    {
+                        "key": "-f",
+                        "value": "hls"
+                    }
+                ]
+            }
+        ]
+    },
+    "capacity": {
+        "encode": 108000,
+        "cpu": 90
+    }
+}

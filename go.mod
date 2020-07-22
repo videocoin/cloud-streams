@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.3.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
+	github.com/grpc-ecosystem/grpc-gateway v1.11.3
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 	github.com/jinzhu/gorm v1.9.12
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -27,4 +28,5 @@ require (
 )
 
 replace github.com/videocoin/cloud-api => ../cloud-api
+
 replace github.com/videocoin/cloud-pkg => ../cloud-pkg

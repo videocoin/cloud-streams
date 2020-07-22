@@ -2,41 +2,18 @@ package rpc
 
 import (
 	"context"
+	"github.com/jinzhu/copier"
+	"github.com/videocoin/cloud-streams/wrapper"
 
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
-	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
-	"github.com/videocoin/cloud-pkg/grpcutil"
 	"github.com/videocoin/cloud-streams/datastore"
 	"github.com/videocoin/cloud-streams/manager"
 )
 
-func (s *RPCServer) getProfile(ctx context.Context, profileID string) (*profilesv1.GetProfileResponse, error) {
-	profileReq := &profilesv1.ProfileRequest{ID: profileID}
-	profile, err := s.profiles.Get(ctx, profileReq)
-	if err != nil {
-		if grpcutil.IsNotFoundError(err) {
-			return nil, rpc.NewRpcValidationError(&rpc.MultiValidationError{
-				Errors: []*rpc.ValidationError{
-					{
-						Field:   "profile_id",
-						Message: "profile id does not exist",
-					},
-				},
-			})
-		}
-
-		logFailedTo(s.logger, "get profile", err)
-
-		return nil, rpc.ErrRpcInternal
-	}
-
-	return profile, nil
-}
-
-func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
+func (s *Server) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("name", req.Name)
 	span.SetTag("profile_id", req.ProfileId)
@@ -56,9 +33,10 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 		return nil, rpc.NewRpcValidationError(verr)
 	}
 
-	profile, err := s.getProfile(ctx, req.ProfileId)
+	profile, err := s.manager.GetProfileByID(ctx, req.ProfileId)
 	if err != nil {
-		return nil, err
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcBadRequest
 	}
 
 	stream, err := s.manager.CreateStream(
@@ -93,7 +71,7 @@ func (s *RPCServer) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v
 	return streamResponse, nil
 }
 
-func (s *RPCServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
+func (s *Server) Delete(ctx context.Context, req *v1.StreamRequest) (*protoempty.Empty, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -130,7 +108,7 @@ func (s *RPCServer) Delete(ctx context.Context, req *v1.StreamRequest) (*protoem
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RPCServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
+func (s *Server) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -162,7 +140,7 @@ func (s *RPCServer) Get(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	return streamResponse, nil
 }
 
-func (s *RPCServer) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamListResponse, error) {
+func (s *Server) List(ctx context.Context, req *protoempty.Empty) (*v1.StreamListResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 
 	userID, err := s.authenticate(ctx)
@@ -188,7 +166,7 @@ func (s *RPCServer) List(ctx context.Context, req *protoempty.Empty) (*v1.Stream
 	return streamListResponse, nil
 }
 
-func (s *RPCServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamResponse, error) {
+func (s *Server) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -238,7 +216,7 @@ func (s *RPCServer) Update(ctx context.Context, req *v1.UpdateStreamRequest) (*v
 	return streamResponse, nil
 }
 
-func (s *RPCServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
+func (s *Server) UpdateStatus(ctx context.Context, req *v1.UpdateStreamRequest) (*protoempty.Empty, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -288,7 +266,7 @@ func (s *RPCServer) UpdateStatus(ctx context.Context, req *v1.UpdateStreamReques
 	return &protoempty.Empty{}, nil
 }
 
-func (s *RPCServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
+func (s *Server) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -324,7 +302,7 @@ func (s *RPCServer) Run(ctx context.Context, req *v1.StreamRequest) (*v1.StreamR
 	return resp, nil
 }
 
-func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
+func (s *Server) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -382,4 +360,76 @@ func (s *RPCServer) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.Stream
 	}
 
 	return resp, nil
+}
+
+func (s *Server) GetProfile(ctx context.Context, req *v1.ProfileRequest) (*v1.InternalProfileResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	span.SetTag("profile_id", req.ID)
+	logger := s.logger.WithField("profile_id", req.ID)
+
+	profile, err := s.manager.GetProfileByID(ctx, req.ID)
+	if err != nil {
+		if err == datastore.ErrProfileNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	resp := &v1.InternalProfileResponse{}
+	if err := copier.Copy(&resp, &profile); err != nil {
+		return nil, err
+	}
+	resp.MachineType = profile.Spec.MachineType
+	resp.Cost = profile.Spec.Cost
+	resp.Components = profile.Spec.Components
+	resp.Capacity = profile.Capacity
+
+	return resp, nil
+}
+
+func (s *Server) GetProfileList(ctx context.Context, _ *protoempty.Empty) (*v1.ProfileListResponse, error) {
+	profiles, err := s.manager.ListEnabledProfiles(ctx)
+	if err != nil {
+		logFailedTo(s.logger, "get profile list", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	resp := &v1.ProfileListResponse{}
+	if err := copier.Copy(&resp.Items, &profiles); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (s *Server) RenderProfile(ctx context.Context, req *v1.ProfileRenderRequest) (*v1.ProfileRenderResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	span.SetTag("profile_id", req.ID)
+	logger := s.logger.WithField("profile_id", req.ID)
+
+	if req.Input == "" || req.Output == "" {
+		return nil, rpc.ErrRpcBadRequest
+	}
+
+	profile, err := s.manager.GetProfileByID(ctx, req.ID)
+	if err != nil {
+		if err == datastore.ErrProfileNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	if len(req.Components) > 0 {
+		profile.Spec.Components = req.Components
+	}
+
+	p := &wrapper.Profile{Profile: profile}
+
+	return &v1.ProfileRenderResponse{
+		Render: p.Render(req.Input, req.Output),
+	}, nil
 }

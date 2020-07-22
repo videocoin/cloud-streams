@@ -1,0 +1,58 @@
+{
+    "id": "45d5ef05-efef-4606-6fa3-48f42d3f0b94",
+    "name": "copy",
+    "description": "copy",
+    "is_enabled": true,
+    "spec": {
+        "machine_type": "n1-standard-2",
+        "cost": 0.025,
+        "components": [
+            {
+                "type": "DEMUXER",
+                "params": [
+                    {
+                        "key": "-live_start_index",
+                        "value": "0"
+                    }
+                ]
+            },
+            {
+                "type": "ENCODER",
+                "params": [
+                    {
+                        "key": "-copyts",
+                        "value": ""
+                    },
+                    {
+                        "key": "-c:v",
+                        "value": "copy"
+                    },
+                    {
+                        "key": "-c:a",
+                        "value": "copy"
+                    }
+                ]
+            },
+            {
+                "type": "MUXER",
+                "params": [
+                    {
+                        "key": "-hls_list_size",
+                        "value": "0"
+                    },
+                    {
+                        "key": "-hls_time",
+                        "value": "10"
+                    },
+                    {
+                        "key": "-f",
+                        "value": "hls"
+                    }
+                ]
+            }
+        ]
+    },
+    "capacity": {
+        "encode": 10
+    }
+}

@@ -9,6 +9,7 @@ RUN make build
 FROM bitnami/minideb:jessie
 
 COPY --from=builder /go/src/github.com/videocoin/cloud-streams/bin/streams /streams
+COPY --from=builder /go/src/github.com/videocoin/cloud-streams/presets /presets
 COPY --from=builder /go/src/github.com/videocoin/cloud-streams/tools/linux_amd64/goose /goose
 COPY --from=builder /go/src/github.com/videocoin/cloud-streams/migrations /migrations
 

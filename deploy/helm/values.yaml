@@ -34,7 +34,6 @@ config:
   USERS_RPC_ADDR: "users.console.svc.cluster.local:5000"
   ACCOUNTS_RPC_ADDR: "accounts.console.svc.cluster.local:5001"
   EMITTER_RPC_ADDR: "emitter.console.svc.cluster.local:5003"
-  PROFILES_RPC_ADDR: "profiles.console.svc.cluster.local:5004"
   BILLING_RPC_ADDR: "billing.console.svc.cluster.local:5120"
 
 annotations:

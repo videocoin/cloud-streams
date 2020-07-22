@@ -2,8 +2,12 @@ package service
 
 import (
 	"context"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
-	ctxlogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	clientv1 "github.com/videocoin/cloud-api/client/v1"
 	"github.com/videocoin/cloud-pkg/dlock"
 	ds "github.com/videocoin/cloud-streams/datastore"
@@ -13,11 +17,11 @@ import (
 )
 
 type Service struct {
-	cfg        *Config
-	rpc        *rpc.RPCServer
-	privateRPC *rpc.PrivateRPCServer
-	eb         *eventbus.EventBus
-	dm         *manager.Manager
+	cfg  *Config
+	rpc  *rpc.Server
+	prpc *rpc.PrivateServer
+	eb   *eventbus.EventBus
+	dm   *manager.Manager
 }
 
 func NewService(ctx context.Context, cfg *Config) (*Service, error) {
@@ -36,19 +40,18 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 		return nil, err
 	}
 
-	ebConfig := &eventbus.Config{
+	eb, err := eventbus.New(&eventbus.Config{
 		URI:     cfg.MQURI,
 		Name:    cfg.Name,
 		Logger:  ctxlogrus.Extract(ctx).WithField("system", "eventbus"),
 		Emitter: sc.Emitter,
 		Users:   sc.Users,
-	}
-	eb, err := eventbus.New(ebConfig)
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	managerOpts := &manager.Opts{
+	manager := manager.NewManager(&manager.Opts{
 		Logger:            ctxlogrus.Extract(ctx).WithField("system", "manager"),
 		Ds:                ds,
 		Emitter:           sc.Emitter,
@@ -58,50 +61,43 @@ func NewService(ctx context.Context, cfg *Config) (*Service, error) {
 		EB:                eb,
 		DLock:             dlock,
 		MaxLiveStreamTime: cfg.MaxLiveStreamTime,
-	}
-	manager := manager.NewManager(managerOpts)
+	})
 
-	rpcConfig := &rpc.RPCServerOpts{
+	srv, err := rpc.NewServer(&rpc.ServerOpts{
 		Logger:          ctxlogrus.Extract(ctx).WithField("system", "rpc"),
 		Addr:            cfg.RPCAddr,
 		Ds:              ds,
 		Manager:         manager,
 		Users:           sc.Users,
 		Accounts:        sc.Accounts,
-		Profiles:        sc.Profiles,
 		BaseInputURL:    cfg.BaseInputURL,
 		BaseOutputURL:   cfg.BaseOutputURL,
 		RTMPURL:         cfg.RTMPURL,
 		Emitter:         sc.Emitter,
 		AuthTokenSecret: cfg.AuthTokenSecret,
 		EventBus:        eb,
-	}
-
-	publicRPC, err := rpc.NewRPCServer(rpcConfig)
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	privateRPCConfig := &rpc.PrivateRPCServerOpts{
+	psrv, err := rpc.NewPrivateServer(&rpc.PrivateServerOpts{
 		Addr:     cfg.PrivateRPCAddr,
-		Logger:   ctxlogrus.Extract(ctx).WithField("system", "privaterpc"),
+		Logger:   ctxlogrus.Extract(ctx).WithField("system", "private-rpc"),
 		Manager:  manager,
 		Emitter:  sc.Emitter,
-		Profiles: sc.Profiles,
 		EventBus: eb,
-	}
-
-	privateRPC, err := rpc.NewPrivateRPCServer(privateRPCConfig)
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	svc := &Service{
-		cfg:        cfg,
-		rpc:        publicRPC,
-		privateRPC: privateRPC,
-		eb:         eb,
-		dm:         manager,
+		cfg:  cfg,
+		rpc:  srv,
+		prpc: psrv,
+		eb:   eb,
+		dm:   manager,
 	}
 
 	return svc, nil
@@ -113,7 +109,7 @@ func (s *Service) Start(errCh chan error) {
 	}()
 
 	go func() {
-		errCh <- s.privateRPC.Start()
+		errCh <- s.prpc.Start()
 	}()
 
 	go func() {
@@ -130,4 +126,71 @@ func (s *Service) Stop() error {
 	}
 	err = s.dm.StopBackgroundTasks()
 	return err
+}
+
+func (s *Service) LoadFixtures(presetsRoot string) error {
+	var presetsFiles []string
+
+	err := filepath.Walk(presetsRoot, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			presetsFiles = append(presetsFiles, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	datastore, err := ds.NewDatastore(s.cfg.DBURI)
+	if err != nil {
+		return err
+	}
+
+	m := &runtime.JSONPb{OrigName: true, EmitDefaults: true, EnumsAsInts: false}
+	ctx := context.Background()
+	profileIds := []string{}
+
+	for _, file := range presetsFiles {
+		data, err := ioutil.ReadFile(file)
+		if err != nil {
+			return err
+		}
+
+		profile := new(ds.Profile)
+		err = m.Unmarshal(data, &profile)
+		if err != nil {
+			return err
+		}
+
+		_, err = datastore.Profile.Get(ctx, profile.ID)
+		if err != nil {
+			if err == ds.ErrProfileNotFound {
+				_, createErr := datastore.Profile.Create(ctx, profile)
+				if createErr != nil {
+					return createErr
+				}
+
+				profileIds = append(profileIds, profile.ID)
+				continue
+			}
+
+			return err
+		}
+
+		err = datastore.Profile.Update(ctx, profile)
+		if err != nil {
+			return err
+		}
+
+		profileIds = append(profileIds, profile.ID)
+	}
+
+	if len(profileIds) > 0 {
+		err = datastore.Profile.DeleteAllExceptIds(ctx, profileIds)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

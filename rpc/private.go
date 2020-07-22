@@ -14,7 +14,6 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
 	emitterv1 "github.com/videocoin/cloud-api/emitter/v1"
-	profilesv1 "github.com/videocoin/cloud-api/profiles/v1"
 	"github.com/videocoin/cloud-api/rpc"
 	privatev1 "github.com/videocoin/cloud-api/streams/private/v1"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -28,27 +27,25 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type PrivateRPCServerOpts struct {
+type PrivateServerOpts struct {
 	Addr     string
 	Logger   *logrus.Entry
 	Manager  *manager.Manager
 	Emitter  emitterv1.EmitterServiceClient
-	Profiles profilesv1.ProfilesServiceClient
 	EventBus *eventbus.EventBus
 }
 
-type PrivateRPCServer struct {
-	addr     string
-	logger   *logrus.Entry
-	grpc     *grpc.Server
-	listen   net.Listener
-	manager  *manager.Manager
-	emitter  emitterv1.EmitterServiceClient
-	profiles profilesv1.ProfilesServiceClient
-	eb       *eventbus.EventBus
+type PrivateServer struct {
+	addr    string
+	logger  *logrus.Entry
+	grpc    *grpc.Server
+	listen  net.Listener
+	manager *manager.Manager
+	emitter emitterv1.EmitterServiceClient
+	eb      *eventbus.EventBus
 }
 
-func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) {
+func NewPrivateServer(opts *PrivateServerOpts) (*PrivateServer, error) {
 	grpcOpts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(grpcmiddleware.ChainUnaryServer(
 			grpcctxtags.UnaryServerInterceptor(),
@@ -68,15 +65,14 @@ func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) 
 		return nil, err
 	}
 
-	rpcServer := &PrivateRPCServer{
-		addr:     opts.Addr,
-		logger:   opts.Logger.WithField("system", "privaterpc"),
-		grpc:     grpcServer,
-		listen:   listen,
-		manager:  opts.Manager,
-		emitter:  opts.Emitter,
-		profiles: opts.Profiles,
-		eb:       opts.EventBus,
+	rpcServer := &PrivateServer{
+		addr:    opts.Addr,
+		logger:  opts.Logger.WithField("system", "privaterpc"),
+		grpc:    grpcServer,
+		listen:  listen,
+		manager: opts.Manager,
+		emitter: opts.Emitter,
+		eb:      opts.EventBus,
 	}
 
 	healthService := health.NewServer()
@@ -88,12 +84,12 @@ func NewPrivateRPCServer(opts *PrivateRPCServerOpts) (*PrivateRPCServer, error) 
 	return rpcServer, nil
 }
 
-func (s *PrivateRPCServer) Start() error {
+func (s *PrivateServer) Start() error {
 	s.logger.Infof("starting private rpc server on %s", s.addr)
 	return s.grpc.Serve(s.listen)
 }
 
-func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) Get(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -109,8 +105,7 @@ func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest
 		return nil, rpc.ErrRpcInternal
 	}
 
-	profileReq := &profilesv1.ProfileRequest{ID: stream.ProfileID}
-	profile, err := s.profiles.Get(otCtx, profileReq)
+	profile, err := s.manager.GetProfileByID(otCtx, stream.ProfileID)
 	if err != nil {
 		logFailedTo(logger, "get profile", err)
 		return nil, rpc.ErrRpcInternal
@@ -125,7 +120,7 @@ func (s *PrivateRPCServer) Get(ctx context.Context, req *privatev1.StreamRequest
 	return streamResponse, nil
 }
 
-func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) Publish(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -141,14 +136,13 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 		return nil, rpc.ErrRpcInternal
 	}
 
-	profileReq := &profilesv1.ProfileRequest{ID: stream.ProfileID}
-	profile, err := s.profiles.Get(otCtx, profileReq)
+	profile, err := s.manager.GetProfileByID(otCtx, stream.ProfileID)
 	if err != nil {
 		logFailedTo(logger, "get profile", err)
 		return nil, rpc.ErrRpcInternal
 	}
 
-	cost := profile.Cost / 60 * req.Duration
+	cost := profile.Spec.Cost / 60 * req.Duration
 
 	logger.Infof("cost %f", cost)
 
@@ -193,7 +187,7 @@ func (s *PrivateRPCServer) Publish(ctx context.Context, req *privatev1.StreamReq
 	return streamResponse, nil
 }
 
-func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) PublishDone(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -233,7 +227,7 @@ func (s *PrivateRPCServer) PublishDone(ctx context.Context, req *privatev1.Strea
 	return streamResponse, nil
 }
 
-func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) Complete(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -264,7 +258,7 @@ func (s *PrivateRPCServer) Complete(ctx context.Context, req *privatev1.StreamRe
 	return streamResponse, nil
 }
 
-func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) Run(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -293,7 +287,7 @@ func (s *PrivateRPCServer) Run(ctx context.Context, req *privatev1.StreamRequest
 	return resp, nil
 }
 
-func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) Stop(ctx context.Context, req *privatev1.StreamRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.Id)
 	logger := s.logger.WithField("stream_id", req.Id)
@@ -342,7 +336,7 @@ func (s *PrivateRPCServer) Stop(ctx context.Context, req *privatev1.StreamReques
 	return resp, nil
 }
 
-func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.UpdateStatusRequest) (*privatev1.StreamResponse, error) {
+func (s *PrivateServer) UpdateStatus(ctx context.Context, req *privatev1.UpdateStatusRequest) (*privatev1.StreamResponse, error) {
 	span := opentracing.SpanFromContext(ctx)
 	span.SetTag("stream_id", req.ID)
 	logger := s.logger.WithField("stream_id", req.ID)
@@ -376,7 +370,7 @@ func (s *PrivateRPCServer) UpdateStatus(ctx context.Context, req *privatev1.Upda
 	return resp, nil
 }
 
-func toStreamResponsePrivate(stream *ds.Stream, profile *profilesv1.GetProfileResponse) (*privatev1.StreamResponse, error) {
+func toStreamResponsePrivate(stream *ds.Stream, profile *ds.Profile) (*privatev1.StreamResponse, error) {
 	resp := new(privatev1.StreamResponse)
 	if err := copier.Copy(resp, stream); err != nil {
 		return nil, err
@@ -393,7 +387,7 @@ func toStreamResponsePrivate(stream *ds.Stream, profile *profilesv1.GetProfileRe
 	resp.OutputType = stream.OutputType
 
 	if profile != nil {
-		resp.ProfileCost = profile.Cost
+		resp.ProfileCost = profile.Spec.Cost
 	}
 
 	return resp, nil
