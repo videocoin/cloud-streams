@@ -132,8 +132,6 @@ service StreamsService {
         post: "/api/v1/streams/{id}/stop"
       };
     };
-
-    rpc GetProfile(ProfileRequest) returns (InternalProfileResponse)  {}
 	
     /* This API call returns a list of supported output transcoding profiles. Most notably, the items in the response list the ID of a profile which is required when creating a new stream object. */
     rpc GetProfileList(google.protobuf.Empty) returns (ProfileListResponse)  {
@@ -141,8 +139,6 @@ service StreamsService {
             get: "/api/v1/profiles"
         };
     }
-
-    rpc RenderProfile(ProfileRenderRequest) returns (ProfileRenderResponse) {}
 }
 
 message CreateStreamRequest {
@@ -285,9 +281,9 @@ message StreamListResponse {
 
 message ProfileRequest {
   string id = 1 [
-  (gogoproto.moretags) = "validate:\"required\"",
-  (gogoproto.customname) = "ID"
-];
+    (gogoproto.moretags) = "validate:\"required\"",
+    (gogoproto.customname) = "ID"
+  ];
 }
 
 message ProfileResponse {
@@ -298,35 +294,6 @@ message ProfileResponse {
   CapacityInfo capacity = 5;
 }
 
-message InternalProfileResponse {
-  string id = 1 [(gogoproto.customname) = "ID"];
-  string name = 2;
-  string description = 3;
-  bool is_enabled = 4;
-  string machine_type = 5;
-  double cost = 6;
-  repeated Component components = 7;
-  CapacityInfo capacity = 8;
-}
-
 message ProfileListResponse {
   repeated ProfileResponse items = 1;
-}
-
-message ProfileRenderRequest {
-  string id = 1 [
-  (gogoproto.moretags) = "validate:\"required\"",
-  (gogoproto.customname) = "ID"
-];
-  string input = 2 [
-  (gogoproto.moretags) = "validate:\"required\""
-];
-  string output = 3 [
-  (gogoproto.moretags) = "validate:\"required\""
-];
-repeated Component components = 4;
-}
-
-message ProfileRenderResponse {
-  string render = 1;
 }

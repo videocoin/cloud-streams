@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"github.com/videocoin/cloud-streams/wrapper"
 	"net"
 
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -391,4 +392,61 @@ func toStreamResponsePrivate(stream *ds.Stream, profile *ds.Profile) (*privatev1
 	}
 
 	return resp, nil
+}
+
+func (s *PrivateServer) GetProfile(ctx context.Context, req *privatev1.ProfileRequest) (*privatev1.ProfileResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	span.SetTag("profile_id", req.ID)
+	logger := s.logger.WithField("profile_id", req.ID)
+
+	profile, err := s.manager.GetProfileByID(ctx, req.ID)
+	if err != nil {
+		if err == datastore.ErrProfileNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	resp := &privatev1.ProfileResponse{}
+	if err := copier.Copy(&resp, &profile); err != nil {
+		return nil, err
+	}
+	resp.MachineType = profile.Spec.MachineType
+	resp.Cost = profile.Spec.Cost
+	resp.Components = profile.Spec.Components
+	resp.Capacity = profile.Capacity
+
+	return resp, nil
+}
+
+func (s *PrivateServer) RenderProfile(ctx context.Context, req *privatev1.ProfileRenderRequest) (*privatev1.ProfileRenderResponse, error) {
+	span := opentracing.SpanFromContext(ctx)
+	span.SetTag("profile_id", req.ID)
+	logger := s.logger.WithField("profile_id", req.ID)
+
+	if req.Input == "" || req.Output == "" {
+		return nil, rpc.ErrRpcBadRequest
+	}
+
+	profile, err := s.manager.GetProfileByID(ctx, req.ID)
+	if err != nil {
+		if err == datastore.ErrProfileNotFound {
+			return nil, rpc.ErrRpcNotFound
+		}
+
+		logFailedTo(logger, "get profile", err)
+		return nil, rpc.ErrRpcInternal
+	}
+
+	if len(req.Components) > 0 {
+		profile.Spec.Components = req.Components
+	}
+
+	p := &wrapper.Profile{Profile: profile}
+
+	return &privatev1.ProfileRenderResponse{
+		Render: p.Render(req.Input, req.Output),
+	}, nil
 }

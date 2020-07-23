@@ -2,10 +2,8 @@ package rpc
 
 import (
 	"context"
-	"github.com/jinzhu/copier"
-	"github.com/videocoin/cloud-streams/wrapper"
-
 	protoempty "github.com/gogo/protobuf/types"
+	"github.com/jinzhu/copier"
 	"github.com/opentracing/opentracing-go"
 	"github.com/videocoin/cloud-api/rpc"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
@@ -362,33 +360,6 @@ func (s *Server) Stop(ctx context.Context, req *v1.StreamRequest) (*v1.StreamRes
 	return resp, nil
 }
 
-func (s *Server) GetProfile(ctx context.Context, req *v1.ProfileRequest) (*v1.InternalProfileResponse, error) {
-	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("profile_id", req.ID)
-	logger := s.logger.WithField("profile_id", req.ID)
-
-	profile, err := s.manager.GetProfileByID(ctx, req.ID)
-	if err != nil {
-		if err == datastore.ErrProfileNotFound {
-			return nil, rpc.ErrRpcNotFound
-		}
-
-		logFailedTo(logger, "get profile", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	resp := &v1.InternalProfileResponse{}
-	if err := copier.Copy(&resp, &profile); err != nil {
-		return nil, err
-	}
-	resp.MachineType = profile.Spec.MachineType
-	resp.Cost = profile.Spec.Cost
-	resp.Components = profile.Spec.Components
-	resp.Capacity = profile.Capacity
-
-	return resp, nil
-}
-
 func (s *Server) GetProfileList(ctx context.Context, _ *protoempty.Empty) (*v1.ProfileListResponse, error) {
 	profiles, err := s.manager.ListEnabledProfiles(ctx)
 	if err != nil {
@@ -402,34 +373,4 @@ func (s *Server) GetProfileList(ctx context.Context, _ *protoempty.Empty) (*v1.P
 	}
 
 	return resp, nil
-}
-
-func (s *Server) RenderProfile(ctx context.Context, req *v1.ProfileRenderRequest) (*v1.ProfileRenderResponse, error) {
-	span := opentracing.SpanFromContext(ctx)
-	span.SetTag("profile_id", req.ID)
-	logger := s.logger.WithField("profile_id", req.ID)
-
-	if req.Input == "" || req.Output == "" {
-		return nil, rpc.ErrRpcBadRequest
-	}
-
-	profile, err := s.manager.GetProfileByID(ctx, req.ID)
-	if err != nil {
-		if err == datastore.ErrProfileNotFound {
-			return nil, rpc.ErrRpcNotFound
-		}
-
-		logFailedTo(logger, "get profile", err)
-		return nil, rpc.ErrRpcInternal
-	}
-
-	if len(req.Components) > 0 {
-		profile.Spec.Components = req.Components
-	}
-
-	p := &wrapper.Profile{Profile: profile}
-
-	return &v1.ProfileRenderResponse{
-		Render: p.Render(req.Input, req.Output),
-	}, nil
 }
