@@ -21,7 +21,7 @@
                 "params": [
                     {
                         "key": "-vf",
-                        "value": "scale=640:-1"
+                        "value": "scale=640:-2"
                     }
                 ]
             },
