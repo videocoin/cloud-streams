@@ -73,7 +73,7 @@ service MinersService {
         };
     }
 
-     rpc All(google.protobuf.Empty) returns (MinerListResponse) {
+     rpc All(AllMinersListRequest) returns (MinerListResponse) {
         option (google.api.http) = {
             get: "/api/v1/miners/all"
         };
@@ -181,6 +181,10 @@ message MinerResponse {
 
 message MinerListResponse {
     repeated MinerResponse items = 1;
+    int32 total_count = 2;
+    int32 count = 3;
+    bool has_next = 4;
+    bool has_prev = 5;
 }
 
 message PingRequest {
@@ -249,4 +253,9 @@ message InternalMinerResponse {
     string key = 2;
     string secret = 3;
     string task_id = 4 [(gogoproto.customname) = "TaskID"];
+}
+
+message AllMinersListRequest {
+    int32 offset = 1;
+    int32 limit = 2;
 }
