@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+
 	protoempty "github.com/gogo/protobuf/types"
 	"github.com/jinzhu/copier"
 	"github.com/opentracing/opentracing-go"
@@ -47,6 +48,7 @@ func (s *Server) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.S
 		s.rtmpURL,
 		req.InputType,
 		req.OutputType,
+		req.DrmXml,
 	)
 	if err != nil {
 		logFailedTo(logger, "create stream", err)

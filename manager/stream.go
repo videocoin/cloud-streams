@@ -34,6 +34,7 @@ func (m *Manager) CreateStream(
 	rtmpURL string,
 	inputType v1.InputType,
 	outputType v1.OutputType,
+	drmXML string,
 ) (*ds.Stream, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "manager.CreateStream")
 	defer span.Finish()
@@ -72,6 +73,7 @@ func (m *Manager) CreateStream(
 		Status:           v1.StreamStatusNew,
 		InputType:        inputType,
 		OutputType:       outputType,
+		DrmXml:           drmXML,
 	})
 	if err != nil {
 		tracer.SpanLogError(span, err)
