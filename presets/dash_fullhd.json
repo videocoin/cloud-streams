@@ -1,7 +1,7 @@
 {
-    "id": "hd-multichan-audio",
-    "name": "HD MultiChan Audio",
-    "description": "HD",
+    "id": "45d5ef05-efef-4606-6fa3-48f42d3f0b96",
+    "name": "Dash FullHD",
+    "description": "Dash FullHD",
     "is_enabled": false,
     "spec": {
         "machine_type": "n1-standard-8",
@@ -21,7 +21,7 @@
                 "params": [
                     {
                         "key": "-vf",
-                        "value": "scale=1280:-2"
+                        "value": "scale=1920:-2"
                     }
                 ]
             },
@@ -37,45 +37,20 @@
                         "value": "30"
                     },
                     {
-                        "key": "-c:v",
-                        "value": "libx264"
-                    },
-                    {
                         "key": "-g",
                         "value": "60"
                     },
                     {
+                        "key": "-c:v",
+                        "value": "libx264"
+                    },
+                    {
                         "key": "-b:v",
-                        "value": "5000K"
+                        "value": "4800K"
                     },
                     {
                         "key": "-c:a",
-                        "value": "libfdk_aac"
-                    },
-                    {
-                        "key": "-map",
-                        "value": "0:v"
-                    },
-                    {
-                        "key": "-map",
-                        "value": "0:a"
-                    }
-                ]
-            },
-            {
-                "type": "MUXER",
-                "params": [
-                    {
-                        "key": "-hls_list_size",
-                        "value": "0"
-                    },
-                    {
-                        "key": "-hls_time",
-                        "value": "10"
-                    },
-                    {
-                        "key": "-f",
-                        "value": "hls"
+                        "value": "copy"
                     }
                 ]
             }

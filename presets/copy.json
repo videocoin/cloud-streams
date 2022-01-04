@@ -2,7 +2,7 @@
     "id": "45d5ef05-efef-4606-6fa3-48f42d3f0b94",
     "name": "copy",
     "description": "copy",
-    "is_enabled": true,
+    "is_enabled": false,
     "spec": {
         "machine_type": "n1-standard-2",
         "cost": 0.025,
