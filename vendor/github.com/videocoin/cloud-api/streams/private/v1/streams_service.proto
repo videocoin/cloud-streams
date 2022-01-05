@@ -68,6 +68,8 @@ message StreamResponse {
 
   streams.v1.InputType input_type = 15;
   streams.v1.OutputType output_type = 18;
+
+  string drm_xml = 19;
 }
 
 message UpdateStatusRequest {

@@ -2,8 +2,9 @@ package rpc
 
 import (
 	"context"
-	"github.com/videocoin/cloud-streams/wrapper"
 	"net"
+
+	"github.com/videocoin/cloud-streams/wrapper"
 
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpclogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
@@ -386,6 +387,7 @@ func toStreamResponsePrivate(stream *ds.Stream, profile *ds.Profile) (*privatev1
 	resp.StreamContractAddress = stream.StreamContractAddress
 	resp.InputType = stream.InputType
 	resp.OutputType = stream.OutputType
+	resp.DrmXml = stream.DrmXml
 
 	if profile != nil {
 		resp.ProfileCost = profile.Spec.Cost
