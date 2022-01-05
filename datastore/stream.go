@@ -38,7 +38,7 @@ type Stream struct {
 	InputType             v1.InputType    `gorm:"type:string"`
 	OutputType            v1.OutputType   `gorm:"type:string"`
 	TotalCost             float64         `gorm:"type:decimal(10,6);default:0"`
-	DrmXml                string          `gorm:"type:text;DEFAULT:null"`
+	DrmXml                string          `gorm:"type:text"`
 }
 
 type StreamDatastore struct {
