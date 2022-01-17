@@ -70,6 +70,8 @@ message StreamResponse {
   streams.v1.OutputType output_type = 18;
 
   string drm_xml = 19;
+
+  string output_mpd_url = 20;
 }
 
 message UpdateStatusRequest {

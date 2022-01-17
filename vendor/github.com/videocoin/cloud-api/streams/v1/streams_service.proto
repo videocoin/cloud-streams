@@ -266,6 +266,11 @@ message StreamResponse {
   InputType input_type = 15;
   OutputType output_type = 16;
   double total_cost = 18;
+
+  string output_mpd_url = 19 [
+    (grpc.gateway.protoc_gen_swagger.options.openapiv2_field) = {description: "Unique output MPEG-DASH URL of transcoded video"},
+    (gogoproto.customname) = "OutputMpdURL"
+  ];
 }
 
 message StreamListResponse {
