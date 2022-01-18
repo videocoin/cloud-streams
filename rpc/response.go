@@ -1,6 +1,8 @@
 package rpc
 
 import (
+	"strings"
+
 	"github.com/jinzhu/copier"
 	v1 "github.com/videocoin/cloud-api/streams/v1"
 	ds "github.com/videocoin/cloud-streams/datastore"
@@ -11,6 +13,8 @@ func toStreamResponse(stream *ds.Stream) (*v1.StreamResponse, error) {
 	if err := copier.Copy(response, stream); err != nil {
 		return nil, err
 	}
+
+	response.OutputMpdURL = strings.ReplaceAll(stream.OutputURL, "index.m3u8", "index.mpd")
 
 	return response, nil
 }

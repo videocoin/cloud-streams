@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"net"
+	"strings"
 
 	"github.com/videocoin/cloud-streams/wrapper"
 
@@ -388,6 +389,7 @@ func toStreamResponsePrivate(stream *ds.Stream, profile *ds.Profile) (*privatev1
 	resp.InputType = stream.InputType
 	resp.OutputType = stream.OutputType
 	resp.DrmXml = stream.DrmXml
+	resp.OutputMpdUrl = strings.ReplaceAll(stream.OutputURL, "index.m3u8", "index.mpd")
 
 	if profile != nil {
 		resp.ProfileCost = profile.Spec.Cost
