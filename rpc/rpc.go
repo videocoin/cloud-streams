@@ -32,7 +32,7 @@ func (s *Server) Create(ctx context.Context, req *v1.CreateStreamRequest) (*v1.S
 		return nil, rpc.NewRpcValidationError(verr)
 	}
 
-	profile, err := s.manager.GetProfileByID(ctx, req.ProfileId)
+	profile, err := s.manager.GetProfileByIDOrName(ctx, req.ProfileId)
 	if err != nil {
 		logFailedTo(logger, "get profile", err)
 		return nil, rpc.ErrRpcBadRequest

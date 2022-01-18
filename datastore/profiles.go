@@ -98,6 +98,44 @@ func (ds *ProfileDatastore) Get(ctx context.Context, id string) (*Profile, error
 	return profile, nil
 }
 
+func (ds *ProfileDatastore) GetByName(ctx context.Context, name string) (*Profile, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "Get")
+	defer span.Finish()
+
+	span.SetTag("name", name)
+
+	profile := &Profile{}
+
+	if err := ds.db.Where("name = ?", name).First(profile).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrProfileNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get profile by name %s: %s", name, err.Error())
+	}
+
+	return profile, nil
+}
+
+func (ds *ProfileDatastore) GetByIdOrName(ctx context.Context, idOrName string) (*Profile, error) {
+	span, _ := opentracing.StartSpanFromContext(ctx, "GetByIdOrName")
+	defer span.Finish()
+
+	span.SetTag("id_or_name", idOrName)
+
+	profile := &Profile{}
+
+	if err := ds.db.Where("id = ? OR name = ?", idOrName, idOrName).First(profile).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrProfileNotFound
+		}
+
+		return nil, fmt.Errorf("failed to get profile by id or name%s: %s", idOrName, err.Error())
+	}
+
+	return profile, nil
+}
+
 func (ds *ProfileDatastore) ListEnabled(ctx context.Context) ([]*Profile, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, "ListEnabled")
 	defer span.Finish()
